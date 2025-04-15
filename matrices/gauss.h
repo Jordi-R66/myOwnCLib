@@ -1,7 +1,6 @@
 #pragma once
 
 #include "tracking.h"
-#include "common.h"
 
 size_t identifyGaussPivot(Matrix* mat, size_t rowId);
 

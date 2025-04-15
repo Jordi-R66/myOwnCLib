@@ -12,11 +12,6 @@
 #error Unsupported target
 #endif
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
-//#include <time.h>
+#include "../common.h"
 
 typedef VALUE_TYPE value_t;
