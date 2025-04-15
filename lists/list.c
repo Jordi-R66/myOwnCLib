@@ -1,7 +1,5 @@
 #include "list.h"
 
-#include <string.h>
-
 void initializeList(List* list, size_t initSize, size_t elementSize) {
 	if (list->initialized) {
 		freeList(list);
