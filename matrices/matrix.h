@@ -29,7 +29,7 @@ void scalarMul(Matrix* matrix, value_t scalar);
 void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest);
 void matrixAddition(Matrix* matA, Matrix* matB);
 
-Matrix scalarMulNewMatrix(Matrix* matrix, double scalar);
+Matrix scalarMulNewMatrix(Matrix* matrix, value_t scalar);
 Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB);
 
 void genIdentityMatrix(Matrix* matrix, size_t n);
