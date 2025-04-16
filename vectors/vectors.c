@@ -27,6 +27,10 @@ void setCoord(Vector* vector, size_t coordNumber, double value) {
 	setMatrixCase((Matrix*)vector, value, coordNumber, 0);
 }
 
+void setVector(Vector* vector, value_t* colBuffer) {
+	setMatrixColumn((Matrix*)vector, 0, colBuffer);
+}
+
 Vector crossProduct(Vector* vectorA, Vector* vectorB) {
 	if (vectorA->rows != vectorB->rows) {
 		exit(EXIT_FAILURE);
