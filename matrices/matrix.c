@@ -152,11 +152,7 @@ void genIdentityMatrix(Matrix* matrix, size_t n) {
 	matrix->rows = n;
 	allocMatrix(matrix);
 
-	for (size_t i = 0; i < matrix->cols; i++) {
-		for (size_t j = 0; j < matrix->rows; j++) {
-			setMatrixCase(matrix, 0.0, j, i);
-		}
-	}
+	memset(matrix->data, 0, matrix->size * sizeof(value_t));
 
 	for (size_t i = 0; i < matrix->cols; i++) {
 		setMatrixCase(matrix, 1.0, i, i);
