@@ -8,7 +8,7 @@ void allocVector(Vector* vector, size_t coords) {
 }
 
 void deallocVector(Vector* vector) {
-	deallocVector((Matrix*)vector);
+	deallocMatrix((Matrix*)vector);
 }
 
 double getCoord(Vector* vector, size_t coordNumber) {
