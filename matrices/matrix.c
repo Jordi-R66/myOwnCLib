@@ -71,6 +71,19 @@ void scalarMul(Matrix* matrix, value_t scalar) {
 	}
 }
 
+Matrix scalarMulNewMatrix(Matrix* matrix, double scalar) {
+	Matrix newMatrix;
+	newMatrix.rows = matrix->rows;
+	newMatrix.cols = matrix->cols;
+	allocMatrix(&newMatrix);
+
+	for (size_t i = 0; i < matrix->size; i++) {
+		newMatrix.data[i] = matrix->data[i] * scalar;
+	}
+
+	return newMatrix;
+}
+
 /*
 	Performs an inefficient matrix multiplication algorithm and stores the resulting matrix at a given address
 	Stores the result `matDest` of `matA * matB`
