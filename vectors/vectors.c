@@ -54,3 +54,19 @@ Vector crossProduct(Vector* vectorA, Vector* vectorB) {
 
 	return vectorC;
 }
+
+double dotProduct(Vector* vectorA, Vector* vectorB) {
+	double product = 0;
+
+	if (vectorA->rows != vectorB->rows) {
+		exit(EXIT_FAILURE);
+	}
+
+	size_t rows = vectorA->rows;
+
+	for (size_t i = 0; i < rows; i++) {
+		product += getCoord(vectorA, i) * getCoord(vectorB, i);
+	}
+
+	return product;
+}

@@ -11,3 +11,4 @@ double getCoord(Vector* vector, size_t coordNumber);
 void setCoord(Vector* vector, size_t coordNumber, double value);
 
 Vector crossProduct(Vector* vectorA, Vector* vectorB);
+double dotProduct(Vector* vectorA, Vector* vectorB);
