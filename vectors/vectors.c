@@ -33,6 +33,7 @@ void setVector(Vector* vector, value_t* colBuffer) {
 
 Vector crossProduct(Vector* vectorA, Vector* vectorB) {
 	if (vectorA->rows != vectorB->rows) {
+		fprintf(stderr, "vectorA doesn't have the same amount of dimensions as vectorB\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -41,20 +42,22 @@ Vector crossProduct(Vector* vectorA, Vector* vectorB) {
 
 	value_t a, b, c, d;
 	size_t rows = vectorA->rows;
-	size_t j, k;
 
-	for (size_t i = 0; i < rows; i++) {
-		j = (i % rows);
-		k = j++;
+	size_t current, next = 1, i = 0;
 
-		a = getCoord(vectorA, j);
-		b = getCoord(vectorB, k);
+	do {
+		current = next;
+		next = (current + 1) % rows;
 
-		c = getCoord(vectorA, k);
-		d = getCoord(vectorB, j);
+		a = getCoord(vectorA, current);
+		b = getCoord(vectorB, next);
+
+		c = getCoord(vectorA, next);
+		d = getCoord(vectorB, current);
 
 		setCoord(&vectorC, i, a * b - c * d);
-	}
+		i++;
+	} while (i < rows);
 
 	return vectorC;
 }
