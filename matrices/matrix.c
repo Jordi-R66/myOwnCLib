@@ -133,6 +133,24 @@ void matrixAddition(Matrix* matA, Matrix* matB) {
 	}
 }
 
+Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB) {
+	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
+		exit(EXIT_FAILURE);
+		//return;
+	}
+
+	Matrix newMatrix;
+	newMatrix.rows = matA->rows;
+	newMatrix.cols = matA->cols;
+	allocMatrix(&newMatrix);
+
+	for (size_t i = 0; i < matA->size; i++) {
+		newMatrix.data[i] = matA->data[i] + matB->data[i];
+	}
+
+	return newMatrix;
+}
+
 void genIdentityMatrix(Matrix* matrix, size_t n) {
 	matrix->cols = n;
 	matrix->rows = n;
