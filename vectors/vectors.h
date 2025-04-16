@@ -8,7 +8,7 @@ void allocVector(Vector* vector, size_t coords);
 void deallocVector(Vector* vector);
 
 double getCoord(Vector* vector, size_t coordNumber);
-void setCoord(Vector* vector, size_t coordNumber, double value);
+void setCoord(Vector* vector, size_t coordNumber, value_t value);
 
 void setVector(Vector* vector, value_t* colBuffer);
 
