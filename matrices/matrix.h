@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "localCommon.h"
 
 struct Matrix {
 	size_t rows, cols, size;
