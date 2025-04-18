@@ -73,7 +73,6 @@ value_t dotProduct(Vector* vectorA, Vector* vectorB) {
 
 	for (size_t i = 0; i < rows; i++) {
 		product += getCoord(vectorA, i) * getCoord(vectorB, i);
-		printf("p = %lf | a = %lf | b = %lf\n", product, getCoord(vectorA, i), getCoord(vectorB, i));
 	}
 
 	return product;
