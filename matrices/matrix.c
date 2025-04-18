@@ -12,9 +12,7 @@ void deallocMatrix(Matrix* matrix) {
 }
 
 void getMatrixRow(Matrix* matrix, size_t row, value_t* rowBuffer) {
-	size_t i = row * matrix->cols;
-
-	memcpy(rowBuffer, &matrix->data[i], sizeof(value_t) * matrix->cols);
+	memcpy(rowBuffer, &matrix->data[row * matrix->cols], sizeof(value_t) * matrix->cols);
 }
 
 void getMatrixColumn(Matrix* matrix, size_t column, value_t* colBuffer) {
