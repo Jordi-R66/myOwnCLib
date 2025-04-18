@@ -87,8 +87,8 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 
 	allocMatrix(matDest);
 
-	value_t* col = (value_t*)calloc(matDest->rows, sizeof(value_t) * matDest->rows);
-	value_t* row = (value_t*)calloc(matDest->cols, sizeof(value_t) * matDest->cols);
+	value_t* col = (value_t*)calloc(matB->rows, sizeof(value_t));
+	value_t* row = (value_t*)calloc(matA->cols, sizeof(value_t));
 
 	// Some debug
 	printf("Creating a %lur %luc matrix\n", matDest->rows, matDest->cols);
