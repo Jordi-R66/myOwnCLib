@@ -90,9 +90,6 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 	value_t* col = (value_t*)calloc(matB->rows, sizeof(value_t));
 	value_t* row = (value_t*)calloc(matA->cols, sizeof(value_t));
 
-	// Some debug
-	printf("Creating a %lur %luc matrix\n", matDest->rows, matDest->cols);
-
 	for (size_t i = 0; i < matDest->rows; i++) {
 		for (size_t j = 0; j < matDest->cols; j++) {
 			value_t newValue = 0.0;
