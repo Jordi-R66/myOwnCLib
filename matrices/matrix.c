@@ -89,8 +89,8 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 
 	allocMatrix(matDest);
 
-	value_t* col = (value_t*)calloc(matDest->rows, sizeof(value_t));
-	value_t* row = (value_t*)calloc(matDest->cols, sizeof(value_t));
+	value_t* col = (value_t*)calloc(matDest->rows, sizeof(value_t) * matDest->rows);
+	value_t* row = (value_t*)calloc(matDest->cols, sizeof(value_t) * matDest->cols);
 
 	for (size_t i = 0; i < matDest->rows; i++) {
 		for (size_t j = 0; j < matDest->cols; j++) {
