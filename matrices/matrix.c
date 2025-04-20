@@ -104,7 +104,7 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 			getMatrixRow(matA, i, row);
 			getMatrixColumn(matB, j, col);
 
-			for (size_t k = 0; k < matB->cols; k++) {
+			for (size_t k = 0; k <= matB->cols; k++) {
 				newValue += col[k] * row[k];
 			}
 
