@@ -143,7 +143,7 @@ size_t shrinkToFit(List* list) {
 }
 
 void copyList(List* listDest, List* listSrc) {
-	memcpy(listDest, listSrc, sizeof(listSrc));
+	memcpy(listDest, listSrc, sizeof(*listSrc));
 
 	void* ptr = calloc(listDest->capacity, listDest->elementSize);
 
