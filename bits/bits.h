@@ -1,5 +1,4 @@
 #pragma once
 
-#include <stdint.h>
-
-uint8_t GET_BIT(uint64_t WORD, uint8_t BIT, uint8_t BIT_COUNT);
+#define CTRL_VAL(BIT) (1 << (BIT - 1))
+#define GET_BIT(WORD, BIT) ((WORD & CTRL_VAL(BIT)) == (CTRL_VAL(BIT)))
