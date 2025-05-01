@@ -4,6 +4,8 @@
 /* bool, true and false are keywords.  */
 #else
 
+#define BOOL_BITS 8
+
 typedef unsigned char bool;
 
 #define true 1
