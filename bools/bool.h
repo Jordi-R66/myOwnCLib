@@ -4,7 +4,7 @@
 /* bool, true and false are keywords.  */
 #else
 
-typedef char bool;
+typedef unsigned char bool;
 
 #define true 1
 #define false 0
