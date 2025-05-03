@@ -131,6 +131,16 @@ void replaceElement(List* list, size_t index, void* newElement) {
 	list->fragmented = false;
 }
 
+bool contains(List* list, void* Element) {
+	for (size_t i = 0; i < list->n_elements; i++) {
+		if (memcmp(Element, getElement(list, i), list->elementSize)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 size_t shrinkToFit(List* list) {
 	if (list->fragmented) {
 		fprintf(stderr, "Can't shrink a list if it is fragmented\n");
