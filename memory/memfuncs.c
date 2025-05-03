@@ -1,6 +1,5 @@
-#include "memfuncs.h"
-
 #include <stdlib.h>
+#include "memfuncs.h"
 
 bool equalMemory(void* A, void* B, SizeT n) {
 
