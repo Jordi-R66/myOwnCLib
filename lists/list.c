@@ -1,6 +1,6 @@
 #include "list.h"
 
-void initializeList(List* list, size_t initSize, size_t elementSize) {
+void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	if (list->initialized) {
 		freeList(list);
 	}
@@ -44,7 +44,7 @@ void freeList(List* list) {
 	list->initialized = false;
 }
 
-void resizeList(List* list, size_t newCapacity) {
+void resizeList(List* list, SizeT newCapacity) {
 	if (newCapacity < list->n_elements) {
 		newCapacity = list->n_elements;
 	}
@@ -73,30 +73,30 @@ void addElement(List* list, void* newElement) {
 		resizeList(list, list->n_elements + 50);
 	}
 
-	size_t nBytes = list->n_elements * list->elementSize;
+	SizeT nBytes = list->n_elements * list->elementSize;
 	memcpy((int8*)(list->elements + nBytes), newElement, list->elementSize);
 
 	list->n_elements++;
 }
 
-void removeElement(List* list, size_t index, bool shiftElements) {
+void removeElement(List* list, SizeT index, bool shiftElements) {
 	if (index >= list->n_elements) {
 		fprintf(stderr, "Can't remove an element that is not in a list\n");
 		exit(EXIT_FAILURE);
 	}
 
-	size_t nBytes = index * list->elementSize;
+	SizeT nBytes = index * list->elementSize;
 
 	memset((int8*)list->elements + nBytes, 0, list->elementSize);
 
 	if (shiftElements) {
-		size_t i = index;
-		size_t j = index + 1;
+		SizeT i = index;
+		SizeT j = index + 1;
 
-		size_t nBytesI = i * list->elementSize;
-		size_t nBytesJ = j * list->elementSize;
+		SizeT nBytesI = i * list->elementSize;
+		SizeT nBytesJ = j * list->elementSize;
 
-		size_t bytesToCopy = (list->n_elements - j) * list->elementSize;
+		SizeT bytesToCopy = (list->n_elements - j) * list->elementSize;
 
 		memmove((int8*)list->elements + nBytesI, (int8*)list->elements + nBytesJ, bytesToCopy);
 
@@ -109,7 +109,7 @@ void removeElement(List* list, size_t index, bool shiftElements) {
 /*
 	Returns pointer to element in list as `void*`
 */
-void* getElement(List* list, size_t index) {
+void* getElement(List* list, SizeT index) {
 	if (index >= list->capacity) {
 		return NULL;
 	}
@@ -117,13 +117,13 @@ void* getElement(List* list, size_t index) {
 	return list->elements + index * list->elementSize;
 }
 
-void replaceElement(List* list, size_t index, void* newElement) {
+void replaceElement(List* list, SizeT index, void* newElement) {
 	if (index >= list->capacity) {
 		fprintf(stderr, "Can't replace an element outside of a list\n");
 		exit(EXIT_FAILURE);
 	}
 
-	size_t nBytes = index * list->elementSize;
+	SizeT nBytes = index * list->elementSize;
 
 	removeElement(list, index, false);
 	memcpy((int8*)list->elements + nBytes, newElement, list->elementSize);
@@ -132,7 +132,7 @@ void replaceElement(List* list, size_t index, void* newElement) {
 }
 
 bool contains(List* list, void* refElement) {
-	for (size_t i = 0; i < list->n_elements; i++) {
+	for (SizeT i = 0; i < list->n_elements; i++) {
 		if (equalMemory(refElement, getElement(list, i), list->elementSize)) {
 			return true;
 		}
@@ -141,7 +141,7 @@ bool contains(List* list, void* refElement) {
 	return false;
 }
 
-size_t shrinkToFit(List* list) {
+SizeT shrinkToFit(List* list) {
 	if (list->fragmented) {
 		fprintf(stderr, "Can't shrink a list if it is fragmented\n");
 		exit(EXIT_FAILURE);

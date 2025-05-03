@@ -1,6 +1,6 @@
 #include "vectors.h"
 
-void allocVector(Vector* vector, size_t coords) {
+void allocVector(Vector* vector, SizeT coords) {
 	vector->rows = coords;
 	vector->cols = 1;
 
@@ -11,7 +11,7 @@ void deallocVector(Vector* vector) {
 	deallocMatrix((Matrix*)vector);
 }
 
-value_t getCoord(Vector* vector, size_t coordNumber) {
+value_t getCoord(Vector* vector, SizeT coordNumber) {
 	if (coordNumber >= vector->rows) {
 		exit(EXIT_FAILURE);
 	}
@@ -19,7 +19,7 @@ value_t getCoord(Vector* vector, size_t coordNumber) {
 	return getMatrixCase((Matrix*)vector, coordNumber, 0);
 }
 
-void setCoord(Vector* vector, size_t coordNumber, value_t value) {
+void setCoord(Vector* vector, SizeT coordNumber, value_t value) {
 	if (coordNumber >= vector->rows) {
 		exit(EXIT_FAILURE);
 	}
@@ -41,9 +41,9 @@ Vector crossProduct(Vector* vectorA, Vector* vectorB) {
 	allocVector(&vectorC, vectorA->rows);
 
 	value_t a, b, c, d;
-	size_t rows = vectorA->rows;
+	SizeT rows = vectorA->rows;
 
-	size_t current, next = 1, i = 0;
+	SizeT current, next = 1, i = 0;
 
 	do {
 		current = next;
@@ -69,9 +69,9 @@ value_t dotProduct(Vector* vectorA, Vector* vectorB) {
 		exit(EXIT_FAILURE);
 	}
 
-	size_t rows = vectorA->rows;
+	SizeT rows = vectorA->rows;
 
-	for (size_t i = 0; i < rows; i++) {
+	for (SizeT i = 0; i < rows; i++) {
 		product += getCoord(vectorA, i) * getCoord(vectorB, i);
 	}
 

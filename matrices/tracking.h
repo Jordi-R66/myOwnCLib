@@ -19,7 +19,7 @@ enum SwapType {
 typedef enum SwapType SwapType;
 
 struct Swap {
-	size_t A, B;
+	SizeT A, B;
 	SwapType type;
 };
 
@@ -28,7 +28,7 @@ typedef struct Swap Swap;
 struct MatrixTransformation {
 	TransformationType transType;
 
-	size_t A, B;
+	SizeT A, B;
 	value_t coeff;
 
 	SwapType swapType;
@@ -38,7 +38,7 @@ typedef struct MatrixTransformation MatrixTransformation;
 
 struct Tracker {
 	bool initialised, memFreed;
-	size_t transformationMade;
+	SizeT transformationMade;
 	MatrixTransformation* transformations;
 };
 
@@ -49,8 +49,8 @@ void deallocTracker(Tracker* tracker);
 
 void RecordTransformation(Tracker* tracker, MatrixTransformation transformation);
 
-void recordSwap(Tracker* tracker, size_t idA, size_t idB, SwapType type);
-void recordSub(Tracker* tracker, size_t idA, size_t idB, value_t coeff);
-void recordMul(Tracker* tracker, size_t idA, value_t coeff);
+void recordSwap(Tracker* tracker, SizeT idA, SizeT idB, SwapType type);
+void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff);
+void recordMul(Tracker* tracker, SizeT idA, value_t coeff);
 
 void printTrackingLogs(Tracker* tracker);

@@ -1,6 +1,6 @@
 #include "dict.h"
 
-void initDict(Dict* dict, size_t keySize, size_t valSize, size_t initCapacity) {
+void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT initCapacity) {
 	initializeList(&dict->pairs, initCapacity, sizeof(KeyValuePair_t));
 
 	dict->keySize = keySize;
@@ -9,7 +9,7 @@ void initDict(Dict* dict, size_t keySize, size_t valSize, size_t initCapacity) {
 
 
 void setPair(Dict* dict, void* currentKey, KeyValuePair_t newKvp) {
-	for (size_t i=0; i < dict->pairs.n_elements; i++) {
+	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
 
 		if (memcmp(currentKey, kvp_ptr->key, dict->keySize)) {
@@ -29,7 +29,7 @@ void setValue(Dict* dict, void* key, void* newValue) {
 void* getValue(Dict* dict, void* key) {
 	void* val = NULL;
 
-	for (size_t i=0; i < dict->pairs.n_elements; i++) {
+	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
 
 		if (memcmp(key, kvp_ptr->key, dict->keySize)) {
@@ -66,7 +66,7 @@ void addEntry(Dict* dict, void* key, void* value) {
 }
 
 void removePair(Dict* dict, void* key) {
-	for (size_t i=0; i < dict->pairs.n_elements; i++) {
+	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
 
 		if (memcmp(key, kvp_ptr->key, dict->keySize)) {
@@ -79,7 +79,7 @@ void removePair(Dict* dict, void* key) {
 }
 
 void freeDict(Dict* dict, bool freeKeys, bool freeValues) {
-	for (size_t i=0; (i < dict->pairs.n_elements) && ((freeKeys) || (freeValues)); i++) {
+	for (SizeT i=0; (i < dict->pairs.n_elements) && ((freeKeys) || (freeValues)); i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
 		removePair(dict, kvp_ptr->key);
 	}

@@ -5,9 +5,9 @@
 #include "../targetDetection/types.h"
 
 struct List {
-	size_t capacity; // List capacity in number of elements
-	size_t n_elements; // Actual number of elements
-	size_t elementSize; // Size of elements in bytes
+	SizeT capacity; // List capacity in number of elements
+	SizeT n_elements; // Actual number of elements
+	SizeT elementSize; // Size of elements in bytes
 	bool fragmented; // Is the list fragmented
 	bool initialized; // Is the list initialized
 
@@ -16,16 +16,16 @@ struct List {
 
 typedef struct List List;
 
-void initializeList(List* list, size_t initSize, size_t elementSize);
+void initializeList(List* list, SizeT initSize, SizeT elementSize);
 void freeList(List* list);
 
-void resizeList(List* list, size_t newCapacity);
+void resizeList(List* list, SizeT newCapacity);
 
 void addElement(List* list, void* newElement);
-void removeElement(List* list, size_t index, bool shiftElements);
-void* getElement(List* list, size_t index);
-void replaceElement(List* list, size_t index, void* newElement);
+void removeElement(List* list, SizeT index, bool shiftElements);
+void* getElement(List* list, SizeT index);
+void replaceElement(List* list, SizeT index, void* newElement);
 bool contains(List* list, void* Element);
 
-size_t shrinkToFit(List* list);
+SizeT shrinkToFit(List* list);
 void copyList(List* listDest, List* listSrc);

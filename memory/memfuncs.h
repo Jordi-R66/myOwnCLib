@@ -12,4 +12,4 @@
  * @return true Both are the same values
  * @return false The values are different
  */
-bool equalMemory(void* A, void* B, size_t n);
+bool equalMemory(void* A, void* B, SizeT n);

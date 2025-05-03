@@ -1,11 +1,11 @@
 #include "advMatrix.h"
 
 void mirrorMatrix(Matrix* mat, SwapType type, Tracker* tracker) {
-	size_t j = 0;
+	SizeT j = 0;
 
 	switch (type) {
 		case Row:
-			for (size_t i=0; i < mat->rows / 2; i++) {
+			for (SizeT i=0; i < mat->rows / 2; i++) {
 				j = mat->rows - 1 - i;
 
 				if (i != j) {
@@ -17,7 +17,7 @@ void mirrorMatrix(Matrix* mat, SwapType type, Tracker* tracker) {
 			break;
 
 		case Column:
-			for (size_t i=0; i < mat->cols / 2; i++) {
+			for (SizeT i=0; i < mat->cols / 2; i++) {
 				j = mat->cols - 1 - i;
 
 				if (i != j) {

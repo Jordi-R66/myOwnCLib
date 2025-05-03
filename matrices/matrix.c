@@ -11,58 +11,58 @@ void deallocMatrix(Matrix* matrix) {
 	matrix->memFreed = true;
 }
 
-void getMatrixRow(Matrix* matrix, size_t row, value_t* rowBuffer) {
-	size_t iStart, iEnd;
+void getMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer) {
+	SizeT iStart, iEnd;
 
 	iStart = row * matrix->cols;
 	iEnd = (row + 1) * matrix->cols;
 
-	for (size_t i = iStart; i < iEnd; i++) {
+	for (SizeT i = iStart; i < iEnd; i++) {
 		rowBuffer[i - iStart] = matrix->data[i];
 	}
 }
 
-void getMatrixColumn(Matrix* matrix, size_t column, value_t* colBuffer) {
-	for (size_t row = 0; row < matrix->rows; row++) {
-		size_t i = row * matrix->cols + column;
+void getMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer) {
+	for (SizeT row = 0; row < matrix->rows; row++) {
+		SizeT i = row * matrix->cols + column;
 		colBuffer[row] = matrix->data[i];
 	}
 }
 
-void setMatrixRow(Matrix* matrix, size_t row, value_t* rowBuffer) {
-	for (size_t i = 0; i < matrix->cols; i++) {
+void setMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer) {
+	for (SizeT i = 0; i < matrix->cols; i++) {
 		value_t val = rowBuffer[i];
 		setMatrixCase(matrix, val, row, i);
 	}
 }
 
-void setMatrixColumn(Matrix* matrix, size_t column, value_t* colBuffer) {
-	for (size_t i = 0; i < matrix->rows; i++) {
+void setMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer) {
+	for (SizeT i = 0; i < matrix->rows; i++) {
 		value_t val = colBuffer[i];
 		setMatrixCase(matrix, val, i, column);
 	}
 }
 
-void setMatrixCase(Matrix* matrix, value_t value, size_t row, size_t col) {
-	size_t i = row * matrix->cols + col;
+void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col) {
+	SizeT i = row * matrix->cols + col;
 
 	matrix->data[i] = value;
 }
 
-value_t getMatrixCase(Matrix* matrix, size_t row, size_t col) {
-	size_t i = row * matrix->cols + col;
+value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col) {
+	SizeT i = row * matrix->cols + col;
 
 	return matrix->data[i];
 }
 
 void setMatrix(Matrix* matrix, value_t* values) {
-	for (size_t i = 0; i < matrix->size; i++) {
+	for (SizeT i = 0; i < matrix->size; i++) {
 		matrix->data[i] = values[i];
 	}
 }
 
 void scalarMul(Matrix* matrix, value_t scalar) {
-	for (size_t i = 0; i < matrix->size; i++) {
+	for (SizeT i = 0; i < matrix->size; i++) {
 		matrix->data[i] *= scalar;
 	}
 }
@@ -73,7 +73,7 @@ Matrix scalarMulNewMatrix(Matrix* matrix, double scalar) {
 	newMatrix.cols = matrix->cols;
 	allocMatrix(&newMatrix);
 
-	for (size_t i = 0; i < matrix->size; i++) {
+	for (SizeT i = 0; i < matrix->size; i++) {
 		newMatrix.data[i] = matrix->data[i] * scalar;
 	}
 
@@ -97,14 +97,14 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 	value_t* col = (value_t*)calloc(matB->rows, sizeof(value_t));
 	value_t* row = (value_t*)calloc(matA->cols, sizeof(value_t));
 
-	for (size_t i = 0; i < matDest->rows; i++) {
-		for (size_t j = 0; j < matDest->cols; j++) {
+	for (SizeT i = 0; i < matDest->rows; i++) {
+		for (SizeT j = 0; j < matDest->cols; j++) {
 			value_t newValue = 0.0;
 
 			getMatrixRow(matA, i, row);
 			getMatrixColumn(matB, j, col);
 
-			for (size_t k = 0; k <= matB->cols; k++) {
+			for (SizeT k = 0; k <= matB->cols; k++) {
 				newValue += col[k] * row[k];
 			}
 
@@ -124,7 +124,7 @@ void matrixAddition(Matrix* matA, Matrix* matB) {
 		return;
 	}
 
-	for (size_t i = 0; i < matA->size; i++) {
+	for (SizeT i = 0; i < matA->size; i++) {
 		matA->data[i] += matB->data[i];
 	}
 }
@@ -140,21 +140,21 @@ Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB) {
 	newMatrix.cols = matA->cols;
 	allocMatrix(&newMatrix);
 
-	for (size_t i = 0; i < matA->size; i++) {
+	for (SizeT i = 0; i < matA->size; i++) {
 		newMatrix.data[i] = matA->data[i] + matB->data[i];
 	}
 
 	return newMatrix;
 }
 
-void genIdentityMatrix(Matrix* matrix, size_t n) {
+void genIdentityMatrix(Matrix* matrix, SizeT n) {
 	matrix->cols = n;
 	matrix->rows = n;
 	allocMatrix(matrix);
 
 	memset(matrix->data, 0, matrix->size * sizeof(value_t));
 
-	for (size_t i = 0; i < matrix->cols; i++) {
+	for (SizeT i = 0; i < matrix->cols; i++) {
 		setMatrixCase(matrix, 1.0, i, i);
 	}
 }
@@ -162,10 +162,10 @@ void genIdentityMatrix(Matrix* matrix, size_t n) {
 void printMatrix(Matrix* matrix) {
 	value_t* row_buffer = (value_t*)calloc(matrix->cols, sizeof(value_t));
 
-	for (size_t row = 0; row < matrix->rows; row++) {
+	for (SizeT row = 0; row < matrix->rows; row++) {
 		getMatrixRow(matrix, row, row_buffer);
 
-		for (size_t i = 0; i < matrix->cols; i++) {
+		for (SizeT i = 0; i < matrix->cols; i++) {
 			printf("%.2lf\t", row_buffer[i]);
 		}
 		printf("\n");
@@ -176,7 +176,7 @@ void printMatrix(Matrix* matrix) {
 
 // Originally in gauss.c
 
-void swapRows(Matrix* mat, size_t rowAId, size_t rowBId) {
+void swapRows(Matrix* mat, SizeT rowAId, SizeT rowBId) {
 	if (rowAId == rowBId) {
 		return;
 	}
@@ -201,7 +201,7 @@ void swapRows(Matrix* mat, size_t rowAId, size_t rowBId) {
 	return;
 }
 
-void swapCols(Matrix* mat, size_t colAId, size_t colBId) {
+void swapCols(Matrix* mat, SizeT colAId, SizeT colBId) {
 	if (colAId == colBId) {
 		return;
 	}
@@ -226,14 +226,14 @@ void swapCols(Matrix* mat, size_t colAId, size_t colBId) {
 	return;
 }
 
-void subtractRows(Matrix* mat, size_t rowAId, size_t rowBId, value_t coeffRowB) {
+void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB) {
 	value_t* rowA = (value_t*)calloc(mat->cols, sizeof(value_t));
 	value_t* rowB = (value_t*)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowAId, rowA);
 	getMatrixRow(mat, rowBId, rowB);
 
-	for (size_t i = 0; i < mat->cols; i++) {
+	for (SizeT i = 0; i < mat->cols; i++) {
 		rowA[i] -= coeffRowB * rowB[i];
 	}
 
@@ -245,12 +245,12 @@ void subtractRows(Matrix* mat, size_t rowAId, size_t rowBId, value_t coeffRowB) 
 	return;
 }
 
-void multiplyRow(Matrix* mat, size_t rowId, value_t coeffRow) {
+void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow) {
 	value_t* row = (value_t*)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowId, row);
 
-	for (size_t i = 0; i < mat->cols; i++) {
+	for (SizeT i = 0; i < mat->cols; i++) {
 		row[i] *= coeffRow;
 	}
 

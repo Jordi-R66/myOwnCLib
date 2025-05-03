@@ -29,7 +29,7 @@ void RecordTransformation(Tracker* tracker, MatrixTransformation transformation)
 }
 
 void deallocTracker(Tracker* tracker) {
-	for (size_t i = 0; i < tracker->transformationMade; i++) {
+	for (SizeT i = 0; i < tracker->transformationMade; i++) {
 		memset(&(tracker->transformations[i]), 0, sizeof(MatrixTransformation));
 	}
 
@@ -40,7 +40,7 @@ void deallocTracker(Tracker* tracker) {
 	memset(tracker, 0, sizeof(Tracker));
 }
 
-void recordSwap(Tracker* tracker, size_t idA, size_t idB, SwapType type) {
+void recordSwap(Tracker* tracker, SizeT idA, SizeT idB, SwapType type) {
 	if (idA == idB) {
 		return;
 	}
@@ -58,7 +58,7 @@ void recordSwap(Tracker* tracker, size_t idA, size_t idB, SwapType type) {
 	RecordTransformation(tracker, transformation);
 }
 
-void recordSub(Tracker* tracker, size_t idA, size_t idB, value_t coeff) {
+void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff) {
 	if ((idA == idB) || (coeff == -1.0)) {
 		return;
 	}
@@ -76,7 +76,7 @@ void recordSub(Tracker* tracker, size_t idA, size_t idB, value_t coeff) {
 	RecordTransformation(tracker, transformation);
 }
 
-void recordMul(Tracker* tracker, size_t idA, value_t coeff) {
+void recordMul(Tracker* tracker, SizeT idA, value_t coeff) {
 	if (coeff == 1.0) {
 		return;
 	}
@@ -142,7 +142,7 @@ void printLog(MatrixTransformation transformation) {
 }
 
 void printTrackingLogs(Tracker* tracker) {
-	for (size_t i = 0; i < tracker->transformationMade; i++) {
+	for (SizeT i = 0; i < tracker->transformationMade; i++) {
 		printLog(tracker->transformations[i]);
 	}
 }

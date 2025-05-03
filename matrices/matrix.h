@@ -3,7 +3,7 @@
 #include "localCommon.h"
 
 struct Matrix {
-	size_t rows, cols, size;
+	SizeT rows, cols, size;
 
 	value_t* data;
 	bool memFreed;
@@ -14,14 +14,14 @@ typedef struct Matrix Matrix;
 void allocMatrix(Matrix* matrix);
 void deallocMatrix(Matrix* matrix);
 
-void getMatrixRow(Matrix* matrix, size_t row, value_t* rowBuffer);
-void getMatrixColumn(Matrix* matrix, size_t column, value_t* colBuffer);
+void getMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer);
+void getMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer);
 
-void setMatrixRow(Matrix* matrix, size_t row, value_t* rowBuffer);
-void setMatrixColumn(Matrix* matrix, size_t column, value_t* colBuffer);
+void setMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer);
+void setMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer);
 
-void setMatrixCase(Matrix* matrix, value_t value, size_t row, size_t col);
-value_t getMatrixCase(Matrix* matrix, size_t row, size_t col);
+void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col);
+value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col);
 
 void setMatrix(Matrix* matrix, value_t* values);
 
@@ -32,14 +32,14 @@ void matrixAddition(Matrix* matA, Matrix* matB);
 Matrix scalarMulNewMatrix(Matrix* matrix, value_t scalar);
 Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB);
 
-void genIdentityMatrix(Matrix* matrix, size_t n);
+void genIdentityMatrix(Matrix* matrix, SizeT n);
 
 void printMatrix(Matrix* matrix);
 
 // Originally in gauss.h
 
-void swapRows(Matrix* mat, size_t rowAId, size_t rowBId);
-void swapCols(Matrix* mat, size_t colAId, size_t colBId);
+void swapRows(Matrix* mat, SizeT rowAId, SizeT rowBId);
+void swapCols(Matrix* mat, SizeT colAId, SizeT colBId);
 
-void subtractRows(Matrix* mat, size_t rowAId, size_t rowBId, value_t coeffRowB);
-void multiplyRow(Matrix* mat, size_t rowId, value_t coeffRow);
+void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB);
+void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow);

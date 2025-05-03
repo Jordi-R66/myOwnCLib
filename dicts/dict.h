@@ -10,11 +10,11 @@ typedef struct kvp {
 typedef struct dict {
 	List pairs; // List of KeyValuePair_t
 
-	size_t keySize; // Size of the key in bytes
-	size_t valSize; // Size of the value in bytes
+	SizeT keySize; // Size of the key in bytes
+	SizeT valSize; // Size of the value in bytes
 } Dict;
 
-void initDict(Dict* dict, size_t keySize, size_t valSize, size_t n_records);
+void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT n_records);
 
 void setPair(Dict* dict, void* currentKey, KeyValuePair_t newKvp);
 void setValue(Dict* dict, void* key, void* newValue);
