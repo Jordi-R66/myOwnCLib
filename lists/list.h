@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../common.h"
+#include "../memory/memfuncs.h"
+#include "../targetDetection/types.h"
 
 struct List {
 	size_t capacity; // List capacity in number of elements
