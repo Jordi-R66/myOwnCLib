@@ -131,9 +131,21 @@ void replaceElement(List* list, size_t index, void* newElement) {
 	list->fragmented = false;
 }
 
-bool contains(List* list, void* Element) {
+bool contains(List* list, void* refElement) {
+	uint8_t* ref = (uint8_t*)refElement;
+
 	for (size_t i = 0; i < list->n_elements; i++) {
-		if (memcmp(Element, getElement(list, i), list->elementSize)) {
+		bool equals = true;
+		uint8_t* Element = (uint8_t*)getElement(list, i);
+
+		for (size_t j=0; j < list->elementSize; j++) {
+			if (ref[j] != Element[j]) {
+				equals = false;
+				break;
+			}
+		}
+
+		if (equals) {
 			return true;
 		}
 	}
