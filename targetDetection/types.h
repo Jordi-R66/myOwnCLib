@@ -11,3 +11,11 @@ typedef signed int int32;
 
 typedef unsigned long long uint64;
 typedef signed long long int64;
+
+#ifdef __64_BITS__
+	typedef uint64 size_t;
+	typedef int64 ssize_t;
+#elif defined(__32_BITS__)
+	typedef uint32 size_t;
+	typedef int32 ssize_t;
+#endif
