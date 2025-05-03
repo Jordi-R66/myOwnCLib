@@ -74,7 +74,7 @@ void addElement(List* list, void* newElement) {
 	}
 
 	size_t nBytes = list->n_elements * list->elementSize;
-	memcpy((int8_t*)(list->elements + nBytes), newElement, list->elementSize);
+	memcpy((int8*)(list->elements + nBytes), newElement, list->elementSize);
 
 	list->n_elements++;
 }
@@ -87,7 +87,7 @@ void removeElement(List* list, size_t index, bool shiftElements) {
 
 	size_t nBytes = index * list->elementSize;
 
-	memset((int8_t*)list->elements + nBytes, 0, list->elementSize);
+	memset((int8*)list->elements + nBytes, 0, list->elementSize);
 
 	if (shiftElements) {
 		size_t i = index;
@@ -98,7 +98,7 @@ void removeElement(List* list, size_t index, bool shiftElements) {
 
 		size_t bytesToCopy = (list->n_elements - j) * list->elementSize;
 
-		memmove((int8_t*)list->elements + nBytesI, (int8_t*)list->elements + nBytesJ, bytesToCopy);
+		memmove((int8*)list->elements + nBytesI, (int8*)list->elements + nBytesJ, bytesToCopy);
 
 		list->n_elements--;
 	} else {
@@ -126,26 +126,14 @@ void replaceElement(List* list, size_t index, void* newElement) {
 	size_t nBytes = index * list->elementSize;
 
 	removeElement(list, index, false);
-	memcpy((int8_t*)list->elements + nBytes, newElement, list->elementSize);
+	memcpy((int8*)list->elements + nBytes, newElement, list->elementSize);
 
 	list->fragmented = false;
 }
 
 bool contains(List* list, void* refElement) {
-	uint8_t* ref = (uint8_t*)refElement;
-
 	for (size_t i = 0; i < list->n_elements; i++) {
-		bool equals = true;
-		uint8_t* Element = (uint8_t*)getElement(list, i);
-
-		for (size_t j=0; j < list->elementSize; j++) {
-			if (ref[j] != Element[j]) {
-				equals = false;
-				break;
-			}
-		}
-
-		if (equals) {
+		if (equalMemory(refElement, getElement(list, i), list->elementSize)) {
 			return true;
 		}
 	}
