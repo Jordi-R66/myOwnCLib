@@ -1,3 +1,4 @@
+#pragma once
 #include "macros.h"
 
 typedef unsigned char uint8;
