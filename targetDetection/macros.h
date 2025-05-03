@@ -11,3 +11,5 @@
 	#endif
 
 #endif
+
+#define NULL ((void*)0)
