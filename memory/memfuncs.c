@@ -1,8 +1,8 @@
 #include "memfuncs.h"
 
 bool equalMemory(void* A, void* B, size_t n) {
-	uint8_t* memA = (uint8_t*)A;
-	uint8_t* memB = (uint8_t*)B;
+	uint8* memA = (uint8*)A;
+	uint8* memB = (uint8*)B;
 
 	bool equals = true;
 

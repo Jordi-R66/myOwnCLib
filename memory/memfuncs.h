@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../bools/bool.h"
-
-#include <stddef.h>
-#include <stdint.h>
+#include "../targetDetection/types.h"
 
 /**
  * @brief Compares the n first bytes of A with the n first bytes of B
