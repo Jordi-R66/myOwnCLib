@@ -14,9 +14,9 @@ typedef unsigned long long uint64;
 typedef signed long long int64;
 
 #ifdef __64_BITS__
-	typedef uint64 size_t;
-	typedef int64 ssize_t;
+	typedef uint64 SizeT;
+	typedef int64 sSizeT;
 #elif defined(__32_BITS__)
-	typedef uint32 size_t;
-	typedef int32 ssize_t;
+	typedef uint32 SizeT;
+	typedef int32 sSizeT;
 #endif
