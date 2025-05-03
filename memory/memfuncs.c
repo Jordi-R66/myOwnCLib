@@ -1,6 +1,13 @@
 #include "memfuncs.h"
 
+#include <stdlib.h>
+
 bool equalMemory(void* A, void* B, SizeT n) {
+
+	if (A == NULL || B == NULL) {
+		exit(EXIT_FAILURE);
+	}
+
 	uint8* memA = (uint8*)A;
 	uint8* memB = (uint8*)B;
 
