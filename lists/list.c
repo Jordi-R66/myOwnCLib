@@ -69,7 +69,7 @@ void resizeList(List* list, SizeT newCapacity) {
 }
 
 void addElement(List* list, void* newElement) {
-	if ((list->n_elements + 1) >= list->capacity) {
+	if ((list->n_elements + 1) > list->capacity) {
 		resizeList(list, list->n_elements + 50);
 	}
 
