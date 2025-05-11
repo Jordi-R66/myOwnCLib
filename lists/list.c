@@ -1,5 +1,7 @@
 #include "list.h"
 
+#include "../memory/memfuncs.h"
+
 void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	if (list->initialized) {
 		freeList(list);
@@ -179,4 +181,27 @@ void copyList(List* listDest, List* listSrc) {
 	}
 
 	memcpy(listDest->elements, listSrc->elements, listSrc->capacity * listSrc->elementSize);
+}
+
+SizeT partition(List* list, SizeT lo, SizeT hi) {
+	SizeT n = list->elementSize;
+
+	void* pivot = getElement(list, hi);
+
+	SizeT i = lo;
+
+	for (SizeT j = lo; j < hi; j++) {
+		void* jPtr = getElement(list, j);
+		if (lessThanMemory(jPtr, pivot, n) || equalMemory(jPtr, pivot, n)) {
+			swapElements(list, i, j);
+			i++;
+		}
+	}
+
+	swapElements(list, i, hi);
+	return i;
+}
+
+void orderList(List* list) {
+
 }
