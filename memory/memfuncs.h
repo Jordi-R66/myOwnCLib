@@ -4,7 +4,7 @@
 #include "../targetDetection/types.h"
 
 typedef enum Comparison {
-	LOWER, EQUALS, GREATER
+	LESS, EQUALS, GREATER
 } Comparison;
 
 /**
@@ -24,6 +24,6 @@ bool equalMemory(void* A, void* B, SizeT n);
  * @param A Pointer to block A
  * @param B Pointer to block B
  * @param n Number of bytes to compare
- * @return Whether A > B, A = B, A < B
+ * @return Whether A < B, A = B, A > B
  */
 Comparison compareMemory(void* A, void* B, SizeT n);
