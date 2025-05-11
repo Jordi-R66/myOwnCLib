@@ -26,6 +26,8 @@ void* getElement(List* list, SizeT index);
 void replaceElement(List* list, SizeT index, void* newElement);
 bool contains(List* list, void* Element);
 
+void swapElements(List* list, SizeT i, SizeT j);
+
 SizeT shrinkToFit(List* list);
 void copyList(List* listDest, List* listSrc);
 
