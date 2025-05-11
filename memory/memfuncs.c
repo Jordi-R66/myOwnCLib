@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include "../endianness/endianness.h"
+
 #include "memfuncs.h"
 
 bool equalMemory(void* A, void* B, SizeT n) {
