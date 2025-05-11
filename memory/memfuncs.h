@@ -18,6 +18,9 @@ typedef enum Comparison {
  */
 bool equalMemory(void* A, void* B, SizeT n);
 
+bool lessThanMemory(void* A, void* B, SizeT n);
+
+bool greaterThanMemory(void* A, void* B, SizeT n);
 /**
  * @brief Compares the n first bytes of A with the n first bytes of B
  * 

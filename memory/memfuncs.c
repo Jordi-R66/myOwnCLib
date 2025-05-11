@@ -7,6 +7,14 @@ bool equalMemory(void* A, void* B, SizeT n) {
 	return (bool)(compareMemory(A, B, n) == EQUALS);
 }
 
+bool lessThanMemory(void* A, void* B, SizeT n) {
+	return (bool)(compareMemory(A, B, n) == LESS);
+}
+
+bool greaterThanMemory(void* A, void* B, SizeT n) {
+	return (bool)(compareMemory(A, B, n) == GREATER);
+}
+
 Comparison compareMemory(void* A, void* B, SizeT n) {
 	if ((A == NULL) || (B == NULL)) {
 		exit(EXIT_FAILURE);
