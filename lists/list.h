@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../common.h"
-#include "../memory/memfuncs.h"
 #include "../targetDetection/types.h"
 
 struct List {
@@ -29,3 +28,5 @@ bool contains(List* list, void* Element);
 
 SizeT shrinkToFit(List* list);
 void copyList(List* listDest, List* listSrc);
+
+void orderList(List* list);
