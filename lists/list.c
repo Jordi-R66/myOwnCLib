@@ -141,6 +141,19 @@ bool contains(List* list, void* refElement) {
 	return false;
 }
 
+void swapElements(List* list, SizeT i, SizeT j) {
+	uint8 temp;
+
+	uint8* a = (uint8*)getElement(list, i);
+	uint8* b = (uint8*)getElement(list, j);
+
+	for (SizeT k = 0; k < list->elementSize; k++) {
+		temp = a[k];
+		a[k] = b[k];
+		b[k] = temp;
+	}
+}
+
 SizeT shrinkToFit(List* list) {
 	if (list->fragmented) {
 		fprintf(stderr, "Can't shrink a list if it is fragmented\n");
