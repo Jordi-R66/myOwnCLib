@@ -202,6 +202,17 @@ SizeT partition(List* list, SizeT lo, SizeT hi) {
 	return i;
 }
 
-void orderList(List* list) {
+void QuickSort(List* list, SizeT lo, SizeT hi) {
+	if ((lo >= hi) || (hi >= list->n_elements)) {
+		return;
+	}
 
+	SizeT p = partition(list, lo, hi);
+
+	QuickSort(list, lo, p - 1);
+	QuickSort(list, p + 1, hi);
+}
+
+void orderList(List* list) {
+	QuickSort(list, 0, list->n_elements - 1);
 }
