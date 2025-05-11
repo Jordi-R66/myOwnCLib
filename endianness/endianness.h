@@ -1,6 +1,7 @@
 #pragma once
 
 #ifndef ENDIANNESS_HEADER
+#include "../targetDetection/types.h"
 
 enum Endianness {
 	Little = 0,
