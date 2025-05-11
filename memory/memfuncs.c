@@ -3,7 +3,7 @@
 
 bool equalMemory(void* A, void* B, SizeT n) {
 
-	if (A == NULL || B == NULL) {
+	if ((A == NULL) || (B == NULL)) {
 		exit(EXIT_FAILURE);
 	}
 
