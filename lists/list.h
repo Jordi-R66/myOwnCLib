@@ -32,3 +32,4 @@ SizeT shrinkToFit(List* list);
 void copyList(List* listDest, List* listSrc);
 
 void sortList(List* list);
+void reverseList(List* list);

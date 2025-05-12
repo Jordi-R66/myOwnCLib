@@ -220,3 +220,15 @@ void sortList(List* list) {
 
 	QuickSort(list, 0, list->n_elements - 1);
 }
+
+void reverseList(List* list) {
+	if (list->n_elements < 2 || list->capacity < 2) {
+		return;
+	}
+
+	for (SizeT i = 0; i < list->n_elements/2; i++) {
+		SizeT j = list->n_elements - i - 1;
+
+		swapElements(list, i, j);
+	}
+}
