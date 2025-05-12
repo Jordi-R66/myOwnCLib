@@ -16,7 +16,7 @@ typedef struct List {
 } List;
 #pragma pack()
 
-#define LIST_SIZE sizeof(List);
+#define LIST_SIZE sizeof(List)
 
 void initializeList(List* list, SizeT initSize, SizeT elementSize);
 void freeList(List* list);
