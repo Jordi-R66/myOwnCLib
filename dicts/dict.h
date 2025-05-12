@@ -2,6 +2,7 @@
 
 #include "../lists/list.h"
 
+#pragma pack(1)
 typedef struct kvp {
 	void* key;
 	void* value;
@@ -13,6 +14,10 @@ typedef struct dict {
 	SizeT keySize; // Size of the key in bytes
 	SizeT valSize; // Size of the value in bytes
 } Dict;
+#pragma pack()
+
+#define KVP_SIZE sizeof(KeyValuePair_t)
+#define DICT_SIZE sizeof(Dict)
 
 void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT n_records);
 
