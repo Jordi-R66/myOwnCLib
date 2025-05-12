@@ -32,5 +32,11 @@ void swapElements(List* list, SizeT i, SizeT j);
 SizeT shrinkToFit(List* list);
 void copyList(List* listDest, List* listSrc);
 
+/**
+ * @brief Sorts the given list using the given comparison function
+ * 
+ * @param list The pointer of the list to sort
+ * @param compFunc the function to use to compare (set to NULL to use default)
+ */
 void sortList(List* list, Comparison (*compFunc)(void*, void*, SizeT));
 void reverseList(List* list);
