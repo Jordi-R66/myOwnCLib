@@ -31,4 +31,4 @@ void swapElements(List* list, SizeT i, SizeT j);
 SizeT shrinkToFit(List* list);
 void copyList(List* listDest, List* listSrc);
 
-void orderList(List* list);
+void sortList(List* list);
