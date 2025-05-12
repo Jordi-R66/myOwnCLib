@@ -2,6 +2,7 @@
 
 #include "../common.h"
 #include "../targetDetection/types.h"
+#include "../memory/memfuncs.h"
 
 struct List {
 	SizeT capacity; // List capacity in number of elements
