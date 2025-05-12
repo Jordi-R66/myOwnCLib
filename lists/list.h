@@ -4,6 +4,7 @@
 #include "../targetDetection/types.h"
 #include "../memory/memfuncs.h"
 
+#pragma pack(1)
 typedef struct List {
 	SizeT capacity; // List capacity in number of elements
 	SizeT n_elements; // Current number of elements
@@ -13,6 +14,9 @@ typedef struct List {
 
 	void* elements; // The actual array
 } List;
+#pragma pack()
+
+#define LIST_SIZE sizeof(List);
 
 void initializeList(List* list, SizeT initSize, SizeT elementSize);
 void freeList(List* list);
