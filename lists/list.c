@@ -187,7 +187,11 @@ void copyList(List* listDest, List* listSrc) {
 	memcpy(listDest->elements, listSrc->elements, listSrc->capacity * listSrc->elementSize);
 }
 
-SizeT partition(List* list, SizeT lo, SizeT hi) {
+SizeT partition(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(void*, void*, SizeT)) {
+	if (compFunc == NULL) {
+		compFunc = compareMemory;
+	}
+
 	SizeT n = list->elementSize;
 
 	void* pivot = getElement(list, hi);
@@ -196,33 +200,42 @@ SizeT partition(List* list, SizeT lo, SizeT hi) {
 
 	for (SizeT j = lo; j < hi; j++) {
 		void* jPtr = getElement(list, j);
-		if (lessThanMemory(jPtr, pivot, n) || equalMemory(jPtr, pivot, n)) {
+		if (compFunc(jPtr, pivot, n) == LESS || compFunc(jPtr, pivot, n) == EQUALS) {
 			swapElements(list, i, j);
 			i++;
 		}
 	}
 
 	swapElements(list, i, hi);
+
 	return i;
 }
 
-void QuickSort(List* list, SizeT lo, SizeT hi) {
+void QuickSort(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(void*, void*, SizeT)) {
 	if ((lo >= hi) || (hi >= list->n_elements)) {
 		return;
 	}
 
-	SizeT p = partition(list, lo, hi);
+	if (compFunc == NULL) {
+		compFunc = compareMemory;
+	}
 
-	QuickSort(list, lo, p - 1);
-	QuickSort(list, p + 1, hi);
+	SizeT p = partition(list, lo, hi, compFunc);
+
+	QuickSort(list, lo, p - 1, compFunc);
+	QuickSort(list, p + 1, hi, compFunc);
 }
 
-void sortList(List* list) {
+void sortList(List* list, Comparison (*compFunc)(void*, void*, SizeT)) {
 	if (list->n_elements < 2 || list->capacity < 2) {
 		return;
 	}
 
-	QuickSort(list, 0, list->n_elements - 1);
+	if (compFunc == NULL) {
+		compFunc = compareMemory;
+	}
+
+	QuickSort(list, 0, list->n_elements - 1, compFunc);
 }
 
 void reverseList(List* list) {

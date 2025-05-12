@@ -31,5 +31,5 @@ void swapElements(List* list, SizeT i, SizeT j);
 SizeT shrinkToFit(List* list);
 void copyList(List* listDest, List* listSrc);
 
-void sortList(List* list);
+void sortList(List* list, Comparison (*compFunc)(void*, void*, SizeT));
 void reverseList(List* list);
