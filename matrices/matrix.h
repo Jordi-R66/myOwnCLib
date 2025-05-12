@@ -2,12 +2,16 @@
 
 #include "localCommon.h"
 
+#pragma pack(1)
 struct Matrix {
 	SizeT rows, cols, size;
 
 	value_t* data;
 	bool memFreed;
 };
+#pragma pack()
+
+#define MATRIX_SIZE sizeof(Matrix)
 
 typedef struct Matrix Matrix;
 
