@@ -146,6 +146,10 @@ bool contains(List* list, void* refElement) {
 void swapElements(List* list, SizeT i, SizeT j) {
 	uint8 temp;
 
+	if (i == j) {
+		return;
+	}
+
 	uint8* a = (uint8*)getElement(list, i);
 	uint8* b = (uint8*)getElement(list, j);
 
