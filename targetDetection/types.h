@@ -20,3 +20,5 @@ typedef signed long int64;
 	typedef uint32 SizeT;
 	typedef int32 sSizeT;
 #endif
+
+typedef char* string;
