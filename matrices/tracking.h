@@ -2,6 +2,7 @@
 
 #include "matrix.h"
 
+#pragma pack(1)
 enum TransformationType {
 	SWAP = 0,
 	SUB = 1,
@@ -43,6 +44,9 @@ struct Tracker {
 };
 
 typedef struct Tracker Tracker;
+#pragma pack()
+
+#define TRACKER_SIZE sizeof(Tracker);
 
 void InitTracker(Tracker* tracker);
 void deallocTracker(Tracker* tracker);
