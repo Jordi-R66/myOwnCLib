@@ -4,17 +4,15 @@
 #include "../targetDetection/types.h"
 #include "../memory/memfuncs.h"
 
-struct List {
+typedef struct List {
 	SizeT capacity; // List capacity in number of elements
-	SizeT n_elements; // Actual number of elements
+	SizeT n_elements; // Current number of elements
 	SizeT elementSize; // Size of elements in bytes
-	bool fragmented; // Is the list fragmented
-	bool initialized; // Is the list initialized
+	bool fragmented; // Is the list fragmented?
+	bool initialized; // Is the list initialized?
 
 	void* elements; // The actual array
-};
-
-typedef struct List List;
+} List;
 
 void initializeList(List* list, SizeT initSize, SizeT elementSize);
 void freeList(List* list);
