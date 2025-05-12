@@ -27,7 +27,7 @@ void addElement(List* list, void* newElement);
 void removeElement(List* list, SizeT index, bool shiftElements);
 void* getElement(List* list, SizeT index);
 void replaceElement(List* list, SizeT index, void* newElement);
-bool contains(List* list, void* Element);
+bool contains(List* list, void* refElement);
 
 void swapElements(List* list, SizeT i, SizeT j);
 
