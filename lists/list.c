@@ -214,5 +214,9 @@ void QuickSort(List* list, SizeT lo, SizeT hi) {
 }
 
 void orderList(List* list) {
+	if (list->n_elements < 2 || list->capacity < 2) {
+		return;
+	}
+
 	QuickSort(list, 0, list->n_elements - 1);
 }
