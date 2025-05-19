@@ -21,7 +21,7 @@
 		typedef ForwardNode ForwardLinkedList;
 
 		void addForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
-		void removeForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
+		void removeForwardNode(ForwardLinkedList* list, void* value, SizeT valSize, bool cascade);
 	#endif
 
 	#ifdef DECLARE_BACKWARDS
