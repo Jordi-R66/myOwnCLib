@@ -8,9 +8,24 @@
 
 #include "../memory/memfuncs.h"
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef DECLARE_FORWARD
-	void addForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
+	void addForwardNode(ForwardLinkedList* list, void* value, SizeT valSize) {
+		ForwardNode* node = list;
+
+		while (node->next != NULL) {
+			node = node->next;
+		}
+
+		node->next = (ForwardNode*)calloc(1, sizeof(ForwardNode));
+		node = node->next;
+
+		node->value = calloc(1, valSize);
+		copyMemory(value, node->value, valSize);
+		node->next = NULL;
+	}
+
 	void removeForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
 #endif
 
