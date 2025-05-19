@@ -46,3 +46,15 @@ Comparison compareMemory(void* A, void* B, SizeT n) {
 	return EQUALS;
 }
 #pragma endregion
+
+#pragma region Memory Manipulation
+void copyMemory(void* src, void* dest, SizeT size) {
+	uint8* a = (uint8*)src;
+	uint8* b = (uint8*)dest;
+
+	for (SizeT i = 0; i < size; i++) {
+		b[i] = a[i];
+	}
+}
+
+#pragma endregion
