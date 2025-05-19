@@ -14,7 +14,7 @@ void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	list->fragmented = false;
 	list->initialized = true;
 
-	void* ptr = (void*)calloc(initSize, elementSize);
+	ptr ptr = (ptr)calloc(initSize, elementSize);
 
 	if (ptr != NULL) {
 		list->elements = ptr;
@@ -57,7 +57,7 @@ void resizeList(List* list, SizeT newCapacity) {
 		exit(EXIT_FAILURE);
 	}
 
-	void* ptr = (void*)realloc(list->elements, newCapacity * list->elementSize);
+	ptr ptr = (ptr)realloc(list->elements, newCapacity * list->elementSize);
 
 	if (ptr != NULL) {
 		//printf("new capacity : %zu elements\n", newCapacity);
@@ -65,12 +65,12 @@ void resizeList(List* list, SizeT newCapacity) {
 		list->capacity = newCapacity;
 	} else {
 		free(ptr);
-		fprintf(stderr, "Reallocation failure in `resizeList(%p, index)`\n", (void*)list);
+		fprintf(stderr, "Reallocation failure in `resizeList(%p, index)`\n", (ptr)list);
 		exit(EXIT_FAILURE);
 	}
 }
 
-void addElement(List* list, void* newElement) {
+void addElement(List* list, ptr newElement) {
 	if ((list->n_elements + 1) > list->capacity) {
 		resizeList(list, list->n_elements + 50);
 	}
@@ -109,9 +109,9 @@ void removeElement(List* list, SizeT index, bool shiftElements) {
 }
 
 /*
-	Returns pointer to element in list as `void*`
+	Returns pointer to element in list as `ptr`
 */
-void* getElement(List* list, SizeT index) {
+ptr getElement(List* list, SizeT index) {
 	if (index >= list->capacity) {
 		return NULL;
 	}
@@ -119,7 +119,7 @@ void* getElement(List* list, SizeT index) {
 	return list->elements + index * list->elementSize;
 }
 
-void replaceElement(List* list, SizeT index, void* newElement) {
+void replaceElement(List* list, SizeT index, ptr newElement) {
 	if (index >= list->capacity) {
 		fprintf(stderr, "Can't replace an element outside of a list\n");
 		exit(EXIT_FAILURE);
@@ -133,7 +133,7 @@ void replaceElement(List* list, SizeT index, void* newElement) {
 	list->fragmented = false;
 }
 
-bool contains(List* list, void* refElement) {
+bool contains(List* list, ptr refElement) {
 	for (SizeT i = 0; i < list->n_elements; i++) {
 		if (equalMemory(refElement, getElement(list, i), list->elementSize)) {
 			return true;
@@ -174,7 +174,7 @@ SizeT shrinkToFit(List* list) {
 void copyList(List* listDest, List* listSrc) {
 	memcpy(listDest, listSrc, sizeof(*listSrc));
 
-	void* ptr = calloc(listDest->capacity, listDest->elementSize);
+	ptr ptr = calloc(listDest->capacity, listDest->elementSize);
 
 	if (ptr != NULL) {
 		listDest->elements = ptr;
@@ -187,19 +187,19 @@ void copyList(List* listDest, List* listSrc) {
 	memcpy(listDest->elements, listSrc->elements, listSrc->capacity * listSrc->elementSize);
 }
 
-SizeT partition(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(void*, void*, SizeT)) {
+SizeT partition(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(ptr, ptr, SizeT)) {
 	if (compFunc == NULL) {
 		compFunc = compareMemory;
 	}
 
 	SizeT n = list->elementSize;
 
-	void* pivot = getElement(list, hi);
+	ptr pivot = getElement(list, hi);
 
 	SizeT i = lo;
 
 	for (SizeT j = lo; j < hi; j++) {
-		void* jPtr = getElement(list, j);
+		ptr jPtr = getElement(list, j);
 		if (compFunc(jPtr, pivot, n) == LESS || compFunc(jPtr, pivot, n) == EQUALS) {
 			swapElements(list, i, j);
 			i++;
@@ -211,7 +211,7 @@ SizeT partition(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(void*, vo
 	return i;
 }
 
-void QuickSort(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(void*, void*, SizeT)) {
+void QuickSort(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(ptr, ptr, SizeT)) {
 	if ((lo >= hi) || (hi >= list->n_elements)) {
 		return;
 	}
@@ -226,7 +226,7 @@ void QuickSort(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(void*, voi
 	QuickSort(list, p + 1, hi, compFunc);
 }
 
-void sortList(List* list, Comparison (*compFunc)(void*, void*, SizeT)) {
+void sortList(List* list, Comparison (*compFunc)(ptr, ptr, SizeT)) {
 	if (list->n_elements < 2 || list->capacity < 2) {
 		return;
 	}

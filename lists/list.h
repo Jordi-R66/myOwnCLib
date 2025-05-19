@@ -12,7 +12,7 @@ typedef struct List {
 	bool fragmented; // Is the list fragmented?
 	bool initialized; // Is the list initialized?
 
-	void* elements; // The actual array
+	ptr elements; // The actual array
 } List;
 #pragma pack()
 
@@ -23,11 +23,11 @@ void freeList(List* list);
 
 void resizeList(List* list, SizeT newCapacity);
 
-void addElement(List* list, void* newElement);
+void addElement(List* list, ptr newElement);
 void removeElement(List* list, SizeT index, bool shiftElements);
-void* getElement(List* list, SizeT index);
-void replaceElement(List* list, SizeT index, void* newElement);
-bool contains(List* list, void* refElement);
+ptr getElement(List* list, SizeT index);
+void replaceElement(List* list, SizeT index, ptr newElement);
+bool contains(List* list, ptr refElement);
 
 void swapElements(List* list, SizeT i, SizeT j);
 
@@ -40,5 +40,5 @@ void copyList(List* listDest, List* listSrc);
  * @param list The pointer of the list to sort
  * @param compFunc the function to use to compare (set to NULL to use default)
  */
-void sortList(List* list, Comparison (*compFunc)(void*, void*, SizeT));
+void sortList(List* list, Comparison (*compFunc)(ptr, ptr, SizeT));
 void reverseList(List* list);
