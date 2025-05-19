@@ -73,7 +73,35 @@
 		node->previous = NULL;
 	}
 
-	void removeBackwardsNode(BackwardsLinkedList** list, SizeT position, bool cascade);
+	void removeBackwardsNode(BackwardsLinkedList** list, SizeT position, bool cascade) {
+		BackwardsLinkedList* next = NULL;
+		BackwardsLinkedList* current = *list;
+		BackwardsLinkedList* previous = current->previous;
+
+		for (SizeT pos = 0; pos < position; pos++) {
+			next = current;
+			current = previous;
+			previous = current->previous;
+
+			if (current == NULL) {
+				return;
+			}
+		}
+
+		if (next != NULL) {
+			next->previous = previous;
+		} else {
+			*list = previous;
+		}
+
+		free(current->value);
+		current->previous = NULL;
+		free(current);
+
+		if (cascade) {
+			removeForwardNode(list, position, true);
+		}
+	}
 #endif
 
 #ifdef DECLARE_DOUBLE
