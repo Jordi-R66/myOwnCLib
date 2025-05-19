@@ -35,6 +35,10 @@
 			prev = current;
 			current = next;
 			next = current->next;
+
+			if (current == NULL) {
+				return;
+			}
 		}
 
 		if (prev != NULL) {
