@@ -1,5 +1,7 @@
 #pragma once
 
+#define DECLARE_FORWARD
+
 #if defined(DECLARE_FORWARD) || defined(DECLARE_BACKWARDS) || defined(DECLARE_DOUBLE)
 	#include "../targetDetection/macros.h"
 	#include "../targetDetection/types.h"
@@ -51,14 +53,9 @@
 
 	#pragma pack()
 
-	#ifdef DECLARE_FORWARD
-		typedef ForwardLinkedList LinkedList;
-	#elif defined(DECLARE_BACKWARDS)
-		typedef BackwardsLinkedList LinkedList;
-	#else
-		typedef DoubleLinkedList LinkedList;
-	#endif
-
-
+	typedef struct LinkedList {
+		void* node;
+		LinkedListTypes listType;
+	} LinkedList;
 
 #endif
