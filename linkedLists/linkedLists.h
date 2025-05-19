@@ -6,6 +6,11 @@
 
 	#pragma pack(1)
 
+	typedef struct {
+		SizeT size;
+		void* value;
+	} ValueField;
+
 	typedef enum {
 		FORWARD = 0,
 		BACKWARDS = 1,
@@ -14,7 +19,7 @@
 
 	#ifdef DECLARE_FORWARD
 		typedef struct ForwardNode {
-			void* value;
+			ValueField value;
 			ForwardNode* next;
 		} ForwardNode;
 
@@ -27,7 +32,7 @@
 	#ifdef DECLARE_BACKWARDS
 		typedef struct BackwardsNode {
 			BackwardsNode* previous;
-			void* value;
+			ValueField value;
 		} BackwardsNode;
 
 		typedef BackwardsNode BackwardsLinkedList;
@@ -39,7 +44,7 @@
 	#ifdef DECLARE_DOUBLE
 		typedef struct DoubleNode {
 			DoubleNode* previous;
-			void* value;
+			ValueField value;
 			DoubleNode* next;
 		} DoubleNode;
 
