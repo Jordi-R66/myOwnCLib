@@ -4,8 +4,8 @@
 
 #pragma pack(1)
 typedef struct kvp {
-	void* key;
-	void* value;
+	ptr key;
+	ptr value;
 } KeyValuePair_t;
 
 typedef struct dict {
@@ -21,12 +21,12 @@ typedef struct dict {
 
 void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT n_records);
 
-void setPair(Dict* dict, void* currentKey, KeyValuePair_t newKvp);
-void setValue(Dict* dict, void* key, void* newValue);
-void* getValue(Dict* dict, void* key);
+void setPair(Dict* dict, ptr currentKey, KeyValuePair_t newKvp);
+void setValue(Dict* dict, ptr key, ptr newValue);
+ptr getValue(Dict* dict, ptr key);
 
-void addEntry(Dict* dict, void* key, void* value);
+void addEntry(Dict* dict, ptr key, ptr value);
 
-void removeValue(Dict* dict, void* key);
+void removeValue(Dict* dict, ptr key);
 
 void freeDict(Dict* dict, bool freeKeys, bool freeValues);

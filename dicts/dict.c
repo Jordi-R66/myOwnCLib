@@ -8,7 +8,7 @@ void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT initCapacity) {
 }
 
 
-void setPair(Dict* dict, void* currentKey, KeyValuePair_t newKvp) {
+void setPair(Dict* dict, ptr currentKey, KeyValuePair_t newKvp) {
 	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
 
@@ -20,14 +20,14 @@ void setPair(Dict* dict, void* currentKey, KeyValuePair_t newKvp) {
 	}
 }
 
-void setValue(Dict* dict, void* key, void* newValue) {
+void setValue(Dict* dict, ptr key, ptr newValue) {
 	KeyValuePair_t kvp = {key, newValue};
 
 	setPair(dict, key, kvp);
 }
 
-void* getValue(Dict* dict, void* key) {
-	void* val = NULL;
+ptr getValue(Dict* dict, ptr key) {
+	ptr val = NULL;
 
 	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
@@ -45,15 +45,15 @@ void addPair(Dict* dict, KeyValuePair_t kvp) {
 	addElement(&dict->pairs, &kvp);
 }
 
-void addEntry(Dict* dict, void* key, void* value) {
+void addEntry(Dict* dict, ptr key, ptr value) {
 	KeyValuePair_t kvp;
 
 	kvp.key = key;
 	kvp.value = value;
 
 	// D'abord on initialise deux arrays, pour respectivement stocker la valeur de la clé, et la valeur elle-même
-	void* temp_key = calloc(1, dict->keySize);
-	void* temp_val = calloc(1, dict->valSize);
+	ptr temp_key = calloc(1, dict->keySize);
+	ptr temp_val = calloc(1, dict->valSize);
 
 	// Ensuite on copie le contenu
 	memcpy(temp_key, key, dict->keySize);
@@ -65,7 +65,7 @@ void addEntry(Dict* dict, void* key, void* value) {
 	addPair(dict, kvp);
 }
 
-void removePair(Dict* dict, void* key) {
+void removePair(Dict* dict, ptr key) {
 	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
 
