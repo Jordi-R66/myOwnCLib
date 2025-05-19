@@ -8,6 +8,8 @@
 			void* value;
 			ForwardNode* next;
 		} ForwardNode;
+
+		typedef ForwardNode ForwardLinkedList;
 	#endif
 
 	#ifdef DECLARE_BACKWARDS
@@ -15,6 +17,8 @@
 			BackwardsNode* previous;
 			void* value;
 		} BackwardsNode;
+
+		typedef BackwardsNode BackwardsLinkedList;
 	#endif
 
 	#ifdef DECLARE_DOUBLE
@@ -23,6 +27,8 @@
 			void* value;
 			DoubleNode* next;
 		} DoubleNode;
+
+		typedef DoubleNode DoubleLinkedList;
 	#endif
 
 	#pragma pack()
