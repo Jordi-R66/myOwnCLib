@@ -50,6 +50,10 @@
 		free(current->value);
 		current->next = NULL;
 		free(current);
+
+		if (cascade) {
+			removeForwardNode(list, position, true);
+		}
 	}
 #endif
 
