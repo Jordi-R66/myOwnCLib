@@ -121,7 +121,35 @@
 		next->next = NULL;
 	}
 
-	void removeDoubleNode(DoubleLinkedList** list, SizeT position, bool cascade);
+	void removeDoubleNode(DoubleLinkedList** list, SizeT position, bool cascade) {
+		DoubleNode* next = NULL;
+		DoubleNode* current = *list;
+		DoubleNode* previous = current->previous;
+
+		for (SizeT pos = 0; pos < position; pos++) {
+			next = current;
+			current = previous;
+			previous = current->previous;
+
+			if (current == NULL) {
+				return;
+			}
+		}
+
+		if (next != NULL) {
+			next->previous = previous;
+		} else {
+			*list = previous;
+		}
+
+		free(current->value.value);
+		current->previous = NULL;
+		free(current);
+
+		if (cascade) {
+			return;//removeBackwardsNode(list, position, true);
+		}
+	}
 #endif
 
 void addNode(LinkedList* list, ValueField value) {
