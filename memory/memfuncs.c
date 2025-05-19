@@ -56,5 +56,4 @@ void copyMemory(void* src, void* dest, SizeT size) {
 		b[i] = a[i];
 	}
 }
-
 #pragma endregion
