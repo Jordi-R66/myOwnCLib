@@ -1,7 +1,5 @@
 #pragma once
 
-#define DECLARE_FORWARD
-
 #if defined(DECLARE_FORWARD) || defined(DECLARE_BACKWARDS) || defined(DECLARE_DOUBLE)
 	#include "../targetDetection/macros.h"
 	#include "../targetDetection/types.h"
@@ -57,5 +55,8 @@
 		void* node;
 		LinkedListTypes listType;
 	} LinkedList;
+
+	void addNode(LinkedList* list, void* value, SizeT valSize);
+	void removeNode(LinkedList* list, void* value, SizeT valSize);
 
 #endif
