@@ -50,7 +50,21 @@
 #endif
 
 #ifdef DECLARE_BACKWARDS
-	void addBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize);
+	void addBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize) {
+		BackwardsNode* node = list;
+
+		while (node->previous != NULL) {
+			node = node->previous;
+		}
+
+		node->previous = (BackwardsNode*)calloc(1, sizeof(BackwardsNode));
+		node = node->previous;
+
+		node->value = calloc(1, valSize);
+		copyMemory(value, node->value, valSize);
+		node->previous = NULL;
+	}
+
 	void removeBackwardsNode(BackwardsLinkedList** list, SizeT position, bool cascade);
 #endif
 
