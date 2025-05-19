@@ -8,7 +8,7 @@
 
 	typedef struct {
 		SizeT size;
-		void* value;
+		ptr value;
 	} ValueField;
 
 	typedef enum {
@@ -25,7 +25,7 @@
 
 		typedef ForwardNode ForwardLinkedList;
 
-		void addForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
+		void addForwardNode(ForwardLinkedList* list, ValueField value);
 		void removeForwardNode(ForwardLinkedList** list, SizeT position, bool cascade);
 	#endif
 
@@ -37,7 +37,7 @@
 
 		typedef BackwardsNode BackwardsLinkedList;
 
-		void addBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize);
+		void addBackwardsNode(BackwardsLinkedList* list, ValueField value);
 		void removeBackwardsNode(BackwardsLinkedList** list, SizeT position, bool cascade);
 	#endif
 
@@ -50,18 +50,18 @@
 
 		typedef DoubleNode DoubleLinkedList;
 
-		void addDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
+		void addDoubleNode(DoubleLinkedList* list, ValueField value);
 		void removeDoubleNode(DoubleLinkedList** list, SizeT position, bool cascade);
 	#endif
 
 	typedef struct LinkedList {
-		void* node;
+		ptr node;
 		LinkedListTypes listType;
 	} LinkedList;
 
 	#pragma pack()
 
-	void addNode(LinkedList* list, void* value, SizeT valSize);
+	void addNode(LinkedList* list, ValueField value);
 	void removeNode(LinkedList** list, SizeT position, bool cascade);
 
 #endif
