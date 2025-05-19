@@ -99,7 +99,7 @@
 		free(current);
 
 		if (cascade) {
-			removeForwardNode(list, position, true);
+			removeBackwardsNode(list, position, true);
 		}
 	}
 #endif
