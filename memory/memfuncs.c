@@ -4,19 +4,19 @@
 #include "memfuncs.h"
 
 #pragma region Memory Comparison
-bool equalMemory(void* A, void* B, SizeT n) {
+bool equalMemory(ptr A, ptr B, SizeT n) {
 	return (bool)(compareMemory(A, B, n) == EQUALS);
 }
 
-bool lessThanMemory(void* A, void* B, SizeT n) {
+bool lessThanMemory(ptr A, ptr B, SizeT n) {
 	return (bool)(compareMemory(A, B, n) == LESS);
 }
 
-bool greaterThanMemory(void* A, void* B, SizeT n) {
+bool greaterThanMemory(ptr A, ptr B, SizeT n) {
 	return (bool)(compareMemory(A, B, n) == GREATER);
 }
 
-Comparison compareMemory(void* A, void* B, SizeT n) {
+Comparison compareMemory(ptr A, ptr B, SizeT n) {
 	if ((A == NULL) || (B == NULL)) {
 		exit(EXIT_FAILURE);
 	}
@@ -48,7 +48,7 @@ Comparison compareMemory(void* A, void* B, SizeT n) {
 #pragma endregion
 
 #pragma region Memory Manipulation
-void copyMemory(void* src, void* dest, SizeT size) {
+void copyMemory(ptr src, ptr dest, SizeT size) {
 	uint8* a = (uint8*)src;
 	uint8* b = (uint8*)dest;
 
@@ -57,7 +57,7 @@ void copyMemory(void* src, void* dest, SizeT size) {
 	}
 }
 
-void setMemory(void* memAddr, uint8 value, SizeT bytes) {
+void setMemory(ptr memAddr, uint8 value, SizeT bytes) {
 	uint8* a = (uint8*)memAddr;
 
 	for (SizeT i = 0; i < bytes; i++) {

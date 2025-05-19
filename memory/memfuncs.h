@@ -19,11 +19,11 @@ typedef enum Comparison {
  * @return true Both are the same values
  * @return false The values are different
  */
-bool equalMemory(void* A, void* B, SizeT n);
+bool equalMemory(ptr A, ptr B, SizeT n);
 
-bool lessThanMemory(void* A, void* B, SizeT n);
+bool lessThanMemory(ptr A, ptr B, SizeT n);
 
-bool greaterThanMemory(void* A, void* B, SizeT n);
+bool greaterThanMemory(ptr A, ptr B, SizeT n);
 /**
  * @brief Compares the n first bytes of A with the n first bytes of B
  * 
@@ -32,13 +32,13 @@ bool greaterThanMemory(void* A, void* B, SizeT n);
  * @param n Number of bytes to compare
  * @return Whether A < B, A = B, A > B
  */
-Comparison compareMemory(void* A, void* B, SizeT n);
+Comparison compareMemory(ptr A, ptr B, SizeT n);
 #pragma endregion
 
 // Memory manipulation
 #pragma region Memory Manipulation
 
-void copyMemory(void* src, void* dest, SizeT size);
-void setMemory(void* memAddr, uint8 value, SizeT bytes);
+void copyMemory(ptr src, ptr dest, SizeT size);
+void setMemory(ptr memAddr, uint8 value, SizeT bytes);
 
 #pragma endregion
