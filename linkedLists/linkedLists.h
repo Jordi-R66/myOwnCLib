@@ -33,16 +33,12 @@
 
 	#pragma pack()
 
-	#ifdef DECLARE_DOUBLE
-		typedef DoubleLinkedList LinkedList;
-	#endif
-
-	#ifdef DECLARE_BACKWARDS
-		typedef BackwardsLinkedList LinkedList;
-	#endif
-
 	#ifdef DECLARE_FORWARD
 		typedef ForwardLinkedList LinkedList;
+	#elif defined(DECLARE_BACKWARDS)
+		typedef BackwardsLinkedList LinkedList;
+	#else
+		typedef DoubleLinkedList LinkedList;
 	#endif
 
 #endif
