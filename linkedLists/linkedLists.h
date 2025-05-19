@@ -1,5 +1,7 @@
 #pragma once
 
+#define DECLARE_FORWARD
+
 #if defined(DECLARE_FORWARD) || defined(DECLARE_BACKWARDS) || defined(DECALRE_DOUBLE)
 	#pragma pack(1)
 
@@ -32,4 +34,17 @@
 	#endif
 
 	#pragma pack()
+
+	#ifdef DECLARE_DOUBLE
+		typedef DoubleLinkedList LinkedList;
+	#endif
+
+	#ifdef DECLARE_BACKWARDS
+		typedef BackwardsLinkedList LinkedList;
+	#endif
+
+	#ifdef DECLARE_FORWARD
+		typedef ForwardLinkedList LinkedList;
+	#endif
+
 #endif
