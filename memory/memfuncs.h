@@ -3,6 +3,9 @@
 #include "../bools/bool.h"
 #include "../targetDetection/types.h"
 
+// Memory comparison
+#pragma region Memory Comparison
+
 typedef enum Comparison {
 	LESS, EQUALS, GREATER
 } Comparison;
@@ -30,3 +33,6 @@ bool greaterThanMemory(void* A, void* B, SizeT n);
  * @return Whether A < B, A = B, A > B
  */
 Comparison compareMemory(void* A, void* B, SizeT n);
+#pragma endregion
+
+// Memory manipulation
