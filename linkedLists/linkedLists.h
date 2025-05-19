@@ -1,6 +1,9 @@
 #pragma once
 
 #if defined(DECLARE_FORWARD) || defined(DECLARE_BACKWARDS) || defined(DECLARE_DOUBLE)
+	#include "../targetDetection/macros.h"
+	#include "../targetDetection/types.h"
+
 	#pragma pack(1)
 
 	#ifdef DECLARE_FORWARD
