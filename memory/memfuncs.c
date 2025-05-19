@@ -3,6 +3,7 @@
 
 #include "memfuncs.h"
 
+#pragma region Memory Comparison
 bool equalMemory(void* A, void* B, SizeT n) {
 	return (bool)(compareMemory(A, B, n) == EQUALS);
 }
@@ -44,3 +45,4 @@ Comparison compareMemory(void* A, void* B, SizeT n) {
 
 	return EQUALS;
 }
+#pragma endregion
