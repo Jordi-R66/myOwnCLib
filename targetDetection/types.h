@@ -22,3 +22,4 @@ typedef signed long int64;
 #endif
 
 typedef char* string;
+typedef void* ptr;
