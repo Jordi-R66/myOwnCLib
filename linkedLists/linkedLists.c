@@ -105,7 +105,24 @@
 #endif
 
 #ifdef DECLARE_DOUBLE
-	void addDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
+	void addDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize) {
+		DoubleNode* previous = NULL;
+		DoubleNode* current = list;
+		DoubleNode* next = list->next;
+
+		while (next != NULL) {
+			current = next;
+			previous = current->previous;
+			next = current->next;
+		}
+
+		next = (DoubleNode*)calloc(1, sizeof(DoubleNode));
+		next->previous = current;
+
+		copyMemory(value, next->value, valSize);
+		next->next = NULL;
+	}
+
 	void removeDoubleNode(DoubleLinkedList** list, SizeT position, bool cascade);
 #endif
 
