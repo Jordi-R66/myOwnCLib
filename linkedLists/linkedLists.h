@@ -1,7 +1,5 @@
 #pragma once
 
-#define DECLARE_FORWARD
-
 #if defined(DECLARE_FORWARD) || defined(DECLARE_BACKWARDS) || defined(DECALRE_DOUBLE)
 	#pragma pack(1)
 
