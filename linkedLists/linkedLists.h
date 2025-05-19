@@ -21,7 +21,7 @@
 		typedef ForwardNode ForwardLinkedList;
 
 		void addForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
-		void removeForwardNode(ForwardLinkedList* list, void* value, SizeT valSize, bool cascade);
+		void removeForwardNode(ForwardLinkedList* list, SizeT position, bool cascade);
 	#endif
 
 	#ifdef DECLARE_BACKWARDS
@@ -33,7 +33,7 @@
 		typedef BackwardsNode BackwardsLinkedList;
 
 		void addBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize);
-		void removeBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize, bool cascade);
+		void removeBackwardsNode(BackwardsLinkedList* list, SizeT position, bool cascade);
 	#endif
 
 	#ifdef DECLARE_DOUBLE
@@ -46,7 +46,7 @@
 		typedef DoubleNode DoubleLinkedList;
 
 		void addDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
-		void removeDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize, bool cascade);
+		void removeDoubleNode(DoubleLinkedList* list, SizeT position, bool cascade);
 	#endif
 
 	typedef struct LinkedList {
@@ -57,6 +57,6 @@
 	#pragma pack()
 
 	void addNode(LinkedList* list, void* value, SizeT valSize);
-	void removeNode(LinkedList* list, void* value, SizeT valSize, bool cascade);
+	void removeNode(LinkedList* list, SizeT position, bool cascade);
 
 #endif
