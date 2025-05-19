@@ -19,6 +19,9 @@
 		} ForwardNode;
 
 		typedef ForwardNode ForwardLinkedList;
+
+		void addForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
+		void removeForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
 	#endif
 
 	#ifdef DECLARE_BACKWARDS
@@ -28,6 +31,9 @@
 		} BackwardsNode;
 
 		typedef BackwardsNode BackwardsLinkedList;
+
+		void addBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize);
+		void removeBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize);
 	#endif
 
 	#ifdef DECLARE_DOUBLE
@@ -38,6 +44,9 @@
 		} DoubleNode;
 
 		typedef DoubleNode DoubleLinkedList;
+
+		void addDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
+		void removeDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
 	#endif
 
 	#pragma pack()
