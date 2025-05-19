@@ -39,5 +39,6 @@ Comparison compareMemory(void* A, void* B, SizeT n);
 #pragma region Memory Manipulation
 
 void copyMemory(void* src, void* dest, SizeT size);
+void setMemory(void* memAddr, uint8 value, SizeT bytes);
 
 #pragma endregion

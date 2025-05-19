@@ -56,4 +56,12 @@ void copyMemory(void* src, void* dest, SizeT size) {
 		b[i] = a[i];
 	}
 }
+
+void setMemory(void* memAddr, uint8 value, SizeT bytes) {
+	uint8* a = (uint8*)memAddr;
+
+	for (SizeT i = 0; i < bytes; i++) {
+		a[i] = value;
+	}
+}
 #pragma endregion
