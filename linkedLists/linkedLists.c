@@ -42,6 +42,6 @@
 #endif
 
 void addNode(LinkedList* list, void* value, SizeT valSize);
-void removeNode(LinkedList* list, void* value, SizeT valSize);
+void removeNode(LinkedList* list, void* value, SizeT valSize, bool cascade);
 
 #endif
