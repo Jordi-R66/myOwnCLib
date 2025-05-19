@@ -49,12 +49,12 @@
 		void removeDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
 	#endif
 
-	#pragma pack()
-
 	typedef struct LinkedList {
 		void* node;
 		LinkedListTypes listType;
 	} LinkedList;
+
+	#pragma pack()
 
 	void addNode(LinkedList* list, void* value, SizeT valSize);
 	void removeNode(LinkedList* list, void* value, SizeT valSize);
