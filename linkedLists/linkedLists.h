@@ -6,6 +6,12 @@
 
 	#pragma pack(1)
 
+	typedef enum {
+		FORWARD = 0,
+		BACKWARDS = 1,
+		DOUBLE = 2
+	} LinkedListTypes;
+
 	#ifdef DECLARE_FORWARD
 		typedef struct ForwardNode {
 			void* value;
