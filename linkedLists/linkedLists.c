@@ -26,17 +26,19 @@
 		node->next = NULL;
 	}
 
-	void removeForwardNode(ForwardLinkedList* list, void* value, SizeT valSize);
+	void removeForwardNode(ForwardLinkedList* list, void* value, SizeT valSize, bool cascade) {
+
+	}
 #endif
 
 #ifdef DECLARE_BACKWARDS
 	void addBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize);
-	void removeBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize);
+	void removeBackwardsNode(BackwardsLinkedList* list, void* value, SizeT valSize, bool cascade);
 #endif
 
 #ifdef DECLARE_DOUBLE
 	void addDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
-	void removeDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize);
+	void removeDoubleNode(DoubleLinkedList* list, void* value, SizeT valSize, bool cascade);
 #endif
 
 void addNode(LinkedList* list, void* value, SizeT valSize);
