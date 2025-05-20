@@ -14,10 +14,10 @@ void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	list->fragmented = false;
 	list->initialized = true;
 
-	ptr ptr = (ptr)calloc(initSize, elementSize);
+	ptr tempPtr = (ptr)calloc(initSize, elementSize);
 
-	if (ptr != NULL) {
-		list->elements = ptr;
+	if (tempPtr != NULL) {
+		list->elements = tempPtr;
 	} else {
 		fprintf(stderr, "Couldn't properly initialize the list, `calloc()` can't find enough space!\n");
 
@@ -25,7 +25,7 @@ void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 		list->capacity = 0;
 		list->elementSize = 0;
 
-		free(ptr);
+		free(tempPtr);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -57,14 +57,14 @@ void resizeList(List* list, SizeT newCapacity) {
 		exit(EXIT_FAILURE);
 	}
 
-	ptr ptr = (ptr)realloc(list->elements, newCapacity * list->elementSize);
+	ptr tempPtr = (ptr)realloc(list->elements, newCapacity * list->elementSize);
 
-	if (ptr != NULL) {
+	if (tempPtr != NULL) {
 		//printf("new capacity : %zu elements\n", newCapacity);
-		list->elements = ptr;
+		list->elements = tempPtr;
 		list->capacity = newCapacity;
 	} else {
-		free(ptr);
+		free(tempPtr);
 		fprintf(stderr, "Reallocation failure in `resizeList(%p, index)`\n", (ptr)list);
 		exit(EXIT_FAILURE);
 	}
