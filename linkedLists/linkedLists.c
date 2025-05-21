@@ -153,9 +153,51 @@
 #endif
 
 void addNode(LinkedList* list, ValueField value) {
-	
+	switch (list->listType) {
+		#ifdef DECLARE_FORWARD
+		case FORWARD:
+			addForwardNode((ForwardLinkedList*)list->node, value);
+			break;
+		#endif
+		#ifdef DECLARE_BACKWARDS
+		case BACKWARDS:
+			addBackwardsNode((BackwardsLinkedList*)list->node, value);
+			break;
+		#endif
+		#ifdef DECLARE_DOUBLE
+		case DOUBLE:
+			addDoubleNode((DoubleLinkedList*)list->node, value);
+			break;
+		#endif
+		default:
+			break;
+	}
 }
 
-void removeNode(LinkedList** list, SizeT position, bool cascade);
+void removeNode(LinkedList** list, SizeT position, bool cascade) {
+	LinkedList* usedList = *list;
 
+	switch (usedList->listType) {
+		#ifdef DECLARE_FORWARD
+		case FORWARD:
+			removeForwardNode((ForwardLinkedList**)&usedList->node, position, cascade);
+			break;
+		#endif
+
+		#ifdef DECLARE_BACKWARDS
+		case BACKWARDS:
+			removeBackwardsNode((BackwardsLinkedList**)&usedList->node, position, cascade);
+			break;
+		#endif
+
+		#ifdef DECLARE_DOUBLE
+		case DOUBLE:
+			removeDoubleNode((DoubleLinkedList**)&usedList->node, position, cascade);
+			break;
+		#endif
+
+		default:
+			break;
+	}
+}
 #endif
