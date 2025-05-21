@@ -1,8 +1,8 @@
 #pragma once
 
 #if defined(DECLARE_FORWARD) || defined(DECLARE_BACKWARDS) || defined(DECLARE_DOUBLE)
-	#include "../targetDetection/macros.h"
-	#include "../targetDetection/types.h"
+	#include "../targetSpecific/macros.h"
+	#include "../targetSpecific/types.h"
 
 	#pragma pack(1)
 

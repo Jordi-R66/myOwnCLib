@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../bools/bool.h"
-#include "../targetDetection/types.h"
+#include "../targetSpecific/types.h"
 
 // Memory comparison
 #pragma region Memory Comparison

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../common.h"
-#include "../targetDetection/types.h"
+#include "../targetSpecific/types.h"
 #include "../memory/memfuncs.h"
 
 #pragma pack(1)

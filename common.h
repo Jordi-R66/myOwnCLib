@@ -7,4 +7,4 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "targetDetection/types.h"
+#include "targetSpecific/types.h"
