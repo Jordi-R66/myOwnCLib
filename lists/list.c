@@ -187,7 +187,7 @@ void copyList(List* listDest, List* listSrc) {
 	memcpy(listDest->elements, listSrc->elements, listSrc->capacity * listSrc->elementSize);
 }
 
-SizeT partition(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(ptr, ptr, SizeT)) {
+SizeT partition(List* list, SizeT lo, SizeT hi, ComparisonFunc compFunc) {
 	if (compFunc == NULL) {
 		compFunc = compareMemory;
 	}
@@ -211,7 +211,7 @@ SizeT partition(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(ptr, ptr,
 	return i;
 }
 
-void QuickSort(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(ptr, ptr, SizeT)) {
+void QuickSort(List* list, SizeT lo, SizeT hi, ComparisonFunc compFunc) {
 	if ((lo >= hi) || (hi >= list->n_elements)) {
 		return;
 	}
@@ -226,7 +226,7 @@ void QuickSort(List* list, SizeT lo, SizeT hi, Comparison (*compFunc)(ptr, ptr, 
 	QuickSort(list, p + 1, hi, compFunc);
 }
 
-void sortList(List* list, Comparison (*compFunc)(ptr, ptr, SizeT)) {
+void sortList(List* list, ComparisonFunc compFunc) {
 	if (list->n_elements < 2 || list->capacity < 2) {
 		return;
 	}

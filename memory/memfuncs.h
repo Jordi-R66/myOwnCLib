@@ -10,6 +10,9 @@ typedef enum Comparison {
 	LESS, EQUALS, GREATER
 } Comparison;
 
+// Création des fonctions de comparaison
+typedef Comparison (*ComparisonFunc)(ptr, ptr, SizeT);
+
 /**
  * @brief Compares the n first bytes of A with the n first bytes of B
  * 

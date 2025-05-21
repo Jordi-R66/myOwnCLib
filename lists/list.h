@@ -40,5 +40,5 @@ void copyList(List* listDest, List* listSrc);
  * @param list The pointer of the list to sort
  * @param compFunc the function to use to compare (set to NULL to use default)
  */
-void sortList(List* list, Comparison (*compFunc)(ptr, ptr, SizeT));
+void sortList(List* list, ComparisonFunc compFunc);
 void reverseList(List* list);
