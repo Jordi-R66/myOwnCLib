@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef INCLUDE_TARGET_SPECIFIC
 #ifndef OVERRIDE_DETECTION
 
 	#ifdef __x86_64__
@@ -17,3 +18,4 @@
 #endif
 
 #define NULL ((void*)0)
+#endif

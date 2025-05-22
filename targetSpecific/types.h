@@ -1,4 +1,6 @@
 #pragma once
+
+#ifdef INCLUDE_TARGET_SPECIFICœ
 #include "macros.h"
 
 typedef unsigned char uint8;
@@ -23,3 +25,4 @@ typedef signed long int64;
 
 typedef char* string;
 typedef void* ptr;
+#endif
