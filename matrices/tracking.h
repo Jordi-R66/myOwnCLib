@@ -3,7 +3,7 @@
 #ifdef INCLUDE_MATRIX_TRACKING
 
 #ifndef INCLUDE_MATRIX
-#include INCLUDE_MATRIX
+#define INCLUDE_MATRIX
 #endif
 
 #include "matrix.h"
