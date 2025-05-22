@@ -1,5 +1,6 @@
 #include "advMatrix.h"
 
+#ifdef INCLUDE_ADV_MATRICES
 void mirrorMatrix(Matrix* mat, SwapType type, Tracker* tracker) {
 	SizeT j = 0;
 
@@ -45,3 +46,4 @@ bool inversibiltyCheck(Matrix* mat, Tracker* tracker) {
 
 	return result;
 }
+#endif
