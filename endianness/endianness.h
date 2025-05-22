@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef INCLUDE_ENDIANNESS
+
+#ifndef INCLUDE_TARGET_SPECIFIC
+#define INCLUDE_TARGET_SPECIFIC
+#endif
+
 #include "../targetSpecific/types.h"
 
 enum Endianness {
@@ -25,3 +31,4 @@ Endianness_t getEndian();
 void swapEndianness(ptr data, SizeT size);
 void toBigEndian(ptr data, SizeT size);
 void toLittleEndian(ptr data, SizeT size);
+#endif

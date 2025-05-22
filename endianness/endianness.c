@@ -1,6 +1,6 @@
 #include "endianness.h"
 
-#ifdef ENDIANNESS_HEADER
+#ifdef INCLUDE_ENDIANNESS
 
 Endianness_t getEndian() {
 	uint8 a[2] = { 0x12, 0x34 };
