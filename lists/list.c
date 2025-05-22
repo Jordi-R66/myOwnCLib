@@ -1,6 +1,6 @@
 #include "list.h"
 
-#include "../memory/memfuncs.h"
+#ifdef INCLUDE_LISTS
 
 void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	if (list->initialized) {
@@ -249,3 +249,4 @@ void reverseList(List* list) {
 		swapElements(list, i, j);
 	}
 }
+#endif
