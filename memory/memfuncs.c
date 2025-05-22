@@ -1,7 +1,13 @@
-#include <stdlib.h>
-#include "../endianness/endianness.h"
-
 #include "memfuncs.h"
+
+#ifdef INCLUDE_MEMFUNCS
+#include <stdlib.h>
+
+#ifndef INCLUDE_ENDIANNESS
+#define INCLUDE_ENDIANNESS
+#endif
+
+#include "../endianness/endianness.h"
 
 #pragma region Memory Comparison
 bool equalMemory(ptr A, ptr B, SizeT n) {
@@ -65,3 +71,4 @@ void setMemory(ptr memAddr, uint8 value, SizeT bytes) {
 	}
 }
 #pragma endregion
+#endif
