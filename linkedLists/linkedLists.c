@@ -4,9 +4,15 @@
 
 #include "linkedLists.h"
 
+#ifdef INCLUDE_LINKED_LISTS
 #if defined(DECLARE_FORWARD) || defined(DECLARE_BACKWARDS) || defined(DECLARE_DOUBLE)
 
+#ifndef INCLUDE_MEMFUNCS
+#define INCLUDE_MEMFUNCS
+#endif
+
 #include "../memory/memfuncs.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -200,4 +206,5 @@ void removeNode(LinkedList** list, SizeT position, bool cascade) {
 			break;
 	}
 }
+#endif
 #endif
