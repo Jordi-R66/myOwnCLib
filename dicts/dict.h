@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef INCLUDE_DICTS
+
+#ifndef INCLUDE_LISTS
+#define INCLUDE_LISTS
+#endif
+
 #include "../lists/list.h"
 
 #pragma pack(1)
@@ -30,3 +36,4 @@ void addEntry(Dict* dict, ptr key, ptr value);
 void removeValue(Dict* dict, ptr key);
 
 void freeDict(Dict* dict, bool freeKeys, bool freeValues);
+#endif

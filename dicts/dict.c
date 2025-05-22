@@ -1,5 +1,6 @@
 #include "dict.h"
 
+#ifdef INCLUDE_DICTS
 void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT initCapacity) {
 	initializeList(&dict->pairs, initCapacity, sizeof(KeyValuePair_t));
 
@@ -86,3 +87,4 @@ void freeDict(Dict* dict, bool freeKeys, bool freeValues) {
 
 	freeList(&dict->pairs);
 }
+#endif
