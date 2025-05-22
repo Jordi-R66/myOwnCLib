@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef INCLUDE_TARGET_SPECIFICœ
+#ifdef INCLUDE_TARGET_SPECIFIC
 #include "macros.h"
 
 typedef unsigned char uint8;
