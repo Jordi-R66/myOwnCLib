@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef INCLUDE_MATRIX_TRACKING
+
+#ifndef INCLUDE_MATRIX
+#include INCLUDE_MATRIX
+#endif
+
 #include "matrix.h"
 
 #pragma pack(1)
@@ -58,3 +64,4 @@ void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff);
 void recordMul(Tracker* tracker, SizeT idA, value_t coeff);
 
 void printTrackingLogs(Tracker* tracker);
+#endif

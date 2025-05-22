@@ -1,5 +1,6 @@
 #include "tracking.h"
 
+#ifdef INCLUDE_MATRIX_TRACKING
 void InitTracker(Tracker* tracker) {
 	tracker->transformationMade = 0;
 	tracker->transformations = (MatrixTransformation*)calloc(1, sizeof(MatrixTransformation));
@@ -146,3 +147,4 @@ void printTrackingLogs(Tracker* tracker) {
 		printLog(tracker->transformations[i]);
 	}
 }
+#endif
