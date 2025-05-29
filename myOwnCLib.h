@@ -14,6 +14,7 @@
 	#define INCLUDE_MATRIX_TRACKING
 	#define INCLUDE_MEMFUNCS
 	#define INCLUDE_TARGET_SPECIFIC
+	#define INCLUDE_VECTORS
 #endif
 
 #include "bits/bits.h"

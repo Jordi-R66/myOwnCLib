@@ -1,5 +1,6 @@
 #include "vectors.h"
 
+#ifdef INCLUDE_VECTORS
 void allocVector(Vector* vector, SizeT coords) {
 	vector->rows = coords;
 	vector->cols = 1;
@@ -77,3 +78,4 @@ value_t dotProduct(Vector* vectorA, Vector* vectorB) {
 
 	return product;
 }
+#endif
