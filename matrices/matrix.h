@@ -47,3 +47,5 @@ void swapCols(Matrix* mat, SizeT colAId, SizeT colBId);
 
 void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB);
 void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow);
+
+#define MATRIX_INCLUDED

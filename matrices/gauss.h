@@ -9,3 +9,5 @@ SizeT identifyGaussPivot(Matrix* mat, SizeT rowId);
 
 void prepareGauss(Matrix* mat, Tracker* tracker);
 void Gauss(Matrix* mat, Tracker* tracker);
+
+#define GAUSS_INCLUDED

@@ -58,3 +58,5 @@ void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff);
 void recordMul(Tracker* tracker, SizeT idA, value_t coeff);
 
 void printTrackingLogs(Tracker* tracker);
+
+#define MATRIX_TRACKING_INCLUDED
