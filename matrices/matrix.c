@@ -1,9 +1,12 @@
 #include "matrix.h"
 
+#include "../memory/memfuncs.h"
+
 #ifdef MATRIX_INCLUDED
 void allocMatrix(Matrix* matrix) {
 	matrix->size = matrix->rows * matrix->cols;
 	matrix->data = (value_t*)calloc(matrix->size, sizeof(value_t));
+	setMemory((ptr)matrix->data, 0, matrix->size);
 	matrix->memFreed = false;
 }
 
