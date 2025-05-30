@@ -141,7 +141,7 @@ bool contains(List* list, ptr refElement) {
 	return false;
 }
 
-void swapElements(List* list, SizeT i, SizeT j) {
+void swapListElements(List* list, SizeT i, SizeT j) {
 	uint8 temp;
 
 	if (i == j) {
@@ -199,12 +199,12 @@ SizeT partition(List* list, SizeT lo, SizeT hi, ComparisonFunc compFunc) {
 	for (SizeT j = lo; j < hi; j++) {
 		ptr jPtr = getElement(list, j);
 		if (compFunc(jPtr, pivot, n) == LESS || compFunc(jPtr, pivot, n) == EQUALS) {
-			swapElements(list, i, j);
+			swapListElements(list, i, j);
 			i++;
 		}
 	}
 
-	swapElements(list, i, hi);
+	swapListElements(list, i, hi);
 
 	return i;
 }
@@ -244,6 +244,6 @@ void reverseList(List* list) {
 	for (SizeT i = 0; i < list->n_elements/2; i++) {
 		SizeT j = list->n_elements - i - 1;
 
-		swapElements(list, i, j);
+		swapListElements(list, i, j);
 	}
 }
