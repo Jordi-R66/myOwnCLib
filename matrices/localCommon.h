@@ -2,8 +2,6 @@
 
 #include "../common.h"
 
-#define VALUE_TYPE double
-
 #ifndef VALUE_TYPE
 	#ifdef __64_BITS__
 		#define VALUE_TYPE double
