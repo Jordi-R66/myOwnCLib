@@ -1,7 +1,5 @@
 #include "endianness.h"
 
-#ifdef INCLUDE_ENDIANNESS
-
 Endianness_t getEndian() {
 	uint8 a[2] = { 0x12, 0x34 };
 	uint16 b = 0x1234;
@@ -36,5 +34,3 @@ void toLittleEndian(ptr data, SizeT size) {
 		swapEndianness(data, size);
 	}
 }
-
-#endif

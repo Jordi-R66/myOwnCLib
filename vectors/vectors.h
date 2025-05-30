@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef INCLUDE_VECTORS
-
-#ifndef INCLUDE_MATRIX
-	#define INCLUDE_MATRIX
-#endif
-
 #include "../matrices/matrix.h"
 
 typedef Matrix Vector;
@@ -20,4 +14,3 @@ void setVector(Vector* vector, value_t* colBuffer);
 
 Vector crossProduct(Vector* vectorA, Vector* vectorB);
 value_t dotProduct(Vector* vectorA, Vector* vectorB);
-#endif

@@ -1,7 +1,5 @@
 #include "list.h"
 
-#ifdef INCLUDE_LISTS
-
 void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	if (list->initialized) {
 		freeList(list);
@@ -249,4 +247,3 @@ void reverseList(List* list) {
 		swapElements(list, i, j);
 	}
 }
-#endif

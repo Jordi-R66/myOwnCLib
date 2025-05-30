@@ -1,8 +1,6 @@
 #pragma once
 
-#ifdef INCLUDE_TARGET_SPECIFIC
 #ifndef OVERRIDE_DETECTION
-
 	#ifdef __x86_64__
 		#define __64_BITS__
 	#elif defined(__i386__) || defined(__i386)
@@ -10,7 +8,6 @@
 	#else
 		#error "Unknown target"
 	#endif
-
 #endif
 
 #ifdef NULL
@@ -18,4 +15,3 @@
 #endif
 
 #define NULL ((void*)0)
-#endif

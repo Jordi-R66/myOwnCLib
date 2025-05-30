@@ -1,15 +1,5 @@
 #pragma once
 
-#ifdef INCLUDE_LISTS
-
-#ifndef INCLUDE_COMMONS
-#define INCLUDE_COMMONS
-#endif
-
-#ifndef INCLUDE_MEMFUNCS
-#define INCLUDE_MEMFUNCS
-#endif
-
 #include "../common.h"
 #include "../memory/memfuncs.h"
 
@@ -51,4 +41,3 @@ void copyList(List* listDest, List* listSrc);
  */
 void sortList(List* list, ComparisonFunc compFunc);
 void reverseList(List* list);
-#endif

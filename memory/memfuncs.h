@@ -1,15 +1,5 @@
 #pragma once
 
-#ifdef INCLUDE_MEMFUNCS
-
-#ifndef INCLUDE_TARGET_SPECIFIC
-#define INCLUDE_TARGET_SPECIFIC
-#endif
-
-#ifndef INCLUDE_BOOLS
-#define INCLUDE_BOOLS
-#endif
-
 #include "../bools/bool.h"
 #include "../targetSpecific/types.h"
 
@@ -55,4 +45,3 @@ void copyMemory(ptr src, ptr dest, SizeT size);
 void setMemory(ptr memAddr, uint8 value, SizeT bytes);
 
 #pragma endregion
-#endif

@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef INCLUDE_MATRIX
-
-#ifndef INCLUDE_COMMONS
-#define INCLUDE_COMMONS
-#endif
-
 #include "../common.h"
 
 #define VALUE_TYPE double
@@ -21,4 +15,3 @@
 #endif
 
 typedef VALUE_TYPE value_t;
-#endif

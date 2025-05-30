@@ -1,7 +1,5 @@
 #include "gauss.h"
 
-#ifdef INCLUDE_GAUSS
-
 /*
 Function to return the index of the row's pivot in the context
 of Gauss' Pivot Algorithm
@@ -211,6 +209,4 @@ void Gauss(Matrix* mat, Tracker* tracker) {
 	free(col);
 
 	printf("Freed\n");
-
 }
-#endif

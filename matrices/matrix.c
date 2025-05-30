@@ -1,6 +1,5 @@
 #include "matrix.h"
 
-#ifdef INCLUDE_MATRIX
 void allocMatrix(Matrix* matrix) {
 	matrix->size = matrix->rows * matrix->cols;
 	matrix->data = (value_t*)calloc(matrix->size, sizeof(value_t));
@@ -260,4 +259,3 @@ void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow) {
 	free(row);
 	return;
 }
-#endif
