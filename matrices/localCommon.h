@@ -2,7 +2,11 @@
 
 #include "../common.h"
 
-#ifndef VALUE_TYPE
+#ifndef OVERRIDE_MATRIX_VALUE_TYPE
+	#ifdef VALUE_TYPE
+	#undef VALUE_TYPE
+	#endif
+
 	#ifdef __64_BITS__
 		#define VALUE_TYPE double
 	#elif defined(__32_BITS__)
