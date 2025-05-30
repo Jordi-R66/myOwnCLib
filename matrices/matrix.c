@@ -48,12 +48,32 @@ void setMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer) {
 }
 
 void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col) {
+	if (row >= matrix->rows) {
+		fprintf(stderr, "Can't get to row %zu : limit exceeded\n", row);
+		exit(EXIT_FAILURE);
+	}
+
+	if (col >= matrix->cols) {
+		fprintf(stderr, "Can't get to col %zu : limit exceeded\n", col);
+		exit(EXIT_FAILURE);
+	}
+
 	SizeT i = row * matrix->cols + col;
 
 	matrix->data[i] = value;
 }
 
 value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col) {
+	if (row >= matrix->rows) {
+		fprintf(stderr, "Can't get to row %zu : limit exceeded\n", row);
+		exit(EXIT_FAILURE);
+	}
+
+	if (col >= matrix->cols) {
+		fprintf(stderr, "Can't get to col %zu : limit exceeded\n", col);
+		exit(EXIT_FAILURE);
+	}
+
 	SizeT i = row * matrix->cols + col;
 
 	return matrix->data[i];
