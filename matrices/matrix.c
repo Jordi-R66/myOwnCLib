@@ -183,14 +183,27 @@ void genIdentityMatrix(Matrix* matrix, SizeT n) {
 	}
 }
 
-void printMatrix(Matrix* matrix) {
+void printMatrix(Matrix* matrix, ValType valFormat) {
 	value_t* row_buffer = (value_t*)calloc(matrix->cols, sizeof(value_t));
 
 	for (SizeT row = 0; row < matrix->rows; row++) {
 		getMatrixRow(matrix, row, row_buffer);
 
 		for (SizeT i = 0; i < matrix->cols; i++) {
-			printf("%.2lf\t", row_buffer[i]);
+			switch (valFormat) {
+				case (REAL):
+					printf("%.2lf\t", (double)row_buffer[i]);
+					break;
+				case (U_DISCRETE):
+					printf("%llu\t", (uint64)row_buffer[i]);
+					break;
+				case (S_DISCRETE):
+					printf("%lld\t", (int64)row_buffer[i]);
+					break;
+				default:
+					fprintf(stderr, "Unknown format\n");
+					exit(EXIT_FAILURE);
+			}
 		}
 		printf("\n");
 	}

@@ -38,7 +38,7 @@ Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB);
 
 void genIdentityMatrix(Matrix* matrix, SizeT n);
 
-void printMatrix(Matrix* matrix);
+void printMatrix(Matrix* matrix, ValType valFormat);
 
 // Originally in gauss.h
 
