@@ -110,7 +110,8 @@ Matrix scalarMulNewMatrix(Matrix* matrix, double scalar) {
 */
 void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 	if (matA->cols != matB->rows) {
-		return;
+		fprintf(stderr, "Can't multiply the given matrices, matA.cols != matB.rows\n");
+		exit(EXIT_FAILURE);
 	}
 
 	matDest->rows = matA->rows;
