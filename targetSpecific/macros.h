@@ -5,9 +5,12 @@
 	#pragma region ArchDetection
 		#ifdef __x86_64__
 			#define __64_BITS__
+			#define INTEL_ARCH_FAMILY
 		#elif defined(__i386__) || defined(__i386) || defined(__i686__) || defined(__i686)
 			#define __32_BITS__
+			#define INTEL_ARCH_FAMILY
 		#elif defined(__ARM_ASM_SYNTAX_UNIFIED__)
+			#define ARM_ARCH_FAMILY
 			#if defined(__ARM_32BIT_STATE)
 				#define __32_BITS__
 			#elif defined(__ARM_64BIT_STATE)
