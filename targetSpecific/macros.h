@@ -5,9 +5,12 @@
 #ifndef MACROS
 #define MACROS
 
-#ifdef NULL
-	#undef NULL
+#ifndef __need_NULL
+	#ifdef NULL
+		#undef NULL
+	#endif
+
+	#define NULL ((void*)0)
 #endif
 
-#define NULL ((void*)0)
 #endif
