@@ -79,7 +79,9 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 	CustomInteger result = allocInteger(longest+1);
 
 	for (SizeT i = 0; i <= longest; i++) {
-		for (currentBit = 0; i < 8; currentBit++) {
+		result.value[i] = 0;
+
+		for (currentBit = 0; currentBit < 8; currentBit++) {
 			C_IN = C_OUT;
 
 			bool A = 0, B = 0;
@@ -106,7 +108,9 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
+CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
+	
+}
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
 CustomInteger divideInteger(CustomInteger a, CustomInteger b);
 CustomInteger modInteger(CustomInteger a, CustomInteger b);
