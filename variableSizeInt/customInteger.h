@@ -23,7 +23,7 @@ typedef CustomInteger* custIntPtr;
 
 CustomInteger allocInteger(SizeT capacity);
 void reallocInteger(custIntPtr integer);
-void freeInteger(custIntPtr ineger);
+void freeInteger(custIntPtr integer);
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
