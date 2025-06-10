@@ -36,6 +36,21 @@ typedef signed short int16;
 	#endif
 #pragma endregion
 
+#pragma region SizeT Declaration
+	#if defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
+		typedef uint32 SizeT;
+		typedef int32 sSizeT;
+	#elif defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_64BITS)
+		typedef uint64 SizeT;
+		typedef int64 sSizeT;
+	#elif defined(WINDOWS) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
+		typedef uint32 SizeT;
+		typedef int32 sSizeT;
+	#elif defined(WINDOWS) && defined(INTEL_ARCH_FAMILY) && defined(_64BITS)
+		typedef uint64 SizeT;
+		typedef int64 sSizeT;
+	#endif
+#pragma endregion
 
 typedef char* string;
 typedef void* ptr;
