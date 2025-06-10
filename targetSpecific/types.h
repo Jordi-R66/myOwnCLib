@@ -2,6 +2,9 @@
 
 #include "macros.h"
 
+#ifndef FIXED_TYPES
+#define FIXED_TYPES
+
 typedef unsigned char uint8;
 typedef signed char int8;
 
@@ -59,3 +62,5 @@ typedef void* ptr;
 #define I16_SIZE sizeof(uint16);
 #define I32_SIZE sizeof(uint32);
 #define I64_SIZE sizeof(uint64);
+
+#endif
