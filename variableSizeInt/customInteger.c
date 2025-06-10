@@ -29,3 +29,54 @@ CustomInteger allocInteger(SizeT capacity) {
 
 	return output;
 }
+
+CustomInteger addInteger(CustomInteger a, CustomInteger b) {
+
+	if ((a.isNegative != b.isNegative) && b.isNegative) {
+		b.isNegative = false;
+
+		return subtractInteger(a, b);
+	} else if ((a.isNegative != b.isNegative) && a.isNegative) {
+		a.isNegative = false;
+
+		CustomInteger result = subtractInteger(a, b);
+		result.isNegative = !result.isNegative;
+
+		return result;
+	}
+
+	SizeT longest = a.size >= b.size ? a.size : b.size;
+
+	bool S = false, C_IN = false, C_OUT = false;
+	uint8 A_BYTE, B_BYTE;
+	uint8 currentBit = 0;
+
+	CustomInteger result = allocInteger(longest+1);
+
+	for (SizeT i = 0; i <= longest; i++) {
+		for (currentBit = 0; i < 8; currentBit++) {
+			C_IN = C_OUT;
+
+			bool A = 0, B = 0;
+
+			if (i < a.size) {
+				A_BYTE = a.value[i];
+				A = GET_BIT(A_BYTE, currentBit);
+			}
+
+			if (i < b.size) {
+				B_BYTE = b.value[i];
+				B = GET_BIT(B_BYTE, currentBit);
+			}
+
+			S = ADD_BIT_S(A, B, C_IN);
+			C_OUT = ADD_BIT_C(A, B, C_IN);
+
+			result.value[i] += S << currentBit;
+		}
+
+		result.size++;
+	}
+
+	return result;
+}
