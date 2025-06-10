@@ -42,10 +42,12 @@
 			"name": "LinuxToWin32",
 			"includePath": [
 				"${workspaceFolder}/**",
-				"/usr/i686-w64-mingw32/include"
+				"/usr/lib/gcc/i686-w64-mingw32/14-win32/include",
+				"/usr/lib/gcc/i686-w64-mingw32/14-win32/include-fixed",
+				"/usr/lib/gcc/i686-w64-mingw32/14-win32/../../../../i686-w64-mingw32/include"
 			],
 			"defines": [],
-			"compilerPath": "/usr/bin/i686-w64-mingw32-gcc",
+			"compilerPath": "/usr/bin/i686-w64-mingw32-gcc-14",
 			"intelliSenseMode": "windows-gcc-x86",
 			"cStandard": "c17"
 		},
@@ -53,10 +55,12 @@
 			"name": "LinuxToWin64",
 			"includePath": [
 				"${workspaceFolder}/**",
-				"/usr/x86_64-w64-mingw32/include"
+				"/usr/lib/gcc/x86_64-w64-mingw32/14-win32/include",
+				"/usr/lib/gcc/x86_64-w64-mingw32/14-win32/include-fixed",
+				"/usr/lib/gcc/x86_64-w64-mingw32/14-win32/../../../../x86_64-w64-mingw32/include"
 			],
 			"defines": [],
-			"compilerPath": "/usr/bin/x86_64-w64-mingw32-gcc",
+			"compilerPath": "/usr/bin/x86_64-w64-mingw32-gcc-14",
 			"intelliSenseMode": "windows-gcc-x64",
 			"cStandard": "c17"
 		}
