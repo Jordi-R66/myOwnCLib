@@ -2,17 +2,17 @@
 
 	#pragma region ArchDetection
 		#ifdef __x86_64__
-			#define __64_BITS__
-			#define INTEL_ARCH_FAMILY
+			#define _64BITS 1
+			#define INTEL_ARCH_FAMILY 1
 		#elif defined(__i386__) || defined(__i386) || defined(__i686__) || defined(__i686)
-			#define __32_BITS__
-			#define INTEL_ARCH_FAMILY
+			#define _32BITS 1
+			#define INTEL_ARCH_FAMILY 1
 		#elif defined(__ARM_ASM_SYNTAX_UNIFIED__)
-			#define ARM_ARCH_FAMILY
+			#define ARM_ARCH_FAMILY 1
 			#if defined(__ARM_32BIT_STATE)
-				#define __32_BITS__
+				#define _32BITS 1
 			#elif defined(__ARM_64BIT_STATE)
-				#define __64_BITS__
+				#define _64BITS 1
 			#else
 				#error "Can't identify target ARM arch"
 			#endif
@@ -23,9 +23,9 @@
 
 	#pragma region SysDetection
 		#ifdef __linux
-			#define LINUX
+			#define LINUX 1
 		#elif defined(_WIN64) || defined(_WIN32)
-			#define WINDOWS
+			#define WINDOWS 1
 		#else
 			#error "Unknown target OS"
 		#endif
