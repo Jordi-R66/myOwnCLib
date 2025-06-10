@@ -7,9 +7,9 @@
 	#undef VALUE_TYPE
 	#endif
 
-	#ifdef __64_BITS__
+	#ifdef _64BITS
 		#define VALUE_TYPE double
-	#elif defined(__32_BITS__)
+	#elif defined(_32BITS)
 		#define VALUE_TYPE float
 	#else
 		#error "Unsupported"
