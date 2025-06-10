@@ -22,7 +22,7 @@ typedef struct customInt {
 typedef CustomInteger* custIntPtr;
 
 CustomInteger allocInteger(SizeT capacity);
-void reallocInteger(custIntPtr integer);
+void reallocInteger(custIntPtr integer, SizeT newCapacity);
 void freeInteger(custIntPtr integer);
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
