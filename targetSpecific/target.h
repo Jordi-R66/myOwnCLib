@@ -1,3 +1,6 @@
+
+#ifndef TARGET_DETECTION
+#define TARGET_DETECTION
 #ifndef OVERRIDE_DETECTION
 
 	#pragma region ArchDetection
@@ -31,4 +34,5 @@
 		#endif
 	#pragma endregion
 
+	#endif
 #endif
