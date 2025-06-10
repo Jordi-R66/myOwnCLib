@@ -13,7 +13,7 @@
 #pragma pack(1)
 
 typedef struct customInt {
-	ptr value;
+	uint8* value;
 	SizeT size;
 	SizeT capacity;
 	bool isNegative;
