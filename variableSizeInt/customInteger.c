@@ -30,6 +30,31 @@ CustomInteger allocInteger(SizeT capacity) {
 	return output;
 }
 
+void reallocInteger(custIntPtr integer, SizeT newCapacity) {
+	ptr oldPtr = (ptr)integer->value;
+	ptr newPtr = calloc(newCapacity, I8_SIZE);
+
+	if (newPtr == NULL) {
+		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", newCapacity * 8);
+		exit(EXIT_FAILURE);
+	}
+
+	copyMemory(oldPtr, newPtr, integer->size);
+	setMemory(oldPtr, 0, integer->capacity);
+
+	integer->capacity = newCapacity;
+	integer->value = (uint8*)newPtr;
+
+	free(oldPtr);
+}
+
+void freeInteger(custIntPtr integer) {
+	setMemory((ptr)integer->value, 0, integer->capacity);
+	free((ptr)integer->value);
+
+	setMemory((ptr)integer, 0, sizeof(CustomInteger));
+}
+
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	if ((a.isNegative != b.isNegative) && b.isNegative) {
@@ -80,3 +105,10 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	return result;
 }
+
+CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
+CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
+CustomInteger divideInteger(CustomInteger a, CustomInteger b);
+CustomInteger modInteger(CustomInteger a, CustomInteger b);
+
+CustomInteger powInteger(CustomInteger a, CustomInteger exp);
