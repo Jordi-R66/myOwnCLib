@@ -37,14 +37,16 @@ void reallocToFitInteger(custIntPtr integer) {
 
 	SizeT newSize = integer->size;
 	SizeT i = newSize - 1;
+	uint8* bytes = (uint8*)integer->value;
 
 	do {
-		uint8 val = (uint8*)integer->value[i];
+		//printf("%zu\n", i);
+		uint8 val = bytes[i];
 
 		if ((val != 0) || (i == 0)) {
 			break;
 		} else {
-			SizeT i = newSize - 1;
+			i--;
 		}
 	} while (i >= 0);
 
@@ -103,8 +105,6 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	CustomInteger result = allocInteger(longest+1);
 
-	C_OUT = 0; 
-
 	for (SizeT i = 0; i <= longest; i++) {
 		result.value[i] = 0;
 
@@ -125,15 +125,14 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 			S = ADD_BIT_S(A, B, C_IN);
 			C_OUT = ADD_BIT_C(A, B, C_IN);
-			result.value[i] += S << (currentBit);
+
+			result.value[i] += S << currentBit;
 		}
+
+		result.size++;
 	}
 
-	result.size = longest + 1;
-
-	while (result.size > 1 && result.value[result.size - 1] == 0) {
-		result.size--;
-	}
+	reallocToFitInteger(&result);
 
 	return result;
 }
