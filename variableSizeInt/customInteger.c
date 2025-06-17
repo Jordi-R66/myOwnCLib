@@ -52,6 +52,10 @@ void reallocToFitInteger(custIntPtr integer) {
 }
 
 void reallocInteger(custIntPtr integer, SizeT newCapacity) {
+	if (newCapacity == integer->capacity) {
+		return;
+	}
+
 	ptr oldPtr = (ptr)integer->value;
 	ptr newPtr = calloc(newCapacity, I8_SIZE);
 
