@@ -29,6 +29,28 @@ CustomInteger allocInteger(SizeT capacity) {
 	return output;
 }
 
+void reallocToFitInteger(custIntPtr integer) {
+	if (integer->capacity <= 1) {
+		fprintf(stderr, "Can't reduce the size of your integer\n");
+		exit(EXIT_FAILURE);
+	}
+
+	SizeT newSize = integer->size;
+	SizeT i = newSize - 1;
+
+	do {
+		uint8 val = (uint8*)integer->value[i];
+
+		if ((val != 0) || (i == 0)) {
+			break;
+		} else {
+			SizeT i = newSize - 1;
+		}
+	} while (i >= 0);
+
+	reallocInteger(integer, i + 1);
+}
+
 void reallocInteger(custIntPtr integer, SizeT newCapacity) {
 	ptr oldPtr = (ptr)integer->value;
 	ptr newPtr = calloc(newCapacity, I8_SIZE);
