@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 CustomInteger allocInteger(SizeT capacity) {
-
 	if (capacity == 0) {
 		fprintf(stderr, "Undefined behaviour for 0 bit integer\n");
 		exit(EXIT_FAILURE);
@@ -78,6 +77,8 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	CustomInteger result = allocInteger(longest+1);
 
+	C_OUT = 0; 
+
 	for (SizeT i = 0; i <= longest; i++) {
 		result.value[i] = 0;
 
@@ -98,11 +99,14 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 			S = ADD_BIT_S(A, B, C_IN);
 			C_OUT = ADD_BIT_C(A, B, C_IN);
-
-			result.value[i] += S << currentBit;
+			result.value[i] += S << (currentBit);
 		}
+	}
 
-		result.size++;
+	result.size = longest + 1;
+
+	while (result.size > 1 && result.value[result.size - 1] == 0) {
+		result.size--;
 	}
 
 	return result;
