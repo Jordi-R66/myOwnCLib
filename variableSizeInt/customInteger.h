@@ -12,6 +12,12 @@
 
 #pragma pack(1)
 
+typedef enum {
+	BIN = 0,
+	DECI = 1,
+	HEX = 2
+} Base;
+
 typedef struct customInt {
 	uint8* value;
 	SizeT size;
@@ -25,6 +31,8 @@ CustomInteger allocInteger(SizeT capacity);
 void reallocToFitInteger(custIntPtr integer);
 void reallocInteger(custIntPtr integer, SizeT newCapacity);
 void freeInteger(custIntPtr integer);
+
+char* integerToString(CustomInteger integer, Base base);
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b);

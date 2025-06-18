@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
 
 CustomInteger allocInteger(SizeT capacity) {
 	if (capacity == 0) {
@@ -40,7 +41,6 @@ void reallocToFitInteger(custIntPtr integer) {
 	uint8* bytes = (uint8*)integer->value;
 
 	do {
-		//printf("%zu\n", i);
 		uint8 val = bytes[i];
 
 		if ((val != 0) || (i == 0)) {
@@ -80,6 +80,81 @@ void freeInteger(custIntPtr integer) {
 	free((ptr)integer->value);
 
 	setMemory((ptr)integer, 0, sizeof(CustomInteger));
+}
+
+char* integerToString(CustomInteger integer, Base base) {
+	SizeT byteLength = 0;
+	SizeT divider = 0;
+
+	string hexChars = "0123456789ABCDEF";
+	string binChars = "01";
+
+	switch (base) {
+		case BIN:
+			byteLength = 8;
+			divider = 2;
+			break;
+
+		case HEX:
+			byteLength = 2;
+			divider = 16;
+			break;
+
+		default:
+			fprintf(stderr, "Unsupported base\n");
+			exit(EXIT_FAILURE);
+			break;
+	}
+
+	SizeT strLength = integer.capacity * byteLength + 1 + 2;
+
+	string str = (string)calloc(strLength, sizeof(char));
+
+	if ((ptr)str == NULL) {
+		fprintf(stderr, "Not enough space to allocate to a %zu chars string\n", strLength + 1);
+		exit(EXIT_FAILURE);
+	}
+
+	if ((base == BIN) || (base == HEX)) {
+		str[0] = '0';
+
+		string baseChars = (string)NULL;
+
+		if (base == BIN) {
+			str[1] = 'b';
+			baseChars = binChars;
+		} else if (base == HEX) {
+			str[1] = 'x';
+			baseChars = hexChars;
+		}
+
+		char c;
+		SizeT rangStr = 0;
+
+		for (SizeT byteI = 0; byteI < integer.capacity; byteI++) {
+			uint8 byte = integer.value[byteI];
+			SizeT index;
+
+			for (SizeT i = 0; i < byteLength; i++) {
+				index = byte % divider;
+				byte /= divider;
+
+				rangStr = byteI * divider + 2 + index;
+				rangStr -= strLength - 1;
+
+				printf("%c", str[rangStr]);
+				c = baseChars[index];
+				str[rangStr] = c;
+			}
+		}
+
+	} else {
+		fprintf(stderr, "Unsupported base, freeing memory\n");
+		free((ptr)str);
+		exit(EXIT_FAILURE);
+	}
+
+	return str;
 }
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
@@ -140,6 +215,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	
 }
+
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
 CustomInteger divideInteger(CustomInteger a, CustomInteger b);
 CustomInteger modInteger(CustomInteger a, CustomInteger b);
