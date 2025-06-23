@@ -8,7 +8,7 @@
 #define CUSTOM_INT
 
 #define ADD_BIT_S(A, B, C_IN) (A ^ B ^ C_IN)
-#define ADD_BIT_C(A, B, C_IN) (A && B || (C_IN && (A ^ B)))
+#define ADD_BIT_C(A, B, C_IN) (A && B) || (A && C_IN) || (B && C_IN)
 
 #pragma pack(1)
 
