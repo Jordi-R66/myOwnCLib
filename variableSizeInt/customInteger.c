@@ -213,7 +213,31 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
-	
+	CustomInteger result = allocInteger(a.capacity);
+
+	uint8 A_BYTE, B_BYTE;
+
+	for (SizeT i = 0; i <= a.capacity; i++) {
+		result.value[i] = 0;
+
+		for (uint8 currentBit = 0; currentBit < 8; currentBit++) {
+			bool A = 0, B = 0;
+
+			if (i < a.size) {
+				A_BYTE = a.value[i];
+				A = GET_BIT(A_BYTE, currentBit);
+			}
+
+			if (i < b.size) {
+				B_BYTE = b.value[i];
+				B = GET_BIT(B_BYTE, currentBit);
+			}
+
+			result.value[i] = (A ^ B) << currentBit;
+		}
+	}
+
+	return result;
 }
 
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
