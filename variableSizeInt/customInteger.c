@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#pragma region Misc Operations
 CustomInteger allocInteger(SizeT capacity) {
 	if (capacity == 0) {
 		fprintf(stderr, "Undefined behaviour for 0 bit integer\n");
@@ -86,8 +87,7 @@ char* integerToString(CustomInteger integer, Base base) {
 	SizeT byteLength = 0;
 	SizeT divider = 0;
 
-	string hexChars = "0123456789ABCDEF";
-	string binChars = "01";
+	string baseChars = "0123456789ABCDEF";
 
 	switch (base) {
 		case BIN:
@@ -118,14 +118,10 @@ char* integerToString(CustomInteger integer, Base base) {
 	if ((base == BIN) || (base == HEX)) {
 		str[0] = '0';
 
-		string baseChars = (string)NULL;
-
 		if (base == BIN) {
 			str[1] = 'b';
-			baseChars = binChars;
 		} else if (base == HEX) {
 			str[1] = 'x';
-			baseChars = hexChars;
 		}
 
 		char c;
@@ -142,7 +138,6 @@ char* integerToString(CustomInteger integer, Base base) {
 				rangStr = byteI * divider + 2 + index;
 				rangStr -= strLength - 1;
 
-				printf("%c", str[rangStr]);
 				c = baseChars[index];
 				str[rangStr] = c;
 			}
@@ -156,7 +151,9 @@ char* integerToString(CustomInteger integer, Base base) {
 
 	return str;
 }
+#pragma endregion
 
+#pragma region Arithmetic Operations
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	if ((a.isNegative != b.isNegative) && b.isNegative) {
@@ -176,6 +173,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	bool S = false, C_IN = false, C_OUT = false;
 	uint8 A_BYTE, B_BYTE;
+
 	uint8 currentBit = 0;
 
 	CustomInteger result = allocInteger(longest+1);
@@ -245,3 +243,8 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b);
 CustomInteger modInteger(CustomInteger a, CustomInteger b);
 
 CustomInteger powInteger(CustomInteger a, CustomInteger exp);
+#pragma endregion
+
+#pragma region Comparison operations
+
+#pragma endregion
