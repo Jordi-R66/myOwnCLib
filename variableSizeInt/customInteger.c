@@ -126,13 +126,15 @@ String integerToString(CustomInteger integer, Base base) {
 			}
 		}
 
+		stringLength(&obj);
+
 	} else {
 		fprintf(stderr, "Unsupported base, freeing memory\n");
 		freeString(&obj);
 		exit(EXIT_FAILURE);
 	}
 
-	return ;
+	return obj;
 }
 #pragma endregion
 
