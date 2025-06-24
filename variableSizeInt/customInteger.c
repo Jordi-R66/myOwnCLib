@@ -106,7 +106,7 @@ char* integerToString(CustomInteger integer, Base base) {
 			break;
 	}
 
-	SizeT strLength = integer.capacity * byteLength + 1 + 2;
+	SizeT strLength = integer.capacity * byteLength + 1;
 
 	string str = (string)calloc(strLength, sizeof(char));
 
@@ -116,14 +116,6 @@ char* integerToString(CustomInteger integer, Base base) {
 	}
 
 	if ((base == BIN) || (base == HEX)) {
-		str[0] = '0';
-
-		if (base == BIN) {
-			str[1] = 'b';
-		} else if (base == HEX) {
-			str[1] = 'x';
-		}
-
 		char c;
 		SizeT rangStr = 0;
 
@@ -135,8 +127,7 @@ char* integerToString(CustomInteger integer, Base base) {
 				index = byte % divider;
 				byte /= divider;
 
-				rangStr = byteI * divider + 2 + index;
-				rangStr -= strLength - 1;
+				rangStr = byteI * byteLength + index;
 
 				c = baseChars[index];
 				str[rangStr] = c;
