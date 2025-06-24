@@ -20,6 +20,6 @@ typedef struct {
 #define INT_SIZE sizeof(String)
 
 String allocString(SizeT nChars);
-void freeString(String str);
+void freeString(String* str);
 
 #endif
