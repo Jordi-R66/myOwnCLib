@@ -20,6 +20,14 @@ typedef struct {
 #define INT_SIZE sizeof(String)
 
 String allocString(SizeT nChars);
+void reallocString(String* str, SizeT newSize);
 void freeString(String* str);
+
+SizeT stringLength(String* str);
+
+void appendChar(String* str, char c);
+void containsChar(String* str, char c);
+void containsString(String* str, string lookingUp);
+void containsStringObject(String* str, String lookingUp);
 
 #endif
