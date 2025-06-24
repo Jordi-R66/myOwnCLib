@@ -127,6 +127,7 @@ String integerToString(CustomInteger integer, Base base) {
 		}
 
 		stringLength(&obj);
+		reverseString(&obj);
 
 	} else {
 		fprintf(stderr, "Unsupported base, freeing memory\n");
