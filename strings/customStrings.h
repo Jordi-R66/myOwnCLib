@@ -22,6 +22,7 @@ typedef struct {
 String allocString(SizeT nChars);
 void reallocString(String* str, SizeT newSize);
 void freeString(String* str);
+void reverseString(String* str);
 
 SizeT stringLength(String* str);
 

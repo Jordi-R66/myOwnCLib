@@ -55,6 +55,16 @@ void reallocString(String* str, SizeT newSize) {
 	str->capacity = newSize;
 }
 
+void reverseString(String* str) {
+	for (SizeT i = 0; i < str->length/2; i++) {
+		SizeT j = str->length - 1 - i;
+
+		str->chars[i] += str->chars[j];
+		str->chars[j] = str->chars[i] - str->chars[j];
+		str->chars[i] -= str->chars[j];
+	}
+}
+
 SizeT stringLength(String* str) {
 	SizeT length = 0;
 
