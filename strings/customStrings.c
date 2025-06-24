@@ -36,3 +36,27 @@ void freeString(String* str) {
 
 	free(str->chars);
 }
+
+void reallocString(String* str, SizeT newSize);
+
+SizeT stringLength(String* str) {
+	SizeT length = 0;
+
+	for (SizeT i = 0; i < str->capacity; i++) {
+		if (str->chars[i] != 0) {
+			length++;
+		} else {
+			break;
+		}
+	}
+
+	return length;
+}
+
+void appendChar(String* str, char c) {
+
+}
+
+void containsChar(String* str, char c);
+void containsString(String* str, string lookingUp);
+void containsStringObject(String* str, String lookingUp);
