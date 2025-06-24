@@ -49,6 +49,7 @@ void reallocString(String* str, SizeT newSize) {
 	SizeT bytesToCopy = str->capacity <= newSize ? str->capacity : newSize;
 
 	copyMemory(str->chars, temp, bytesToCopy);
+	free((ptr)str->chars);
 
 	str->chars = (string)temp;
 	str->capacity = newSize;
@@ -69,7 +70,7 @@ SizeT stringLength(String* str) {
 }
 
 void appendChar(String* str, char c) {
-
+	
 }
 
 void containsChar(String* str, char c);
