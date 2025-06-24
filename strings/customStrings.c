@@ -37,7 +37,22 @@ void freeString(String* str) {
 	free(str->chars);
 }
 
-void reallocString(String* str, SizeT newSize);
+void reallocString(String* str, SizeT newSize) {
+	ptr temp = calloc(newSize + 1, sizeof(char));
+
+	if (temp == NULL) {
+		fprintf(stderr, "Couldn't reallocate enough space for a string\n");
+		exit(EXIT_FAILURE);
+	}
+
+	setMemory(temp, 0, newSize + 1);
+	SizeT bytesToCopy = str->capacity <= newSize ? str->capacity : newSize;
+
+	copyMemory(str->chars, temp, bytesToCopy);
+
+	str->chars = (string)temp;
+	str->capacity = newSize;
+}
 
 SizeT stringLength(String* str) {
 	SizeT length = 0;
