@@ -9,7 +9,7 @@ String allocString(SizeT nChars) {
 	ptr temp = calloc(nChars + 1, sizeof(char));
 
 	if (temp == NULL) {
-		fprintf(stderr, "Couldn't allocate enough space for a new string\n");
+		fprintf(stderr, "Not enough space to allocate to a %zu chars string\n", nChars + 1);
 		exit(EXIT_FAILURE);
 	}
 
