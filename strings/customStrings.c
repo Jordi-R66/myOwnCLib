@@ -70,7 +70,12 @@ SizeT stringLength(String* str) {
 }
 
 void appendChar(String* str, char c) {
-	
+	if (str->length + 1 > str->capacity) {
+		reallocString(str, str->capacity + 1);
+	}
+
+	str->chars[str->length] = c;
+	str->length++;
 }
 
 void containsChar(String* str, char c);
