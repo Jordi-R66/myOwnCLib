@@ -3,6 +3,7 @@
 #include "../targetSpecific/types.h"
 #include "../bits/bits.h"
 #include "../bools/bool.h"
+#include "../strings/customStrings.h"
 
 #ifndef CUSTOM_INT
 #define CUSTOM_INT
@@ -32,7 +33,7 @@ void reallocToFitInteger(custIntPtr integer);
 void reallocInteger(custIntPtr integer, SizeT newCapacity);
 void freeInteger(custIntPtr integer);
 
-char* integerToString(CustomInteger integer, Base base);
+String integerToString(CustomInteger integer, Base base);
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b);

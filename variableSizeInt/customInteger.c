@@ -83,7 +83,7 @@ void freeInteger(custIntPtr integer) {
 	setMemory((ptr)integer, 0, sizeof(CustomInteger));
 }
 
-char* integerToString(CustomInteger integer, Base base) {
+String integerToString(CustomInteger integer, Base base) {
 	SizeT byteLength = 0;
 	SizeT divider = 0;
 
@@ -106,18 +106,12 @@ char* integerToString(CustomInteger integer, Base base) {
 			break;
 	}
 
-	SizeT strLength = integer.capacity * byteLength + 1;
+	SizeT strLength = integer.capacity * byteLength + 2;
 
-	string str = (string)calloc(strLength, sizeof(char));
-
-	if ((ptr)str == NULL) {
-		fprintf(stderr, "Not enough space to allocate to a %zu chars string\n", strLength + 1);
-		exit(EXIT_FAILURE);
-	}
+	String obj = allocString(strLength);
 
 	if ((base == BIN) || (base == HEX)) {
 		char c;
-		SizeT rangStr = 0;
 
 		for (SizeT byteI = 0; byteI < integer.capacity; byteI++) {
 			uint8 byte = integer.value[byteI];
@@ -127,20 +121,18 @@ char* integerToString(CustomInteger integer, Base base) {
 				index = byte % divider;
 				byte /= divider;
 
-				rangStr = byteI * byteLength + index;
-
 				c = baseChars[index];
-				str[rangStr] = c;
+				appendChar(&obj, c);
 			}
 		}
 
 	} else {
 		fprintf(stderr, "Unsupported base, freeing memory\n");
-		free((ptr)str);
+		freeString(&obj);
 		exit(EXIT_FAILURE);
 	}
 
-	return str;
+	return ;
 }
 #pragma endregion
 
