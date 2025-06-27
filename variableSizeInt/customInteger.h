@@ -14,9 +14,9 @@
 #pragma pack(1)
 
 typedef enum {
-	BIN = 0,
-	DECI = 1,
-	HEX = 2
+	BIN = 2,
+	DECI = 10,
+	HEX = 16
 } Base;
 
 typedef struct customInt {
