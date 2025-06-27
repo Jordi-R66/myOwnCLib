@@ -86,24 +86,20 @@ void freeInteger(custIntPtr integer) {
 
 String integerToString(CustomInteger integer, Base base) {
 	SizeT byteLength = 0;
-	SizeT divider = 0;
+	SizeT divider = (SizeT)base;
 
 	string baseChars = "0123456789ABCDEF";
 
 	switch (base) {
 		case BIN:
 			byteLength = 8;
-			divider = 2;
 			break;
 
-		case DECI:
-			byteLength = 1;
-			divider = 4;
-			break;
+		case OCT:
+			byteLength = 3;
 
 		case HEX:
 			byteLength = 2;
-			divider = 16;
 			break;
 
 		default:
