@@ -95,6 +95,11 @@ String integerToString(CustomInteger integer, Base base) {
 			divider = 2;
 			break;
 
+		case DECI:
+			byteLength = 1;
+			divider = 4;
+			break;
+
 		case HEX:
 			byteLength = 2;
 			divider = 16;
@@ -110,30 +115,23 @@ String integerToString(CustomInteger integer, Base base) {
 
 	String obj = allocString(strLength);
 
-	if ((base == BIN) || (base == HEX)) {
-		char c;
+	char c;
 
-		for (SizeT byteI = 0; byteI < integer.capacity; byteI++) {
-			uint8 byte = integer.value[byteI];
-			SizeT index;
+	for (SizeT byteI = 0; byteI < integer.capacity; byteI++) {
+		uint8 byte = integer.value[byteI];
+		SizeT index;
 
-			for (SizeT i = 0; i < byteLength; i++) {
-				index = byte % divider;
-				byte /= divider;
+		for (SizeT i = 0; i < byteLength; i++) {
+			index = byte % divider;
+			byte /= divider;
 
-				c = baseChars[index];
-				appendChar(&obj, c);
-			}
+			c = baseChars[index];
+			appendChar(&obj, c);
 		}
-
-		stringLength(&obj);
-		reverseString(&obj);
-
-	} else {
-		fprintf(stderr, "Unsupported base, freeing memory\n");
-		freeString(&obj);
-		exit(EXIT_FAILURE);
 	}
+
+	stringLength(&obj);
+	reverseString(&obj);
 
 	return obj;
 }
