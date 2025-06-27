@@ -95,9 +95,6 @@ String integerToString(CustomInteger integer, Base base) {
 			byteLength = 8;
 			break;
 
-		case OCT:
-			byteLength = 3;
-
 		case HEX:
 			byteLength = 2;
 			break;

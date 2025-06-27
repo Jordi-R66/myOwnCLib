@@ -15,7 +15,6 @@
 
 typedef enum {
 	BIN = 2,
-	OCT = 8,
 	HEX = 16
 } Base;
 
