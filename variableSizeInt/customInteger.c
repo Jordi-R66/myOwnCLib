@@ -139,7 +139,6 @@ String integerToString(CustomInteger integer, Base base) {
 
 #pragma region Arithmetic Operations
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
-
 	if ((a.isNegative != b.isNegative) && b.isNegative) {
 		b.isNegative = false;
 
