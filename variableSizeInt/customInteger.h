@@ -33,6 +33,8 @@ void reallocToFitInteger(custIntPtr integer);
 void reallocInteger(custIntPtr integer, SizeT newCapacity);
 void freeInteger(custIntPtr integer);
 
+CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue);
+
 String integerToString(CustomInteger integer, Base base);
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);

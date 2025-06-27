@@ -7,6 +7,7 @@
 #include <strings.h>
 
 #pragma region Misc Operations
+
 CustomInteger allocInteger(SizeT capacity) {
 	if (capacity == 0) {
 		fprintf(stderr, "Undefined behaviour for 0 bit integer\n");
@@ -136,6 +137,31 @@ String integerToString(CustomInteger integer, Base base) {
 	return obj;
 }
 #pragma endregion
+
+CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue) {
+	SizeT capacity = sizeof(uint64);
+	SizeT size = 1;
+
+	while (value >> (size * 8)) {
+		size++;
+	}
+
+	if (fitToValue) {
+		capacity = size;
+	}
+
+	CustomInteger output = allocInteger(capacity);
+
+	output.size = size;
+
+	output.isNegative = negative;
+
+	for (SizeT i = 0; i < size; i++) {
+		output.value[i] = (uint8)((value >> (i * 8)) % 256);
+	}
+
+	return output;
+}
 
 #pragma region Arithmetic Operations
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
