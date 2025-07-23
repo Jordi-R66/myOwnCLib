@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef LISTS
+#define LISTS
+
 #include "../common.h"
 #include "../memory/memfuncs.h"
 
@@ -16,6 +19,7 @@ typedef struct List {
 #pragma pack()
 
 #define LIST_SIZE sizeof(List)
+#define asList(PTR) ((List*)PTR)
 
 void initializeList(List* list, SizeT initSize, SizeT elementSize);
 void freeList(List* list);
