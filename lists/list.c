@@ -74,7 +74,7 @@ void addElement(List* list, ptr newElement) {
 	}
 
 	SizeT nBytes = list->n_elements * list->elementSize;
-	memcpy((int8*)(list->elements + nBytes), newElement, list->elementSize);
+	copyMemory((ptr)(list->elements + nBytes), newElement, list->elementSize);
 
 	list->n_elements++;
 }
@@ -87,7 +87,7 @@ void removeElement(List* list, SizeT index, bool shiftElements) {
 
 	SizeT nBytes = index * list->elementSize;
 
-	memset((int8*)list->elements + nBytes, 0, list->elementSize);
+	setMemory((ptr)(list->elements + nBytes), 0, list->elementSize);
 
 	if (shiftElements) {
 		SizeT i = index;
@@ -126,7 +126,7 @@ void replaceElement(List* list, SizeT index, ptr newElement) {
 	SizeT nBytes = index * list->elementSize;
 
 	removeElement(list, index, false);
-	memcpy((int8*)list->elements + nBytes, newElement, list->elementSize);
+	copyMemory((ptr)(list->elements + nBytes), newElement, list->elementSize);
 
 	list->fragmented = false;
 }
