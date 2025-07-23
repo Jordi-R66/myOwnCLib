@@ -110,7 +110,7 @@ void removeElement(List* list, SizeT index, bool shiftElements) {
 	Returns pointer to element in list as `ptr`
 */
 ptr getElement(List* list, SizeT index) {
-	if (index >= list->capacity) {
+	if ((index >= list->capacity) || (index >= list->n_elements)) {
 		return NULL;
 	}
 
