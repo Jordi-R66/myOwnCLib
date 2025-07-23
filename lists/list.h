@@ -41,3 +41,4 @@ void copyList(List* listDest, List* listSrc);
  */
 void sortList(List* list, ComparisonFunc compFunc);
 void reverseList(List* list);
+#endif
