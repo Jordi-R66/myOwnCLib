@@ -1,7 +1,5 @@
 #include "customInteger.h"
 
-#include "../memory/memfuncs.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -129,7 +127,6 @@ String integerToString(CustomInteger integer, Base base) {
 
 	return obj;
 }
-#pragma endregion
 
 CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue) {
 	SizeT capacity = sizeof(uint64);
@@ -164,7 +161,10 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex) {
 	return integer.value[byteIndex];
 }
 
+#pragma endregion
+
 #pragma region Arithmetic Operations
+
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 	if ((a.isNegative != b.isNegative) && b.isNegative) {
 		b.isNegative = false;
@@ -200,7 +200,6 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 		CARRY = (uint8)(TEMP > 0xFF);
 
 		result.value[i] = SUM;
-		C_IN = C_OUT;
 
 		result.size++;
 	}
@@ -211,27 +210,11 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
-	CustomInteger result = allocInteger(a.capacity);
+	CustomInteger result;
 
-	uint8 A_BYTE, B_BYTE;
-
-	for (SizeT i = 0; i <= a.capacity; i++) {
-		result.value[i] = 0;
-
-		for (uint8 currentBit = 0; currentBit < 8; currentBit++) {
-			bool A = 0, B = 0;
-
-			if (i < a.size) {
-				A_BYTE = a.value[i];
-				A = GET_BIT(A_BYTE, currentBit);
-			}
-
-			if (i < b.size) {
-				B_BYTE = b.value[i];
-				B = GET_BIT(B_BYTE, currentBit);
-			}
-
-			result.value[i] = (A ^ B) << currentBit;
+	if ((a.isNegative == b.isNegative) && (a.isNegative == false)) {
+		if (lessThanInteger(a, b)) {
+			return subtractInteger(b, a);
 		}
 	}
 
