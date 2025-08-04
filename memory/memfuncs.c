@@ -5,8 +5,13 @@
 #include "../endianness/endianness.h"
 
 #pragma region Memory Comparison
+
 bool equalMemory(ptr A, ptr B, SizeT n) {
 	return (bool)(compareMemory(A, B, n) == EQUALS);
+}
+
+bool differentMemory(ptr A, ptr B, SizeT n) {
+	return (bool)(compareMemory(A, B, n) != EQUALS);
 }
 
 bool lessThanMemory(ptr A, ptr B, SizeT n) {

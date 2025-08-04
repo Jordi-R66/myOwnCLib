@@ -7,7 +7,7 @@
 #pragma region Memory Comparison
 
 typedef enum Comparison {
-	LESS, EQUALS, GREATER
+	LESS = 0, EQUALS = 1, GREATER = 2
 } Comparison;
 
 // Création des fonctions de comparaison
@@ -23,6 +23,8 @@ typedef Comparison (*ComparisonFunc)(ptr, ptr, SizeT);
  * @return false The values are different
  */
 bool equalMemory(ptr A, ptr B, SizeT n);
+
+bool differentMemory(ptr A, ptr B, SizeT n);
 
 bool lessThanMemory(ptr A, ptr B, SizeT n);
 
