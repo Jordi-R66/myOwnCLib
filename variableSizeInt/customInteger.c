@@ -271,6 +271,20 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 	return EQUALS;
 }
 
+bool isZero(CustomInteger integer) {
+	CustomInteger zero = allocInteger(1);
+
+	zero.value[0] = 0;
+	zero.size = 1;
+	zero.isNegative = false;
+
+	bool output = equalsInteger(integer, zero);
+
+	freeInteger(&zero);
+
+	return output;
+}
+
 bool equalsInteger(CustomInteger a, CustomInteger b) {
 	Comparison comp = compareAbs(a, b);
 
