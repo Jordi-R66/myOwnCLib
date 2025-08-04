@@ -27,6 +27,10 @@ typedef struct customInt {
 
 typedef CustomInteger* custIntPtr;
 
+#pragma pack()
+
+#define CUSTOM_INT_SIZE sizeof(CustomInteger)
+
 CustomInteger allocInteger(SizeT capacity);
 void reallocToFitInteger(custIntPtr integer);
 void reallocInteger(custIntPtr integer, SizeT newCapacity);
