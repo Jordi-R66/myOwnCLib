@@ -247,4 +247,52 @@ CustomInteger powInteger(CustomInteger a, CustomInteger exp);
 
 #pragma region Comparison operations
 
+Comparison compareAbs(CustomInteger a, CustomInteger b) {
+	SizeT highestCapacity = a.capacity >= b.capacity ? a.capacity : b.capacity;
+
+	uint8 A, B;
+	bool different = false;
+
+	for (SizeT i = highestCapacity; i > 0; i--) {
+		SizeT index = i - 1;
+
+		A = getByteFromInteger(a, index);
+		B = getByteFromInteger(b, index);
+
+		different = A != B;
+
+		if (different && A > B) {
+			return GREATER;
+		} else if (different) {
+			return LESS;
+		}
+	}
+
+	return EQUALS;
+}
+
+bool equalsInteger(CustomInteger a, CustomInteger b) {
+	Comparison comp = compareAbs(a, b);
+
+	return comp == EQUALS;
+}
+
+bool differentFromInteger(CustomInteger a, CustomInteger b) {
+	Comparison comp = compareAbs(a, b);
+
+	return comp != EQUALS;
+}
+
+bool lessThanInteger(CustomInteger a, CustomInteger b) {
+	Comparison comp = compareAbs(a, b);
+
+	return comp == LESS;
+}
+
+bool greaterThanInteger(CustomInteger a, CustomInteger b) {
+	Comparison comp = compareAbs(a, b);
+
+	return comp == GREATER;
+}
+
 #pragma endregion

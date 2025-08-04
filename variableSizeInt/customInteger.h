@@ -50,6 +50,15 @@ CustomInteger modInteger(CustomInteger a, CustomInteger b);
 
 CustomInteger powInteger(CustomInteger a, CustomInteger exp);
 
-#pragma pack()
+
+#pragma region Comparison operations
+
+Comparison compareAbs(CustomInteger a, CustomInteger b);
+bool equalsInteger(CustomInteger a, CustomInteger b);
+bool differentFromInteger(CustomInteger a, CustomInteger b);
+bool lessThanInteger(CustomInteger a, CustomInteger b);
+bool greaterThanInteger(CustomInteger a, CustomInteger b);
+
+#pragma endregion
 
 #endif
