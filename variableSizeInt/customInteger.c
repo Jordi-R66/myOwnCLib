@@ -181,7 +181,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	SizeT longest = a.size >= b.size ? a.size : b.size;
 
-	uint8 SUM = 0, C_IN = 0, C_OUT = 0;
+	uint8 SUM = 0, CARRY = 0;
 	uint8 A_BYTE, B_BYTE;
 
 	uint16 TEMP = 0;
@@ -194,10 +194,10 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 		A_BYTE = getByteFromInteger(a, i);
 		B_BYTE = getByteFromInteger(b, i);
 
-		TEMP = A_BYTE + B_BYTE + C_IN;
+		TEMP = A_BYTE + B_BYTE + CARRY;
 
-		SUM = (TEMP << 7) >> 7;
-		C_OUT = TEMP >> 7;
+		SUM = (uint8)(TEMP & 0xFF);
+		CARRY = (uint8)(TEMP > 0xFF);
 
 		result.value[i] = SUM;
 		C_IN = C_OUT;
