@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../memory/memfuncs.h"
 #include "../targetSpecific/types.h"
 #include "../bits/bits.h"
 #include "../bools/bool.h"
