@@ -292,15 +292,45 @@ bool equalsInteger(CustomInteger a, CustomInteger b) {
 }
 
 bool lessThanInteger(CustomInteger a, CustomInteger b) {
-	Comparison comp = compareAbs(a, b);
+	bool less = compareAbs(a, b) == LESS;
+	bool equal = compareAbs(a, b) == EQUALS;
 
-	return comp == LESS;
+	bool equalSigns = a.isNegative == b.isNegative;
+
+	/*if (equalSigns) {
+		if (a.isNegative && !less && !equal) {
+			return true;
+		} else if (!a.isNegative && less) {
+			return true;
+		}
+	} else {
+		if (a.isNegative) {
+			return true;
+		}
+	}*/
+
+	return (!equalSigns && a.isNegative) || (equalSigns && !a.isNegative && less) || (a.isNegative && !less && !equal);
 }
 
 bool greaterThanInteger(CustomInteger a, CustomInteger b) {
-	Comparison comp = compareAbs(a, b);
+	bool greater = compareAbs(a, b) == GREATER;
+	bool equal = compareAbs(a, b) == EQUALS;
 
-	return comp == GREATER;
+	bool equalSigns = a.isNegative == b.isNegative;
+
+	/*if (!equalSigns) {
+		if (b.isNegative) {
+			return true;
+		}
+	} else {
+		if (a.isNegative && !greater && !equal) {
+			return true;
+		} else if (!a.isNegative && greater) {
+			return true;
+		}
+	}*/
+
+	return (!a.isNegative && (!equalSigns || greater)) || ( a.isNegative &&  equalSigns && !greater && !equal);
 }
 
 #pragma endregion
