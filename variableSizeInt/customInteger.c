@@ -286,15 +286,9 @@ bool isZero(CustomInteger integer) {
 }
 
 bool equalsInteger(CustomInteger a, CustomInteger b) {
-	Comparison comp = compareAbs(a, b);
+	Comparison compAbs = compareAbs(a, b);
 
-	return comp == EQUALS;
-}
-
-bool differentFromInteger(CustomInteger a, CustomInteger b) {
-	Comparison comp = compareAbs(a, b);
-
-	return comp != EQUALS;
+	return (compAbs == EQUALS && (a.isNegative == b.isNegative)) || (isZero(a) && isZero(b));
 }
 
 bool lessThanInteger(CustomInteger a, CustomInteger b) {
