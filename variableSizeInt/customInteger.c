@@ -181,36 +181,26 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	SizeT longest = a.size >= b.size ? a.size : b.size;
 
-	bool S = false, C_IN = false, C_OUT = false;
+	uint8 SUM = 0, C_IN = 0, C_OUT = 0;
 	uint8 A_BYTE, B_BYTE;
 
-	uint8 currentBit = 0;
+	uint16 TEMP = 0;
 
 	CustomInteger result = allocInteger(longest+1);
 
 	for (SizeT i = 0; i <= longest; i++) {
 		result.value[i] = 0;
 
-		for (currentBit = 0; currentBit < 8; currentBit++) {
-			C_IN = C_OUT;
+		A_BYTE = getByteFromInteger(a, i);
+		B_BYTE = getByteFromInteger(b, i);
 
-			bool A = 0, B = 0;
+		TEMP = A_BYTE + B_BYTE + C_IN;
 
-			if (i < a.size) {
-				A_BYTE = a.value[i];
-				A = GET_BIT(A_BYTE, currentBit);
-			}
+		SUM = (TEMP << 7) >> 7;
+		C_OUT = TEMP >> 7;
 
-			if (i < b.size) {
-				B_BYTE = b.value[i];
-				B = GET_BIT(B_BYTE, currentBit);
-			}
-
-			S = ADD_BIT_S(A, B, C_IN);
-			C_OUT = ADD_BIT_C(A, B, C_IN);
-
-			result.value[i] += S << currentBit;
-		}
+		result.value[i] = SUM;
+		C_IN = C_OUT;
 
 		result.size++;
 	}
