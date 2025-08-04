@@ -156,6 +156,14 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 	return output;
 }
 
+uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex) {
+	if (byteIndex >= integer.size || byteIndex >= integer.capacity) {
+		return 0;
+	}
+
+	return integer.value[byteIndex];
+}
+
 #pragma region Arithmetic Operations
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 	if ((a.isNegative != b.isNegative) && b.isNegative) {

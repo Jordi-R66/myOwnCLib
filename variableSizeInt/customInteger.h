@@ -36,6 +36,8 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 
 String integerToString(CustomInteger integer, Base base);
 
+uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
+
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
