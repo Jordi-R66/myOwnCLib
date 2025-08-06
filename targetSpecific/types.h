@@ -107,9 +107,5 @@ typedef signed short int16;
 typedef char* string;
 typedef void* ptr;
 
-#define I8_SIZE sizeof(uint8)
-#define I16_SIZE sizeof(uint16)
-#define I32_SIZE sizeof(uint32)
-#define I64_SIZE sizeof(uint64)
 
 #endif
