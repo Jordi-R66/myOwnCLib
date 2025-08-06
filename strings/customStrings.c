@@ -65,6 +65,13 @@ void reverseString(String* str) {
 	}
 }
 
+void printStr(String* str, bool newLine) {
+	printf("%s", str->chars);
+	if (newLine) {
+		printf("\n");
+	}
+}
+
 SizeT stringLength(String* str) {
 	SizeT length = 0;
 

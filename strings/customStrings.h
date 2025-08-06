@@ -24,6 +24,7 @@ void reallocString(String* str, SizeT newSize);
 void freeString(String* str);
 void reverseString(String* str);
 
+void printStr(String* str, bool newLine);
 SizeT stringLength(String* str);
 
 void appendChar(String* str, char c);
