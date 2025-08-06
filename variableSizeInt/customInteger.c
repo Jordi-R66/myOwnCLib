@@ -202,6 +202,10 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 		result.value[i] = SUM;
 
 		result.size++;
+
+		if (i == longest) {
+			break;
+		}
 	}
 
 	reallocToFitInteger(&result);
