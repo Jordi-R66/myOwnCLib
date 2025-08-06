@@ -231,6 +231,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	CustomInteger Zero = allocIntegerFromValue(0, false, true);
 
 	bool redirected = false;
+	bool returnedZero = false;
 
 	if (b.isNegative && !redirected) {
 		b.isNegative = false;
@@ -238,7 +239,9 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		redirected = true;
 	} else if (equalsInteger(a, b)) {
 		Zero.isNegative = a.isNegative;
-		return Zero;
+		result = Zero;
+		redirected = true;
+		returnedZero = true;
 	} else if (isZero(a) && !redirected) {
 		result = copyInteger(b);
 		result.isNegative = !result.isNegative;
@@ -300,7 +303,9 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		exit(EXIT_FAILURE);
 	}
 
-	freeInteger((CustomInteger*)&Zero);
+	if (!returnedZero) {
+		freeInteger(&Zero);
+	}
 
 	return result;
 }
