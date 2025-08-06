@@ -181,17 +181,14 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex) {
 #pragma region Arithmetic Operations
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {
-	if ((a.isNegative != b.isNegative) && b.isNegative) {
+	if (b.isNegative) {
 		b.isNegative = false;
 
 		return subtractInteger(a, b);
 	} else if ((a.isNegative != b.isNegative) && a.isNegative) {
 		a.isNegative = false;
 
-		CustomInteger result = subtractInteger(a, b);
-		result.isNegative = !result.isNegative;
-
-		return result;
+		return subtractInteger(b, a);
 	}
 
 	SizeT longest = a.size >= b.size ? a.size : b.size;
