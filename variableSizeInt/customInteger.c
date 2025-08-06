@@ -133,6 +133,10 @@ String integerToString(CustomInteger integer, Base base) {
 		}
 	}
 
+	char sign = integer.isNegative ? '-' : '+';
+
+	appendChar(&obj, sign);
+
 	stringLength(&obj);
 	reverseString(&obj);
 
