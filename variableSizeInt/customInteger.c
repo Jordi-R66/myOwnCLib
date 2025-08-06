@@ -203,7 +203,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 		result.size++;
 
-		if (i == longest) {
+		if (i == SIZET_MAX_VAL) {
 			break;
 		}
 	}
