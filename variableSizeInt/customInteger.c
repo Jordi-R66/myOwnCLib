@@ -30,6 +30,17 @@ CustomInteger allocInteger(SizeT capacity) {
 	return output;
 }
 
+CustomInteger copyInteger(CustomInteger original) {
+	CustomInteger output = allocInteger(original.capacity);
+
+	output.size = original.size;
+	output.isNegative = original.isNegative;
+
+	copyMemory(original.value, output.value, output.size);
+
+	return output;
+}
+
 void reallocToFitInteger(custIntPtr integer) {
 	if (integer->capacity <= 1) {
 		fprintf(stderr, "Can't reduce the size of your integer\n");
