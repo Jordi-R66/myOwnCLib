@@ -228,11 +228,79 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	CustomInteger result;
 
-	if ((a.isNegative == b.isNegative) && (a.isNegative == false)) {
+	CustomInteger Zero = allocIntegerFromValue(0, false, true);
+
+	bool redirected = false;
+
+	if (b.isNegative && !redirected) {
+		b.isNegative = false;
+		result = addInteger(a, b);
+		redirected = true;
+	} else if (equalsInteger(a, b)) {
+		Zero.isNegative = a.isNegative;
+		return Zero;
+	} else if (isZero(a) && !redirected) {
+		result = copyInteger(b);
+		result.isNegative = !result.isNegative;
+		redirected = true;
+	} else if (isZero(b) && !redirected) {
+		result = copyInteger(a);
+		redirected = true;
+	} else if (!redirected && (a.isNegative != b.isNegative)) {
 		if (lessThanInteger(a, b)) {
-			return subtractInteger(b, a);
+			a.isNegative = false;
+			result = addInteger(a, b);
+			result.isNegative = true;
+			redirected = true;
+		}
+	} else if (!redirected && (a.isNegative == b.isNegative)) {
+		if (!a.isNegative && lessThanInteger(a, b)) {
+			redirected = true;
+
+			result = subtractInteger(b, a);
+			result.isNegative = !result.isNegative;
 		}
 	}
+
+
+	if (!redirected && (a.isNegative == b.isNegative) && (a.isNegative == false) && greaterThanInteger(a, b)) {
+		SizeT longest = a.size >= b.size ? a.size : b.size;
+
+		a = copyInteger(a);
+		b = copyInteger(b);
+
+		reallocInteger(&a, longest);
+		reallocInteger(&b, longest);
+
+		result = allocInteger(longest+1);
+
+		uint8 BORROW = 0;
+		uint8 A, B;
+
+		for (SizeT i = 0; i <= longest; i++) {
+			A = getByteFromInteger(a, i);
+			B = getByteFromInteger(b, i);
+
+			result.value[i] = A - B - BORROW;
+
+			BORROW = ((A <= B && BORROW) || (A < B));
+
+			result.size++;
+
+			if (i == SIZET_MAX_VAL) {
+				break;
+			}
+		}
+
+		reallocToFitInteger(&result);
+
+		freeInteger(&a);
+		freeInteger(&b);
+	} else if (!redirected) {
+		exit(EXIT_FAILURE);
+	}
+
+	freeInteger((CustomInteger*)&Zero);
 
 	return result;
 }
