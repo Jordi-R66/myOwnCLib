@@ -32,6 +32,8 @@ typedef CustomInteger* custIntPtr;
 
 #define CUSTOM_INT_SIZE sizeof(CustomInteger)
 
+#pragma region Misc Operations
+
 CustomInteger allocInteger(SizeT capacity);
 void reallocToFitInteger(custIntPtr integer);
 void reallocInteger(custIntPtr integer, SizeT newCapacity);
@@ -43,6 +45,10 @@ String integerToString(CustomInteger integer, Base base);
 
 uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
 
+#pragma endregion
+
+#pragma region Arithmetic Operations
+
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
@@ -51,6 +57,7 @@ CustomInteger modInteger(CustomInteger a, CustomInteger b);
 
 CustomInteger powInteger(CustomInteger a, CustomInteger exp);
 
+#pragma endregion
 
 #pragma region Comparison operations
 
