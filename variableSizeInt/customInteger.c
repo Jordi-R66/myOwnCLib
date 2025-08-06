@@ -271,15 +271,16 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 }
 
 bool isZero(CustomInteger integer) {
-	CustomInteger zero = allocInteger(1);
+	bool output = true;
 
-	zero.value[0] = 0;
-	zero.size = 1;
-	zero.isNegative = false;
+	for (SizeT i = 0; i < integer.size; i++) {
 
-	bool output = equalsInteger(integer, zero);
+		output = getByteFromInteger(integer, i) == 0;
 
-	freeInteger(&zero);
+		if (i == SIZET_MAX_VAL || !output) {
+			break;
+		}
+	}
 
 	return output;
 }
