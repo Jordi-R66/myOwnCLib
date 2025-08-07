@@ -49,6 +49,9 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
 
 #pragma endregion
 
+void incrementIntegerByPrimitive(custIntPtr custInt, uint64 quantity);
+void incrementIntegerByCustom(custIntPtr custInt, CustomInteger quantity);
+
 #pragma region Arithmetic Operations
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
