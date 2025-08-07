@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "buildTestInt",
+			"type": "shell",
+			"command": "./compileTestInt.sh",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": ["$gcc"],
+			"detail": "Tâche générée pour compiler le projet C"
+		}
+	]
+}
