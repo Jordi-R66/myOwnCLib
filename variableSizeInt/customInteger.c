@@ -187,22 +187,17 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex) {
 #pragma region Unary Operations
 
 void incrementIntegerByPrimitive(custIntPtr custInt, uint64 quantity) {
-	printf("[Primitive] ICI 1\n");
 	CustomInteger quant = allocIntegerFromValue(quantity, false, true);
 	incrementIntegerByCustom(custInt, quant);
 
 	freeInteger(&quant);
-	printf("[Primitive] ICI 2\n");
 }
 
 void incrementIntegerByCustom(custIntPtr custInt, CustomInteger quantity) {
-	printf("[Custom] ICI 1\n");
-	printf("ici?\n");
 	CustomInteger temp = addInteger(*custInt, quantity);
 	freeInteger(custInt);
 	copyInteger(&temp, custInt);
 	freeInteger(&temp);
-	printf("[Custom] ICI 2\n");
 }
 
 #pragma endregion
