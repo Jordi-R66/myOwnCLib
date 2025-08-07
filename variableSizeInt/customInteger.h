@@ -35,7 +35,8 @@ typedef CustomInteger* custIntPtr;
 #pragma region Misc Operations
 
 CustomInteger allocInteger(SizeT capacity);
-CustomInteger copyInteger(CustomInteger original);
+CustomInteger copyIntegerToNew(CustomInteger original);
+void copyInteger(custIntPtr src, custIntPtr dest);
 void reallocToFitInteger(custIntPtr integer);
 void reallocInteger(custIntPtr integer, SizeT newCapacity);
 void freeInteger(custIntPtr integer);

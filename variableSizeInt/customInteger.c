@@ -30,7 +30,7 @@ CustomInteger allocInteger(SizeT capacity) {
 	return output;
 }
 
-CustomInteger copyInteger(CustomInteger original) {
+CustomInteger copyIntegerToNew(CustomInteger original) {
 	CustomInteger output = allocInteger(original.capacity);
 
 	output.size = original.size;
@@ -39,6 +39,12 @@ CustomInteger copyInteger(CustomInteger original) {
 	copyMemory(original.value, output.value, output.size);
 
 	return output;
+}
+
+void copyInteger(custIntPtr src, custIntPtr dest) {
+	freeInteger(dest);
+
+	*dest = copyIntegerToNew(*src);
 }
 
 void reallocToFitInteger(custIntPtr integer) {
