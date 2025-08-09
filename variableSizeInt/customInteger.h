@@ -64,6 +64,10 @@ CustomInteger BitwiseOR(CustomInteger a, CustomInteger b);
 CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b);
 CustomInteger BitwiseNOT(CustomInteger a);
 
+uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace);
+void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
+
+
 #pragma endregion
 
 #pragma region Arithmetic Operations

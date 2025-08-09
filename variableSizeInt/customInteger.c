@@ -270,6 +270,43 @@ CustomInteger BitwiseNOT(CustomInteger a) {
 	return result;
 }
 
+uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace) {
+	SizeT bytes = bytePlace + bitPlace / 8;
+
+	SizeT bit = bitPlace % 8;
+
+	if (bytes >= integer.capacity) {
+		return (uint8)UNDEF;
+	}
+
+	return GET_BIT(integer.value[bytes], bit+1);
+}
+
+void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace) {
+	newVal %= 2;
+
+	SizeT bytes = bytePlace + bitPlace / 8;
+	SizeT bit = bitPlace % 8;
+
+	if ((integer->capacity > bytes) && (bytes >= integer->size)) {
+		integer->size = bytes + 1;
+	} else if (bytes >= integer->capacity) {
+		return;
+	}
+
+	uint8 curVal = getBit(*integer, bit, bytes);
+
+	if (curVal ^ newVal) {
+		if (curVal == 1) {
+			integer->value[bytes] -= CTRL_VAL(bit+1);
+		} else {
+			integer->value[bytes] += CTRL_VAL(bit+1);
+		}
+	}
+
+	return;
+}
+
 #pragma endregion
 
 #pragma region Arithmetic Operations
