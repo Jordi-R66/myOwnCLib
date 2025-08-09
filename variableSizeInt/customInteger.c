@@ -93,10 +93,14 @@ void reallocInteger(custIntPtr integer, SizeT newCapacity) {
 }
 
 void freeInteger(custIntPtr integer) {
+	if (integer->value == NULL) {
+		return;
+	}
+
 	setMemory((ptr)integer->value, 0, integer->capacity);
 	free((ptr)integer->value);
 
-	setMemory((ptr)integer, 0, sizeof(CustomInteger));
+	setMemory((ptr)integer, 0, CUSTOM_INT_SIZE);
 }
 
 String integerToString(CustomInteger integer, Base base) {
@@ -267,11 +271,11 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		redirected = true;
 		returnedZero = true;
 	} else if (isZero(a) && !redirected) {
-		result = copyInteger(b);
+		result = copyIntegerToNew(b);
 		result.isNegative = !result.isNegative;
 		redirected = true;
 	} else if (isZero(b) && !redirected) {
-		result = copyInteger(a);
+		result = copyIntegerToNew(a);
 		redirected = true;
 	} else if (!redirected && (a.isNegative != b.isNegative)) {
 		if (lessThanInteger(a, b)) {
@@ -289,12 +293,11 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		}
 	}
 
-
 	if (!redirected && (a.isNegative == b.isNegative) && (a.isNegative == false) && greaterThanInteger(a, b)) {
 		SizeT longest = a.size >= b.size ? a.size : b.size;
 
-		a = copyInteger(a);
-		b = copyInteger(b);
+		a = copyIntegerToNew(a);
+		b = copyIntegerToNew(b);
 
 		reallocInteger(&a, longest);
 		reallocInteger(&b, longest);
