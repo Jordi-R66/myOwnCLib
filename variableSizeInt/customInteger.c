@@ -433,7 +433,23 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 		}
 	}
 
-	return EQUALS;
+	if (!different) {
+		return EQUALS;
+	} else {
+		return UNDEF;
+	}
+}
+
+Comparison compareIntegers(CustomInteger a, CustomInteger b) {
+	if (equalsInteger(a, b)) {
+		return EQUALS;
+	} else if (lessThanInteger(a, b)) {
+		return LESS;
+	} else if (greaterThanInteger(a, b)) {
+		return GREATER;
+	} else {
+		return UNDEF;
+	}
 }
 
 bool isZero(CustomInteger integer) {

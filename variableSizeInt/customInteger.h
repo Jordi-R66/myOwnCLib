@@ -76,6 +76,7 @@ CustomInteger powInteger(CustomInteger a, CustomInteger exp);
 #pragma region Comparison operations
 
 Comparison compareAbs(CustomInteger a, CustomInteger b);
+Comparison compareIntegers(CustomInteger a, CustomInteger b);
 bool isZero(CustomInteger integer);
 bool equalsInteger(CustomInteger a, CustomInteger b);
 bool differentFromInteger(CustomInteger a, CustomInteger b);
