@@ -206,6 +206,72 @@ void incrementIntegerByCustom(custIntPtr custInt, CustomInteger quantity) {
 
 #pragma endregion
 
+#pragma region Bitwise Operations
+
+CustomInteger BitwiseAND(CustomInteger a, CustomInteger b) {
+	CustomInteger result;
+
+	SizeT smallest = a.size < b.size ? a.size : b.size;
+
+	result = allocInteger(smallest);
+
+	for (SizeT i = 0; i < smallest; i++) {
+		result.value[i] = a.value[i] & b.value[i];
+
+		result.size++;
+	}
+
+	return result;
+}
+
+CustomInteger BitwiseOR(CustomInteger a, CustomInteger b) {
+	CustomInteger result;
+
+	SizeT smallest = a.size < b.size ? a.size : b.size;
+
+	result = allocInteger(smallest);
+
+	for (SizeT i = 0; i < smallest; i++) {
+		result.value[i] = a.value[i] | b.value[i];
+
+		result.size++;
+	}
+
+	return result;
+}
+
+CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b) {
+	CustomInteger result;
+
+	SizeT smallest = a.size < b.size ? a.size : b.size;
+
+	result = allocInteger(smallest);
+
+	for (SizeT i = 0; i < smallest; i++) {
+		result.value[i] = a.value[i] ^ b.value[i];
+
+		result.size++;
+	}
+
+	return result;
+}
+
+CustomInteger BitwiseNOT(CustomInteger a) {
+	CustomInteger result;
+
+	result = allocInteger(a.capacity);
+
+	for (SizeT i = 0; i < a.capacity; i++) {
+		result.value[i] = ~a.value[i];
+
+		result.size++;
+	}
+
+	return result;
+}
+
+#pragma endregion
+
 #pragma region Arithmetic Operations
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b) {

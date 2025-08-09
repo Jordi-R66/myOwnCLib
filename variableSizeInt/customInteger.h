@@ -52,6 +52,15 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
 void incrementIntegerByPrimitive(custIntPtr custInt, uint64 quantity);
 void incrementIntegerByCustom(custIntPtr custInt, CustomInteger quantity);
 
+#pragma region Bitwise Operations
+
+CustomInteger BitwiseAND(CustomInteger a, CustomInteger b);
+CustomInteger BitwiseOR(CustomInteger a, CustomInteger b);
+CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b);
+CustomInteger BitwiseNOT(CustomInteger a);
+
+#pragma endregion
+
 #pragma region Arithmetic Operations
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
