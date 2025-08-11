@@ -271,13 +271,13 @@ CustomInteger BitwiseNOT(CustomInteger a) {
 }
 
 uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace) {
-	SizeT bytes = bytePlace + bitPlace / 8;
+	SizeT bytes = bytePlace + BYTES_FROM_BITS(bitPlace);
 
 	SizeT bit = bitPlace % 8;
 
 	if (bytes >= integer.capacity) {
-		return (uint8)UNDEF;
-	}
+		return 0;
+	} 
 
 	return GET_BIT(integer.value[bytes], bit+1);
 }
@@ -285,7 +285,7 @@ uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace) {
 void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace) {
 	newVal %= 2;
 
-	SizeT bytes = bytePlace + bitPlace / 8;
+	SizeT bytes = bytePlace + BYTES_FROM_BITS(bitPlace);
 	SizeT bit = bitPlace % 8;
 
 	if ((integer->capacity > bytes) && (bytes >= integer->size)) {
@@ -305,6 +305,56 @@ void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace) {
 	}
 
 	return;
+}
+
+CustomInteger Bitshift(CustomInteger integer, SizeT bits, ShiftDirection direction) {
+	if (bits == 0) {
+		return copyIntegerToNew(integer);
+	}
+
+	CustomInteger result;
+
+	bool foundNewSize = false;
+	SizeT j = 0;
+
+	result = allocInteger(integer.capacity);
+
+	result.isNegative = integer.isNegative;
+	result.size = result.capacity;
+
+	if (direction == LEFT) {
+		for (SizeT i = 0; i < integer.size; i--) {
+			SizeT donorAddr, receiverAddr;
+			uint8 donorBit, receiverBit;
+
+			for (SizeT k = 0; k < 8; k++) {
+				receiverAddr = i * 8 + k;
+				donorAddr = receiverAddr + bits;
+
+				donorBit = getBit(integer, k - bits, 0);
+
+				printf("[%zu]\t%u\n", receiverAddr, donorBit);
+
+				setBit(&result, donorBit, receiverAddr, 0);
+			}
+		}
+	} else {
+		exit(EXIT_FAILURE);
+	}
+
+	for (SizeT i = result.capacity; i > 0; i++) {
+		SizeT j = i - 1;
+
+		if (result.value[j] == 0) {
+			result.size = i;
+		} else {
+			break;
+		}
+	}
+
+	reallocToFitInteger(&result);
+
+	return result;
 }
 
 #pragma endregion
@@ -440,7 +490,55 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
+CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
+	CustomInteger result;
+
+	CustomInteger Zero = allocIntegerFromValue(0, false, true);
+	CustomInteger One = allocIntegerFromValue(1, false, true);
+
+	if (isZero(a) || isZero(b)) {
+		result = Zero;
+	} else if (compareAbs(a, One) == EQUALS) {
+		result = copyIntegerToNew(b);
+
+		if (a.isNegative) {
+			result.isNegative = !result.isNegative;
+		}
+	} else if (compareAbs(b, One) == EQUALS) {
+		result = copyIntegerToNew(a);
+
+		if (b.isNegative) {
+			result.isNegative = !result.isNegative;
+		}
+	} else {
+		freeInteger(&Zero);
+
+		result = allocInteger(a.size + b.size + 1);
+
+		uint8 A_BYTE = 0, B_BYTE = 0, CARRY = 0;
+		uint16 TEMP = 0;
+
+		for (SizeT i = 0; i < a.size; i++) {
+			A_BYTE = getByteFromInteger(a, i);
+
+			result.value[i] = 0;
+
+			for (SizeT j = 0; j < b.size; j++) {
+				B_BYTE = getByteFromInteger(b, j);
+
+				TEMP = A_BYTE * B_BYTE + CARRY;
+				CARRY = TEMP >> 8;
+
+				uint8 VAL = (TEMP << 8) >> 8;
+
+				result.value[i] += VAL;
+			}
+		}
+	}
+
+	return result;
+}
+
 CustomInteger divideInteger(CustomInteger a, CustomInteger b);
 CustomInteger modInteger(CustomInteger a, CustomInteger b);
 

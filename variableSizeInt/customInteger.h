@@ -67,6 +67,7 @@ CustomInteger BitwiseNOT(CustomInteger a);
 uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace);
 void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
 
+CustomInteger Bitshift(CustomInteger integer, SizeT bits, ShiftDirection direction);
 
 #pragma endregion
 
