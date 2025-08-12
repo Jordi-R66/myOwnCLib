@@ -142,25 +142,25 @@ ENDING:
 int main(void) {
 	CustomInteger a, b, c;
 
-	a = allocIntegerFromValue(299792458, false, true);
+	a = allocIntegerFromValue(0xCAFE, true, true);
+	b = allocIntegerFromValue(0xCB, false, true);
 
-	//b = Bitshift(a, 1, LEFT, true);
-	c = Bitshift(a, 16, RIGHT, true);
+	c = multiplyInteger(a, b);
 
 	String A, B, C;
 
-	A = integerToString(a, BIN);
-	//B = integerToString(b, BIN);
-	C = integerToString(c, BIN);
+	A = integerToString(a, HEX);
+	B = integerToString(b, HEX);
+	C = integerToString(c, HEX);
 
 	freeInteger(&a);
-	//freeInteger(&b);
+	freeInteger(&b);
 	freeInteger(&c);
 
-	printf("%s\n%s\n", A.chars, C.chars);
+	printf("%s * %s = %s\n", A.chars, B.chars, C.chars);
 
 	freeString(&A);
-	//freeString(&B);
+	freeString(&B);
 	freeString(&C);
 
 	return 0;
