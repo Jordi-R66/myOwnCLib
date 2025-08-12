@@ -79,6 +79,8 @@ void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
  */
 CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 
+void BitshiftPtr(custIntPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
+
 #pragma endregion
 
 #pragma region Arithmetic Operations

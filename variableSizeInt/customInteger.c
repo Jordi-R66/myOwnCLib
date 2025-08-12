@@ -364,6 +364,11 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 	return result;
 }
 
+void BitshiftPtr(custIntPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
+	CustomInteger shifted = Bitshift(*integer, shift, direction, adaptCapacity);
+	copyInteger(&shifted, integer);
+}
+
 #pragma endregion
 
 #pragma region Arithmetic Operations
