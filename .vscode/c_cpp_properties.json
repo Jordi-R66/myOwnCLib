@@ -8,7 +8,7 @@
 			"defines": [],
 			"compilerPath": "/usr/bin/gcc",
 			"intelliSenseMode": "${default}",
-			"cStandard": "c17"
+			"cStandard": "gnu23"
 		},
 		{
 			"name": "Linux32",
@@ -22,7 +22,7 @@
 			"defines": [],
 			"compilerPath": "/usr/bin/i686-linux-gnu-gcc-14",
 			"intelliSenseMode": "linux-gcc-x86",
-			"cStandard": "c17"
+			"cStandard": "gnu23"
 		},
 		{
 			"name": "Linux64",
@@ -36,7 +36,7 @@
 			"defines": [],
 			"compilerPath": "/usr/bin/x86_64-linux-gnu-gcc-14",
 			"intelliSenseMode": "linux-gcc-x64",
-			"cStandard": "c17"
+			"cStandard": "gnu23"
 		},
 		{
 			"name": "LinuxToWin32",
@@ -49,7 +49,7 @@
 			"defines": [],
 			"compilerPath": "/usr/bin/i686-w64-mingw32-gcc-14",
 			"intelliSenseMode": "windows-gcc-x86",
-			"cStandard": "c17"
+			"cStandard": "c23"
 		},
 		{
 			"name": "LinuxToWin64",
@@ -62,7 +62,7 @@
 			"defines": [],
 			"compilerPath": "/usr/bin/x86_64-w64-mingw32-gcc-14",
 			"intelliSenseMode": "windows-gcc-x64",
-			"cStandard": "c17"
+			"cStandard": "c23"
 		}
 	],
 	"version": 4
