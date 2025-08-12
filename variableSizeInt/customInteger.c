@@ -193,22 +193,6 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex) {
 
 #pragma endregion
 
-#pragma region Unary Operations
-
-void incrementIntegerByPrimitive(CustomIntegerPtr custInt, uint64 quantity) {
-	CustomInteger quant = allocIntegerFromValue(quantity, false, true);
-	incrementIntegerByCustom(custInt, quant);
-
-	freeInteger(&quant);
-}
-
-void incrementIntegerByCustom(CustomIntegerPtr custInt, CustomInteger quantity) {
-	CustomInteger temp = addInteger(*custInt, quantity);
-	copyInteger(&temp, custInt);
-}
-
-#pragma endregion
-
 #pragma region Bitwise Operations
 
 CustomInteger BitwiseAND(CustomInteger a, CustomInteger b) {

@@ -55,9 +55,6 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
 
 #pragma endregion
 
-void incrementIntegerByPrimitive(CustomIntegerPtr custInt, uint64 quantity);
-void incrementIntegerByCustom(CustomIntegerPtr custInt, CustomInteger quantity);
-
 #pragma region Bitwise Operations
 
 CustomInteger BitwiseAND(CustomInteger a, CustomInteger b);
