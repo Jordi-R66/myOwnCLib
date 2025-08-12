@@ -199,9 +199,7 @@ void incrementIntegerByPrimitive(custIntPtr custInt, uint64 quantity) {
 
 void incrementIntegerByCustom(custIntPtr custInt, CustomInteger quantity) {
 	CustomInteger temp = addInteger(*custInt, quantity);
-	freeInteger(custInt);
 	copyInteger(&temp, custInt);
-	freeInteger(&temp);
 }
 
 #pragma endregion
