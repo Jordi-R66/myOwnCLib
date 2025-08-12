@@ -41,13 +41,13 @@ CustomInteger copyIntegerToNew(CustomInteger original) {
 	return output;
 }
 
-void copyInteger(custIntPtr src, custIntPtr dest) {
+void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest) {
 	freeInteger(dest);
 
 	*dest = copyIntegerToNew(*src);
 }
 
-void reallocToFitInteger(custIntPtr integer) {
+void reallocToFitInteger(CustomIntegerPtr integer) {
 	if (integer->capacity <= 1) {
 		fprintf(stderr, "Can't reduce the size of your integer\n");
 		exit(EXIT_FAILURE);
@@ -70,7 +70,7 @@ void reallocToFitInteger(custIntPtr integer) {
 	reallocInteger(integer, i + 1);
 }
 
-void reallocInteger(custIntPtr integer, SizeT newCapacity) {
+void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity) {
 	if (newCapacity == integer->capacity) {
 		return;
 	}
@@ -92,12 +92,12 @@ void reallocInteger(custIntPtr integer, SizeT newCapacity) {
 	free(oldPtr);
 }
 
-void setToZero(custIntPtr integer) {
+void setToZero(CustomIntegerPtr integer) {
 	setMemory(integer->value, 0, integer->capacity);
 	integer->isNegative = false;
 }
 
-void freeInteger(custIntPtr integer) {
+void freeInteger(CustomIntegerPtr integer) {
 	if (integer->value == NULL) {
 		return;
 	}
@@ -195,14 +195,14 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex) {
 
 #pragma region Unary Operations
 
-void incrementIntegerByPrimitive(custIntPtr custInt, uint64 quantity) {
+void incrementIntegerByPrimitive(CustomIntegerPtr custInt, uint64 quantity) {
 	CustomInteger quant = allocIntegerFromValue(quantity, false, true);
 	incrementIntegerByCustom(custInt, quant);
 
 	freeInteger(&quant);
 }
 
-void incrementIntegerByCustom(custIntPtr custInt, CustomInteger quantity) {
+void incrementIntegerByCustom(CustomIntegerPtr custInt, CustomInteger quantity) {
 	CustomInteger temp = addInteger(*custInt, quantity);
 	copyInteger(&temp, custInt);
 }
@@ -285,7 +285,7 @@ uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace) {
 	return GET_BIT(integer.value[bytes], bit+1);
 }
 
-void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace) {
+void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace) {
 	newVal %= 2;
 
 	SizeT bytes = bytePlace + BYTES_FROM_BITS(bitPlace);
@@ -369,7 +369,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 	return result;
 }
 
-void BitshiftPtr(custIntPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
+void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
 	CustomInteger shifted = Bitshift(*integer, shift, direction, adaptCapacity);
 	copyInteger(&shifted, integer);
 }

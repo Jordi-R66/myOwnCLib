@@ -31,7 +31,7 @@ typedef struct customInt {
 	SizeT size;
 	SizeT capacity;
 	bool isNegative;
-} CustomInteger, *custIntPtr;
+} CustomInteger, *CustomIntegerPtr;
 
 #pragma pack()
 
@@ -41,11 +41,11 @@ typedef struct customInt {
 
 CustomInteger allocInteger(SizeT capacity);
 CustomInteger copyIntegerToNew(CustomInteger original);
-void copyInteger(custIntPtr src, custIntPtr dest);
-void reallocToFitInteger(custIntPtr integer);
-void reallocInteger(custIntPtr integer, SizeT newCapacity);
-void setToZero(custIntPtr integer);
-void freeInteger(custIntPtr integer);
+void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest);
+void reallocToFitInteger(CustomIntegerPtr integer);
+void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity);
+void setToZero(CustomIntegerPtr integer);
+void freeInteger(CustomIntegerPtr integer);
 
 CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue);
 
@@ -55,8 +55,8 @@ uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
 
 #pragma endregion
 
-void incrementIntegerByPrimitive(custIntPtr custInt, uint64 quantity);
-void incrementIntegerByCustom(custIntPtr custInt, CustomInteger quantity);
+void incrementIntegerByPrimitive(CustomIntegerPtr custInt, uint64 quantity);
+void incrementIntegerByCustom(CustomIntegerPtr custInt, CustomInteger quantity);
 
 #pragma region Bitwise Operations
 
@@ -66,7 +66,7 @@ CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b);
 CustomInteger BitwiseNOT(CustomInteger a);
 
 uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace);
-void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
+void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
 
 
 /**
@@ -80,7 +80,7 @@ void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
  */
 CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 
-void BitshiftPtr(custIntPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
+void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 
 #pragma endregion
 
