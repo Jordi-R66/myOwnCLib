@@ -307,36 +307,42 @@ void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace) {
 	return;
 }
 
-CustomInteger Bitshift(CustomInteger integer, SizeT bits, ShiftDirection direction) {
-	if (bits == 0) {
-		return copyIntegerToNew(integer);
-	}
-
+CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
 	CustomInteger result;
 
-	bool foundNewSize = false;
-	SizeT j = 0;
+	setMemory(&result, 0, CUSTOM_INT_SIZE);
 
-	result = allocInteger(integer.capacity);
+	if (shift == 0) {
+		return copyIntegerToNew(integer);
+	} else if (direction == LEFT || direction == RIGHT) {
 
-	result.isNegative = integer.isNegative;
-	result.size = result.capacity;
+		SizeT deltaSize = shift / 8;
+		SizeT resultCapacity = integer.capacity;
 
-	if (direction == LEFT || direction == RIGHT) {
+		if (adaptCapacity && direction == LEFT) {
+			resultCapacity += deltaSize + 1;
+		}
+
+		result = allocInteger(resultCapacity);
+
+		result.isNegative = integer.isNegative;
+		result.size = result.capacity;
+
+		setMemory(result.value, 0, result.capacity);
+
 		for (SizeT i = integer.size; i > 0; i--) {
 			SizeT j = i - 1;
-			result.value[j] = 0;
 
 			for (SizeT k = 8; k > 0; k--) {
 				SizeT currentBit = j * 8 + (k - 1);
 
-				if (direction == RIGHT && currentBit < bits) {
+				if (direction == RIGHT && currentBit < shift) {
 					break;
 				}
 
 				uint8 bitVal = GET_BIT(integer.value[j], k);
 
-				SizeT destBit = direction == LEFT ? currentBit + bits: currentBit - bits;
+				SizeT destBit = direction == LEFT ? currentBit + shift: currentBit - shift;
 
 				setBit(&result, bitVal, destBit, 0);
 			}
@@ -345,7 +351,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT bits, ShiftDirection directi
 		exit(EXIT_FAILURE);
 	}
 
-	for (SizeT i = result.capacity; i > 0; i++) {
+	for (SizeT i = result.size; i > 0; i--) {
 		SizeT j = i - 1;
 
 		if (result.value[j] == 0) {

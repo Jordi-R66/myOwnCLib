@@ -67,7 +67,17 @@ CustomInteger BitwiseNOT(CustomInteger a);
 uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace);
 void setBit(custIntPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
 
-CustomInteger Bitshift(CustomInteger integer, SizeT bits, ShiftDirection direction);
+
+/**
+ * @brief Returns a new CustomInteger object representing the shifted integer passed as argument
+ * 
+ * @param integer The integer to shift
+ * @param shift The amount of bits to shift by
+ * @param direction LEFT or RIGHT
+ * @param adaptCapacity Tells the function to output a bigger integer if the bitshift would cause an overflow of the original capacity
+ * @return CustomInteger 
+ */
+CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 
 #pragma endregion
 
