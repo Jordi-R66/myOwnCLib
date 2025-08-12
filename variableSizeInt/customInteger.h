@@ -31,9 +31,7 @@ typedef struct customInt {
 	SizeT size;
 	SizeT capacity;
 	bool isNegative;
-} CustomInteger;
-
-typedef CustomInteger* custIntPtr;
+} CustomInteger, *custIntPtr;
 
 #pragma pack()
 
