@@ -322,20 +322,23 @@ CustomInteger Bitshift(CustomInteger integer, SizeT bits, ShiftDirection directi
 	result.isNegative = integer.isNegative;
 	result.size = result.capacity;
 
-	if (direction == LEFT) {
-		for (SizeT i = 0; i < integer.size; i--) {
-			SizeT donorAddr, receiverAddr;
-			uint8 donorBit, receiverBit;
+	if (direction == LEFT || direction == RIGHT) {
+		for (SizeT i = integer.size; i > 0; i--) {
+			SizeT j = i - 1;
+			result.value[j] = 0;
 
-			for (SizeT k = 0; k < 8; k++) {
-				receiverAddr = i * 8 + k;
-				donorAddr = receiverAddr + bits;
+			for (SizeT k = 8; k > 0; k--) {
+				SizeT currentBit = j * 8 + (k - 1);
 
-				donorBit = getBit(integer, k - bits, 0);
+				if (direction == RIGHT && currentBit < bits) {
+					break;
+				}
 
-				printf("[%zu]\t%u\n", receiverAddr, donorBit);
+				uint8 bitVal = GET_BIT(integer.value[j], k);
 
-				setBit(&result, donorBit, receiverAddr, 0);
+				SizeT destBit = direction == LEFT ? currentBit + bits: currentBit - bits;
+
+				setBit(&result, bitVal, destBit, 0);
 			}
 		}
 	} else {
