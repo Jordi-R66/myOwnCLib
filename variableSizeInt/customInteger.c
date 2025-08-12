@@ -92,6 +92,11 @@ void reallocInteger(custIntPtr integer, SizeT newCapacity) {
 	free(oldPtr);
 }
 
+void setToZero(custIntPtr integer) {
+	setMemory(integer->value, 0, integer->capacity);
+	integer->isNegative = false;
+}
+
 void freeInteger(custIntPtr integer) {
 	if (integer->value == NULL) {
 		return;

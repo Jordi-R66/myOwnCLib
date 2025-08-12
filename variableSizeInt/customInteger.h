@@ -46,6 +46,7 @@ CustomInteger copyIntegerToNew(CustomInteger original);
 void copyInteger(custIntPtr src, custIntPtr dest);
 void reallocToFitInteger(custIntPtr integer);
 void reallocInteger(custIntPtr integer, SizeT newCapacity);
+void setToZero(custIntPtr integer);
 void freeInteger(custIntPtr integer);
 
 CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue);
