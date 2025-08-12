@@ -54,44 +54,61 @@ bool intEqualsCustom(int32 val, CustomInteger valCust) {
 	CustomInteger* valsCust = calloc(N_TESTS_VALS, CUSTOM_INT_SIZE);
 
 	for (SizeT i = 0; i < N_TESTS_VALS; i++) {
-		CustomInteger custInt = allocInteger(I32_SIZE);
+		CustomInteger custInt;
 		int32 val = vals[i];
+		bool neg;
 
 		if (val < 0) {
 			val *= -1;
-			custInt.isNegative = true;
+			neg = true;
 		} else {
-			custInt.isNegative = false;
+			neg = false;
 		}
 
-		custInt.size = I32_SIZE;
-
-		copyMemory(&val, custInt.value, I32_SIZE);
+		custInt = allocIntegerFromValue(val, neg, true);
 
 		valsCust[i] = custInt;
 	}
 
+	int32 A, B, C;
+	uint32 A_, B_, C_;
+	char signeA, signeB, signeC;
+	char plus = '+', moins = '-';
+
 	for (SizeT i = 0; i < N_TESTS_VALS; i++) {
 		CustomInteger a = valsCust[i];
 
-		int32 A, B, C;
-
 		A = vals[i];
+		A_ = (uint32)(A < 0 ? A * -1 : A);
+		signeA = A < 0 ? moins: plus;
 
 		for (SizeT j = 0; j < N_TESTS_VALS; j++) {
 			B = vals[j];
-			C = A - B;
+			C = A * B;
+
+			B_ = (uint32)(B < 0 ? B * -1 : B);
+			signeB = B < 0 ? moins: plus;
+			C_ = (uint32)(C < 0 ? C * -1 : C);
+			signeC = C < 0 ? moins: plus;
 
 			CustomInteger b = valsCust[j];
-			CustomInteger c = subtractInteger(a, b);
+			CustomInteger c = multiplyInteger(a, b);
+
+			String strA = integerToString(a, HEX), strB = integerToString(b, HEX), strC = integerToString(c, HEX);
+			printf("%c%X * %c%X = %c%X\n%s * %s = %s\n\n", signeA, A_, signeB, B_, signeC, C_, strA.chars, strB.chars, strC.chars);
+
+			freeString(&strA);
+			freeString(&strB);
+			freeString(&strC);
 
 			if (!intEqualsCustom(C, c)) {
-				String strA = integerToString(a, HEX), strB = integerToString(b, HEX), strC = integerToString(c, HEX);
-				fprintf(stderr, "Error for %d - %d = %d\nGot %s - %s = %s\n\n", A, B, C, strA.chars, strB.chars, strC.chars);
+				/*String strA = integerToString(a, HEX), strB = integerToString(b, HEX), strC = integerToString(c, HEX);
+				fprintf(stderr, "Error for %d * %d = %d\nGot %s * %s = %s\n\n", A, B, C, strA.chars, strB.chars, strC.chars);
 
 				freeString(&strA);
 				freeString(&strB);
 				freeString(&strC);
+				freeInteger(&c);
 
 				for (SizeT k = 0; k < I32_SIZE; k++) {
 
@@ -103,6 +120,7 @@ bool intEqualsCustom(int32 val, CustomInteger valCust) {
 
 				goto ENDING;
 			} else {
+				freeInteger(&c);
 				//printf("SUCCESS WITH A = %d AND B = %d\n", A, B);
 			}
 		}
