@@ -3,8 +3,8 @@
 #ifndef LISTS
 #define LISTS
 
-#include "../common.h"
-#include "../memory/memfuncs.h"
+#include "../../common.h"
+#include "../../memory/memfuncs.h"
 
 #pragma pack(1)
 typedef struct List {
