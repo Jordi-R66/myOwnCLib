@@ -502,6 +502,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
+// WIP
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 	CustomInteger result;
 
@@ -527,24 +528,16 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 
 		result = allocInteger(a.size + b.size + 1);
 
-		uint8 A_BYTE = 0, B_BYTE = 0, CARRY = 0;
-		uint16 TEMP = 0;
+		CustomInteger	*multiplier = a.size < b.size ? &a: &b,
+						*multipliee = a.size < b.size ? &b: &a;
 
-		for (SizeT i = 0; i < a.size; i++) {
-			A_BYTE = getByteFromInteger(a, i);
+		List intermediate;
+		CustomInteger intermediateInt = allocInteger(multipliee->size + 1);
 
-			result.value[i] = 0;
+		uint8 A, B;
 
-			for (SizeT j = 0; j < b.size; j++) {
-				B_BYTE = getByteFromInteger(b, j);
+		for (SizeT i = 0; i < multiplier->size; i++) {
 
-				TEMP = A_BYTE * B_BYTE + CARRY;
-				CARRY = TEMP >> 8;
-
-				uint8 VAL = (TEMP << 8) >> 8;
-
-				result.value[i] += VAL;
-			}
 		}
 	}
 
