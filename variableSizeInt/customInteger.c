@@ -507,7 +507,6 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-// WIP
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 	CustomInteger result;
 
@@ -518,33 +517,63 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 		result = Zero;
 	} else if (compareAbs(a, One) == EQUALS) {
 		result = copyIntegerToNew(b);
-
-		if (a.isNegative) {
-			result.isNegative = !result.isNegative;
-		}
 	} else if (compareAbs(b, One) == EQUALS) {
 		result = copyIntegerToNew(a);
-
-		if (b.isNegative) {
-			result.isNegative = !result.isNegative;
-		}
 	} else {
 		freeInteger(&Zero);
+		freeInteger(&One);
 
 		result = allocInteger(a.size + b.size + 1);
 
 		CustomInteger	*multiplier = a.size < b.size ? &a: &b,
 						*multipliee = a.size < b.size ? &b: &a;
 
-		List intermediate;
-		CustomInteger intermediateInt = allocInteger(multipliee->size + 1);
+		CustomInteger carry, prod, sum, temp;
 
-		uint8 A, B;
+		setMemory(&carry, 0, CUSTOM_INT_SIZE);
+		setMemory(&prod, 0, CUSTOM_INT_SIZE);
+		setMemory(&sum, 0, CUSTOM_INT_SIZE);
+		setMemory(&temp, 0, CUSTOM_INT_SIZE);
+
+		uint8 A = 0, B = 0, CARRY = 0, PROD = 0;
+		uint16 TEMP = 0;
 
 		for (SizeT i = 0; i < multiplier->size; i++) {
+			A = multiplier->value[i];
 
+			if (A != 0) {
+
+				CustomInteger carry = allocInteger(multipliee->size + 1);
+				CustomInteger prod = allocInteger(carry.capacity);
+
+				for (SizeT j = 0; j < multipliee->size; j++) {
+					B = multipliee->value[j];
+
+					TEMP = (uint16)A * (uint16)B;
+					PROD = (uint8)(TEMP & 0xFF);
+					CARRY = (uint8)(TEMP >> 8);
+
+					prod.value[j] = PROD;
+					carry.value[j+1] = CARRY;
+
+					prod.size++;
+					carry.size = prod.size + 1;
+				}
+
+				sum = addInteger(carry, prod);
+				BitshiftPtr(&sum, i * 8, LEFT, true);
+				freeInteger(&carry);
+				freeInteger(&prod);
+
+				temp = addInteger(result, sum);
+				copyInteger(&temp, &result);
+				freeInteger(&sum);
+				freeInteger(&temp);
+			}
 		}
 	}
+
+	result.isNegative = a.isNegative ^ b.isNegative;
 
 	return result;
 }
