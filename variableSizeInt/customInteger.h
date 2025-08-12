@@ -1,10 +1,12 @@
 #pragma once
 
+#include "../common.h"
 #include "../memory/memfuncs.h"
 #include "../targetSpecific/types.h"
 #include "../bits/bits.h"
 #include "../bools/bool.h"
 #include "../strings/customStrings.h"
+#include "../collections/lists/list.h"
 
 #ifndef CUSTOM_INT
 #define CUSTOM_INT
