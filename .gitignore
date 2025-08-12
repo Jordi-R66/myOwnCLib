@@ -54,9 +54,4 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-*.sh
-
-# Test files
-test*
-
 *.py

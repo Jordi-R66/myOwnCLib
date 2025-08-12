@@ -1,0 +1,1 @@
+gcc -static -O0 -g testInt.c collections/lists/list.c strings/customStrings.c variableSizeInt/customInteger.c memory/memfuncs.c endianness/endianness.c
