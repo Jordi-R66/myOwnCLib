@@ -562,7 +562,67 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-CustomInteger divideInteger(CustomInteger a, CustomInteger b);
+CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
+	CustomInteger cmp, var, temp, result;
+
+	bool BisNeg = b.isNegative;
+
+	CustomInteger Zero = allocIntegerFromValue(0, false, true);
+	CustomInteger One = allocIntegerFromValue(1, false, true);
+
+	if (isZero(a) && isZero(b)) {
+		freeInteger(&Zero);
+		freeInteger(&One);
+
+		fprintf(stderr, "Math error: you tried to compute 0 / 0, which is undefined\n");
+		exit(EXIT_FAILURE);
+	} else if (isZero(b)) {
+		freeInteger(&Zero);
+		freeInteger(&One);
+
+		fprintf(stderr, "Math error: you tried to divide by 0, which is undefined\n");
+		exit(EXIT_FAILURE);
+	} else if (isZero(a) || (compareAbs(b, a) == GREATER)) {
+		result = Zero;
+		freeInteger(&One);
+	} else if (compareAbs(a, b) == EQUALS) {
+		result = One;
+		freeInteger(&Zero);
+	} else {
+		freeInteger(&Zero);
+
+		var = allocIntegerFromValue(1, false, false);
+
+		b.isNegative = false;
+
+		while (true) {
+			freeInteger(&cmp);
+
+			cmp = multiplyInteger(var, b);
+			temp = addInteger(var, One);
+			freeInteger(&var);
+			copyInteger(&temp, &var);
+			freeInteger(&temp);
+
+			if (compareAbs(cmp, a) == GREATER) {
+				break;
+			}
+		}
+
+		result = copyIntegerToNew(var);
+		freeInteger(&var);
+		freeInteger(&cmp);
+
+		b.isNegative = BisNeg;
+
+		freeInteger(&One);
+	}
+
+	result.isNegative = a.isNegative ^ b.isNegative;
+
+	return result;
+}
+
 CustomInteger modInteger(CustomInteger a, CustomInteger b);
 
 CustomInteger powInteger(CustomInteger a, CustomInteger exp);
