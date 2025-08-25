@@ -18,7 +18,7 @@
 
 typedef VALUE_TYPE value_t;
 
-typedef enum {
+typedef enum ValTypes {
 	S_DISCRETE = 0,
 	U_DISCRETE = 1,
 	REAL = 2
