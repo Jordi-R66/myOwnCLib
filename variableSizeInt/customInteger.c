@@ -49,8 +49,7 @@ void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest) {
 
 void reallocToFitInteger(CustomIntegerPtr integer) {
 	if (integer->capacity <= 1) {
-		fprintf(stderr, "Can't reduce the size of your integer\n");
-		exit(EXIT_FAILURE);
+		return;
 	}
 
 	SizeT newSize = integer->size;
