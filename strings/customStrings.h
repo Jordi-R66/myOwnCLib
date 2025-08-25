@@ -9,7 +9,7 @@
 
 #pragma pack(1)
 
-typedef struct {
+typedef struct String {
 	string chars;
 	SizeT capacity;
 	SizeT length;

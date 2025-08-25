@@ -7,12 +7,12 @@
 
 	#pragma pack(1)
 
-	typedef struct {
+	typedef struct ValueField {
 		SizeT size;
 		ptr value;
 	} ValueField;
 
-	typedef enum {
+	typedef enum LL_Types {
 		FORWARD = 0,
 		BACKWARDS = 1,
 		DOUBLE = 2
