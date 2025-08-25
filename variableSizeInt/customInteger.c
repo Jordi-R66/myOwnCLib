@@ -41,6 +41,13 @@ CustomInteger copyIntegerToNew(CustomInteger original) {
 	return output;
 }
 
+void printInteger(CustomInteger integer, Base base) {
+	String repr = integerToString(integer, base);
+
+	printf("%s\n", repr.chars);
+	freeString(&repr);
+}
+
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest) {
 	freeInteger(dest);
 
