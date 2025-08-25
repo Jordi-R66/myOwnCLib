@@ -16,12 +16,12 @@
 
 #pragma pack(1)
 
-typedef enum {
+typedef enum ShiftDirection {
 	LEFT = 0,
 	RIGHT = 1
 } ShiftDirection;
 
-typedef enum {
+typedef enum Base {
 	BIN = 2,
 	HEX = 16
 } Base;
