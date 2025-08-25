@@ -3,7 +3,7 @@
 
 #include "variableSizeInt/customInteger.h"
 
-#define MIN_TEST_VAL -1024
+#define MIN_TEST_VAL 0
 #define MAX_TEST_VAL 1024
 #define TEST_VAL_STEP 1
 
@@ -49,103 +49,13 @@ bool intEqualsCustom(int32 val, CustomInteger valCust) {
 	return absEq && (valNeg == valCust.isNegative);
 }
 
-/*int main() {
-	int32* vals = generateTestVals();
-	CustomInteger* valsCust = calloc(N_TESTS_VALS, CUSTOM_INT_SIZE);
-
-	for (SizeT i = 0; i < N_TESTS_VALS; i++) {
-		CustomInteger custInt;
-		int32 val = vals[i];
-		bool neg;
-
-		if (val < 0) {
-			val *= -1;
-			neg = true;
-		} else {
-			neg = false;
-		}
-
-		custInt = allocIntegerFromValue(val, neg, true);
-
-		valsCust[i] = custInt;
-	}
-
-	int32 A, B, C;
-	uint32 A_, B_, C_;
-	char signeA, signeB, signeC;
-	char plus = '+', moins = '-';
-
-	for (SizeT i = 0; i < N_TESTS_VALS; i++) {
-		CustomInteger a = valsCust[i];
-
-		A = vals[i];
-		A_ = (uint32)(A < 0 ? A * -1 : A);
-		signeA = A < 0 ? moins: plus;
-
-		for (SizeT j = 0; j < N_TESTS_VALS; j++) {
-			B = vals[j];
-			C = A * B;
-
-			B_ = (uint32)(B < 0 ? B * -1 : B);
-			signeB = B < 0 ? moins: plus;
-			C_ = (uint32)(C < 0 ? C * -1 : C);
-			signeC = C < 0 ? moins: plus;
-
-			CustomInteger b = valsCust[j];
-			CustomInteger c = multiplyInteger(a, b);
-
-			String strA = integerToString(a, HEX), strB = integerToString(b, HEX), strC = integerToString(c, HEX);
-			printf("%c%X * %c%X = %c%X\n%s * %s = %s\n\n", signeA, A_, signeB, B_, signeC, C_, strA.chars, strB.chars, strC.chars);
-
-			freeString(&strA);
-			freeString(&strB);
-			freeString(&strC);
-
-			if (!intEqualsCustom(C, c)) {
-				/*String strA = integerToString(a, HEX), strB = integerToString(b, HEX), strC = integerToString(c, HEX);
-				fprintf(stderr, "Error for %d * %d = %d\nGot %s * %s = %s\n\n", A, B, C, strA.chars, strB.chars, strC.chars);
-
-				freeString(&strA);
-				freeString(&strB);
-				freeString(&strC);
-				freeInteger(&c);
-
-				for (SizeT k = 0; k < I32_SIZE; k++) {
-
-					uint8 byteSub = ((uint8*)&C)[k];
-					uint8 byteCust = c.value[k];
-
-					printf("%X\t%X | %c\n", byteSub, byteCust, byteSub == byteCust ? 'Y' : 'N');
-				}
-
-				goto ENDING;
-			} else {
-				freeInteger(&c);
-				//printf("SUCCESS WITH A = %d AND B = %d\n", A, B);
-			}
-		}
-	}
-
-ENDING:
-	printf("THE END\n");
-
-	for (SizeT i = 0; i < N_TESTS_VALS; i++) {
-		freeInteger(&valsCust[i]);
-	}
-
-	free(valsCust);
-	free(vals);
-
-	return 0;
-}*/
-
 int main(void) {
 	CustomInteger a, b, c;
 
-	a = allocIntegerFromValue(0xCAFE, true, true);
-	b = allocIntegerFromValue(0xCB, false, true);
+	a = allocIntegerFromValue(343, false, true);
+	b = allocIntegerFromValue(20, false, true);
 
-	c = multiplyInteger(a, b);
+	c = divideInteger(a, b);
 
 	String A, B, C;
 
@@ -157,7 +67,7 @@ int main(void) {
 	freeInteger(&b);
 	freeInteger(&c);
 
-	printf("%s * %s = %s\n", A.chars, B.chars, C.chars);
+	printf("%s / %s = %s\n", A.chars, B.chars, C.chars);
 
 	freeString(&A);
 	freeString(&B);
