@@ -569,7 +569,7 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
-	CustomInteger cmp, var, temp, result;
+	CustomInteger compteur, temp, temp2, result;
 
 	bool BisNeg = b.isNegative;
 
@@ -597,27 +597,25 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 	} else {
 		freeInteger(&Zero);
 
-		var = allocIntegerFromValue(1, false, false);
+		compteur = allocIntegerFromValue(0, false, false);
+		temp = copyIntegerToNew(a);
 
+		temp.isNegative = false;
 		b.isNegative = false;
 
-		while (true) {
-			freeInteger(&cmp);
+		while (compareAbs(temp, b) == GREATER || compareAbs(temp, b) == EQUALS) {
+			temp2 = subtractInteger(temp, b);
+			copyInteger(&temp2, &temp);
+			freeInteger(&temp2);
 
-			cmp = multiplyInteger(var, b);
-			temp = addInteger(var, One);
-			freeInteger(&var);
-			copyInteger(&temp, &var);
-			freeInteger(&temp);
-
-			if (compareAbs(cmp, a) == GREATER) {
-				break;
-			}
+			temp2 = addInteger(compteur, One);
+			copyInteger(&temp2, &compteur);
+			freeInteger(&temp2);
 		}
 
-		result = copyIntegerToNew(var);
-		freeInteger(&var);
-		freeInteger(&cmp);
+		result = copyIntegerToNew(compteur);
+		freeInteger(&temp);
+		freeInteger(&compteur);
 
 		b.isNegative = BisNeg;
 
@@ -625,6 +623,7 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 	}
 
 	result.isNegative = a.isNegative ^ b.isNegative;
+	reallocToFitInteger(&result);
 
 	return result;
 }
