@@ -123,10 +123,11 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 	value_t* row = (value_t*)calloc(matA->cols, sizeof(value_t));
 
 	for (SizeT i = 0; i < matDest->rows; i++) {
+		getMatrixRow(matA, i, row);
+
 		for (SizeT j = 0; j < matDest->cols; j++) {
 			value_t newValue = 0.0;
 
-			getMatrixRow(matA, i, row);
 			getMatrixColumn(matB, j, col);
 
 			for (SizeT k = 0; k <= matB->cols; k++) {
