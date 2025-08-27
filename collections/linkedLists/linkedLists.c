@@ -8,9 +8,6 @@
 
 #include "../memory/memfuncs.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef DECLARE_FORWARD
 	void addForwardNode(ForwardLinkedList* list, ValueField value) {
 		ForwardNode* node = list;
