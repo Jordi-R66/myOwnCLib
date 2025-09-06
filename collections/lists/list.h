@@ -45,4 +45,14 @@ void copyList(List* listDest, List* listSrc);
  */
 void sortList(List* list, ComparisonFunc compFunc);
 void reverseList(List* list);
+
+/**
+ * @brief Returns a slice of the given list of (end - start + 1) elements
+ * 
+ * @param list 
+ * @param start 
+ * @param end 
+ * @return List 
+ */
+List sliceList(List* list, SizeT start, SizeT end);
 #endif

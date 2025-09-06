@@ -247,3 +247,21 @@ void reverseList(List* list) {
 		swapListElements(list, i, j);
 	}
 }
+
+List sliceList(List* list, SizeT start, SizeT end) {
+	List output;
+
+	if ((start >= end) || (start >= list->capacity) || (end >= list->capacity)) {
+		return;
+	}
+
+	SizeT capacity = end - start + 1;
+
+	initializeList(&output, capacity, list->elementSize);
+
+	for (SizeT i = 0; i < capacity; i++) {
+		replaceElement(&output, i, getElement(list, start + i));
+	}
+
+	return output;
+}
