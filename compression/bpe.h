@@ -27,7 +27,7 @@ typedef struct {
 
 #pragma pack()
 
-List findUnusedBytes(MemBlock memBlock);
-List generateFreqList(MemBlock memblock);
+MemBlock findUnusedBytes(MemBlock memBlock);
+MemBlock generateFreqList(MemBlock memblock);
 
 #endif
