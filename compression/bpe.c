@@ -2,6 +2,8 @@
 #include "../memory/memfuncs.h"
 #include "../bools/bool.h"
 
+const MemBlock NULL_MEMBLOCK = {0, NULL};
+
 MemBlock findUnusedBytes(MemBlock memBlock) {
 	MemBlock unused_bytes = {256, NULL};
 
@@ -18,7 +20,7 @@ MemBlock findUnusedBytes(MemBlock memBlock) {
 			unused_bytes.size--;
 
 			if (unused_bytes.size == 0) {
-				return (MemBlock){.size = 0, .addr = NULL};
+				return NULL_MEMBLOCK;
 			}
 		}
 	}
