@@ -2,7 +2,21 @@
 #include "../memory/memfuncs.h"
 #include "../bools/bool.h"
 
+#include "../collections/lists/list.h"
+
 const MemBlock NULL_MEMBLOCK = {0, NULL};
+
+Comparison CompareFreqs(ptr freqA, ptr freqB, SizeT unused_var) {
+	BPFreq *A = freqA, *B = freqB;
+
+	if (A->freq > B->freq) {
+		return GREATER;
+	} else if (A->freq < B->freq) {
+		return LESS;
+	} else {
+		return EQUALS;
+	}
+}
 
 MemBlock findUnusedBytes(MemBlock memBlock) {
 	MemBlock unused_bytes = {256, NULL};
