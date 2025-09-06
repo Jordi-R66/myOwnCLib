@@ -51,3 +51,59 @@ MemBlock findUnusedBytes(MemBlock memBlock) {
 
 	return unused_bytes;
 }
+
+MemBlock generateFreqList(MemBlock memblock, uint16 maxPossibilities) {
+	MemBlock freqList = NULL_MEMBLOCK;
+
+	freqList.addr = calloc(U16_MAX_VAL + 1, BYTEPAIR_FREQ_SIZE);
+
+	BPFreq* freqs = (BPFreq*)freqList.addr;
+
+	uint32 fastLookup[U16_MAX_VAL + 1];
+	setMemory(fastLookup, 0, I32_SIZE * (U16_MAX_VAL + 1));
+
+	uint32 pairsFound = 0;
+
+	BytePair* dataBytePair = (BytePair*)memblock.addr;
+	uint8* dataByte = (BytePair*)memblock.addr;
+
+	SizeT SizeBP = memblock.size / 2;
+
+	for (SizeT i = 0; i < SizeBP; i++) {
+		BytePair BP = dataBytePair[i];
+
+		uint32 index = fastLookup[BP];
+		bool known = index != 0;
+
+		if (known) {
+			freqs[index].freq++;
+		} else {
+			freqs[pairsFound] = (BPFreq){BP, 1};
+			fastLookup[BP] = pairsFound;
+			pairsFound++;
+		}
+	}
+
+	List temp;
+
+	temp.capacity = U16_MAX_VAL + 1;
+	temp.elementSize = BYTEPAIR_FREQ_SIZE;
+	temp.n_elements = pairsFound;
+	temp.fragmented = false;
+	temp.initialized = true;
+	temp.elements = (ptr)freqList.addr;
+
+	if (pairsFound < maxPossibilities) {
+		maxPossibilities = pairsFound;
+	}
+
+	shrinkToFit(&temp);
+	sortList(&temp, CompareFreqs);
+	List sliced = sliceList(&temp, 0, maxPossibilities);
+
+	freeList(&temp);
+	freqList.addr = sliced.elements;
+	freqList.size = maxPossibilities;
+
+	return freqList;
+}
