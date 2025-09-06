@@ -21,6 +21,10 @@ typedef struct {
 	uint8 replacement;
 } BPReplacement;
 
+#define BYTEPAIR_SIZE sizeof(BytePair)
+#define BYTEPAIR_FREQ_SIZE sizeof(BPFreq)
+#define BYTEPAIR_REPLACEMENT_SIZE sizeof(BPReplacement)
+
 #pragma pack()
 
 List findUnusedBytes(MemBlock memBlock);

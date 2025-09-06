@@ -10,7 +10,7 @@ typedef struct {
 	ptr addr;
 } MemBlock;
 
-#define MEMBLOCK_SIZE sizeof(MemBlock);
+#define MEMBLOCK_SIZE sizeof(MemBlock)
 
 #pragma pack()
 
