@@ -7,7 +7,11 @@
 const MemBlock NULL_MEMBLOCK = {0, NULL};
 
 Comparison CompareFreqs(ptr freqA, ptr freqB, SizeT unused_var) {
-	BPFreq *A = freqA, *B = freqB;
+	BPFreq *A = (BPFreq*)freqA, *B = (BPFreq*)freqB;
+
+	if (A->pair == B->pair) {
+		return UNDEF;
+	}
 
 	if (A->freq > B->freq) {
 		return GREATER;
