@@ -25,6 +25,12 @@ typedef struct List {
 
 #pragma endregion
 
+#pragma region public variables
+
+extern SizeT foundAtPosition;
+
+#pragma endregion
+
 #pragma region LIST_FLAGS_GETTER
 bool isListFragmented(ListPtr list); //(((ListPtr)(ListPtr)->flags & LIST_FRAGMENTED) == LIST_FRAGMENTED)
 bool isListInitialised(ListPtr list); //(((ListPtr)(ListPtr)->flags & LIST_INITIALISED) == LIST_INITIALISED)
@@ -44,7 +50,7 @@ void freeList(ListPtr list);
 void resizeList(ListPtr list, SizeT newCapacity);
 
 void addElement(ListPtr list, ptr newElement);
-void removeElement(ListPtr list, SizeT index, bool shiftElements);
+void removeElement(ListPtr list, SizeT index);
 ptr getElement(ListPtr list, SizeT index);
 void replaceElement(ListPtr list, SizeT index, ptr newElement);
 bool contains(ListPtr list, ptr refElement);

@@ -1,5 +1,7 @@
 #include "list.h"
 
+SizeT foundAtPosition = 0;
+
 const List NULL_LIST = {
 	.capacity = 0,
 	.n_elements = 0,
@@ -125,38 +127,31 @@ void addElement(ListPtr list, ptr newElement) {
 	list->n_elements++;
 }
 
-void removeElement(ListPtr list, SizeT index, bool shiftElements) {
+void removeElement(ListPtr list, SizeT index) {
 	if (index >= list->n_elements) {
 		fprintf(stderr, "Can't remove an element that is not in a list\n");
 		exit(EXIT_FAILURE);
 	}
 
-	SizeT nBytes = index * list->elementSize;
+	ptr indexPtr = getElement(list, index);
+	ptr jPtr = getElement(list, index + 1);
 
-	setMemory((ptr)(list->elements + nBytes), 0, list->elementSize);
+	SizeT nBytes = (list->n_elements - (index + 1)) * list->elementSize;
 
-	if (shiftElements) {
-		SizeT i = index;
-		SizeT j = index + 1;
+	setMemory(indexPtr, 0, list->elementSize);
 
-		SizeT nBytesI = i * list->elementSize;
-		SizeT nBytesJ = j * list->elementSize;
-
-		SizeT bytesToCopy = (list->n_elements - j) * list->elementSize;
-
-		memmove((int8*)list->elements + nBytesI, (int8*)list->elements + nBytesJ, bytesToCopy);
-
-		list->n_elements--;
-	} else {
-		listFragmented(list, true);
+	if (nBytes > 0) {
+		memcpy(indexPtr, jPtr, nBytes);
 	}
+
+	list->n_elements--;
 }
 
 /*
 	Returns pointer to element in list as `ptr`
 */
 ptr getElement(ListPtr list, SizeT index) {
-	if ((index >= list->capacity) || (index >= list->n_elements)) {
+	if (index >= list->capacity) {
 		return NULL;
 	}
 
@@ -169,10 +164,10 @@ void replaceElement(ListPtr list, SizeT index, ptr newElement) {
 		exit(EXIT_FAILURE);
 	}
 
-	SizeT nBytes = index * list->elementSize;
+	ptr indexPtr = getElement(list, index);
 
-	removeElement(list, index, false);
-	copyMemory((ptr)(list->elements + nBytes), newElement, list->elementSize);
+	setMemory(indexPtr, 0, list->elementSize);
+	copyMemory(indexPtr, newElement, list->elementSize);
 
 	listFragmented(list, false);
 }
@@ -180,6 +175,7 @@ void replaceElement(ListPtr list, SizeT index, ptr newElement) {
 bool contains(ListPtr list, ptr refElement) {
 	for (SizeT i = 0; i < list->n_elements; i++) {
 		if (equalMemory(refElement, getElement(list, i), list->elementSize)) {
+			foundAtPosition = i;
 			return true;
 		}
 	}
@@ -205,11 +201,6 @@ void swapListElements(ListPtr list, SizeT i, SizeT j) {
 }
 
 SizeT shrinkToFit(ListPtr list) {
-	if (isListFragmented(list)) {
-		fprintf(stderr, "Can't shrink a list if it is fragmented\n");
-		exit(EXIT_FAILURE);
-	}
-
 	resizeList(list, 0);
 
 	return list->capacity;
@@ -297,8 +288,12 @@ void reverseList(ListPtr list) {
 List sliceList(ListPtr list, SizeT start, SizeT end) {
 	List output = NULL_LIST;
 
-	if ((start >= end) || (start >= list->capacity) || (end >= list->capacity)) {
+	if ((start >= end) || (start >= list->n_elements)) {
 		return output;
+	}
+
+	if (end >= list->n_elements) {
+		return sliceList(list, start, list->n_elements-1);
 	}
 
 	SizeT capacity = end - start + 1;
