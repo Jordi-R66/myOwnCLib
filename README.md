@@ -14,7 +14,7 @@ Every path written here is relative to the repository's root
 Anything that is not mentioned here either
 
 1. Uses no C code, only definitions or macros
-2. Has been forgotten
+2. Has been forgotten, in which case open an issue
 
 If it doesn't fall under the second case, then simply include the header in your code and your compiler will do the remaining part of the job
 
@@ -107,3 +107,12 @@ memory/memfuncs.c
 endianness/endianness.c
 ```
 
+### Compression
+
+#### BPE (Byte-Pair Encoding)
+
+```txt
+compression/bpe.c
+collections/lists/lists.c
+memory/memfuncs.c
+```
