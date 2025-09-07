@@ -11,28 +11,35 @@ typedef uint16 BytePair;
 
 #pragma pack(1)
 
-typedef struct {
+typedef struct BPFreq {
 	BytePair pair;
-	uint16 freq;
+	SizeT freq;
 } BPFreq;
 
-typedef struct {
+typedef struct BPReplacement {
 	BytePair pair;
-	uint8 replacement;
+	Byte replacement;
 } BPReplacement;
+
+typedef struct Encoded {
+	MemBlock Replacements; // A memory block filled with BPReplacement objects
+	MemBlock encodedData; // The actual data
+} Encoded;
 
 #define BYTEPAIR_SIZE sizeof(BytePair)
 #define BYTEPAIR_FREQ_SIZE sizeof(BPFreq)
 #define BYTEPAIR_REPLACEMENT_SIZE sizeof(BPReplacement)
 
+#define ENCODED_SIZE sizeof(Encoded)
+
 #pragma pack()
 
-MemBlock findUnusedBytes(MemBlock memBlock);
-MemBlock generateFreqList(MemBlock memblock, uint16 maxPossibilities);
+MemBlock findUnusedBytes(MemBlock rawBlock);
+MemBlock generateFreqList(MemBlock rawBlock, SizeT maxPossibilities);
 
 MemBlock mapBytePairs(MemBlock bytePairs, MemBlock availableBytes);
 
-MemBlock encodeBPE(MemBlock rawBytes);
-MemBlock decodeBPE(MemBlock encodedBytes, MemBlock BPmap);
+Encoded encodeBPE(MemBlock rawBytes);
+MemBlock decodeBPE(Encoded encodedData);
 
 #endif
