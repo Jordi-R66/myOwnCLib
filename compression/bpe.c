@@ -22,42 +22,74 @@ Comparison CompareFreqs(ptr freqA, ptr freqB, SizeT unused_var) {
 	}
 }
 
-MemBlock findUnusedBytes(MemBlock memBlock) {
-	MemBlock unused_bytes = {256, NULL};
+MemBlock findUnusedBytes(MemBlock rawBlock) {
+	MemBlock output = NULL_MEMBLOCK;
 
-	uint8 bytes[256];
-	setMemory(&bytes, true, 256);
+	/*List unused = {0};
+	initializeList(&unused, 256, BYTE_SIZE);
 
-	uint8* addr = (uint8*)memBlock.addr;
+	for (unused.n_elements = 0; unused.n_elements < 256; unused.n_elements++) {
+		unused.elements[unused.n_elements] = (Byte)unused.n_elements;
+	}
 
-	for (SizeT i = 0; i < memBlock.size; i++) {
-		uint8 byte = addr[i];
+	printf("Cap. %zu | Items : %zu\n", unused.capacity, unused.n_elements);
 
-		if (bytes[byte]) {
-			bytes[byte] = false;
-			unused_bytes.size--;
+	fwrite(unused.elements, unused.elementSize, unused.capacity, fp);
 
-			if (unused_bytes.size == 0) {
-				return NULL_MEMBLOCK;
-			}
+	Byte* addr = (Byte*)rawBlock.addr;
+
+	for (SizeT i = 0; (output.size > 0) && (i < rawBlock.size); i++) {
+		Byte byte = addr[i];
+
+		if (contains(&unused, &byte)) {
+			removeElement(&unused, foundAtPosition);
+			output.size--;
 		}
 	}
 
-	unused_bytes.addr = calloc(unused_bytes.size, I8_SIZE);
+	printf("output.size = %zu\n", output.size);*/
 
-	if (unused_bytes.addr == NULL) {
+	SizeT count = 256;
+	static bool usedBytes[256]; // If a byte is used, usedBytes[byteVal] will be set to true
+
+	for (SizeT i = 0; i < 256; i++) {
+		usedBytes[i] = false;
+	}
+
+	for (SizeT i = 0; i < rawBlock.size; i++) {
+		Byte byteVal = rawBlock.addr[i];
+
+		if (!usedBytes[byteVal]) {
+			usedBytes[byteVal] = true;
+			count--;
+		}
+	}
+
+	if (count == 0) {
 		return NULL_MEMBLOCK;
 	}
 
-	uint16 j = 0;
+	ptr unusedBytes = (ptr)calloc(count, BYTE_SIZE);
 
-	for (uint16 i = 0; i < 256; i++) {
-		if (bytes[i]) {
-			((uint8*)unused_bytes.addr)[j++] = (uint8)i;
-		}
+	if (unusedBytes == (ptr)NULL) {
+		return NULL_MEMBLOCK;
 	}
 
-	return unused_bytes;
+	SizeT i = 0, j = 0;
+
+	while ((i < count) && (j < 256)) {
+		if (!usedBytes[j]) {
+			unusedBytes[i] = (Byte)j;
+			i++;
+		}
+
+		j++;
+	}
+
+	output.size = count;
+	output.addr = unusedBytes;
+
+	return output;
 }
 
 MemBlock generateFreqList(MemBlock memblock, uint16 maxPossibilities) {
