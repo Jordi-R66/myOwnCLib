@@ -28,6 +28,11 @@ typedef struct {
 #pragma pack()
 
 MemBlock findUnusedBytes(MemBlock memBlock);
-MemBlock generateFreqList(MemBlock memblock);
+MemBlock generateFreqList(MemBlock memblock, uint16 maxPossibilities);
+
+MemBlock mapBytePairs(MemBlock bytePairs, MemBlock availableBytes);
+
+MemBlock encodeBPE(MemBlock rawBytes);
+MemBlock decodeBPE(MemBlock encodedBytes, MemBlock BPmap);
 
 #endif

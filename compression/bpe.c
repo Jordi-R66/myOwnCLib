@@ -41,6 +41,10 @@ MemBlock findUnusedBytes(MemBlock memBlock) {
 
 	unused_bytes.addr = calloc(unused_bytes.size, I8_SIZE);
 
+	if (unused_bytes.addr == NULL) {
+		return NULL_MEMBLOCK;
+	}
+
 	uint16 j = 0;
 
 	for (uint16 i = 0; i < 256; i++) {
@@ -59,27 +63,27 @@ MemBlock generateFreqList(MemBlock memblock, uint16 maxPossibilities) {
 
 	BPFreq* freqs = (BPFreq*)freqList.addr;
 
-	uint32 fastLookup[U16_MAX_VAL + 1];
+	uint32 fastLookup[U16_MAX_VAL + 2];
 	setMemory(fastLookup, 0, I32_SIZE * (U16_MAX_VAL + 1));
 
 	uint32 pairsFound = 0;
 
 	BytePair* dataBytePair = (BytePair*)memblock.addr;
-	uint8* dataByte = (BytePair*)memblock.addr;
+	uint8* dataByte = (uint8*)memblock.addr;
 
 	SizeT SizeBP = memblock.size / 2;
 
 	for (SizeT i = 0; i < SizeBP; i++) {
 		BytePair BP = dataBytePair[i];
 
-		uint32 index = fastLookup[BP];
+		uint32 index = fastLookup[BP] - 1;
 		bool known = index != 0;
 
 		if (known) {
 			freqs[index].freq++;
 		} else {
 			freqs[pairsFound] = (BPFreq){BP, 1};
-			fastLookup[BP] = pairsFound;
+			fastLookup[BP] = pairsFound - 1;
 			pairsFound++;
 		}
 	}
@@ -88,9 +92,8 @@ MemBlock generateFreqList(MemBlock memblock, uint16 maxPossibilities) {
 
 	temp.capacity = U16_MAX_VAL + 1;
 	temp.elementSize = BYTEPAIR_FREQ_SIZE;
-	temp.n_elements = pairsFound;
-	temp.fragmented = false;
-	temp.initialized = true;
+	temp.n_elements = (SizeT)pairsFound;
+	temp.flags = LIST_INITIALISED;
 	temp.elements = (ptr)freqList.addr;
 
 	if (pairsFound < maxPossibilities) {
@@ -103,7 +106,35 @@ MemBlock generateFreqList(MemBlock memblock, uint16 maxPossibilities) {
 
 	freeList(&temp);
 	freqList.addr = sliced.elements;
-	freqList.size = maxPossibilities;
+	freqList.size = maxPossibilities * BYTEPAIR_FREQ_SIZE;
 
 	return freqList;
 }
+
+MemBlock mapBytePairs(MemBlock bytePairs, MemBlock availableBytes) {
+	MemBlock output = NULL_MEMBLOCK;
+
+	uint8* bytes = (uint8*)availableBytes.addr;
+	BPFreq* freqs = (BPFreq*)bytePairs.addr;
+
+	if ((bytePairs.size / BYTEPAIR_SIZE) == (availableBytes.size / I8_SIZE)) {
+		SizeT size = bytePairs.size / BYTEPAIR_SIZE;
+		BPReplacement* replacements = (BPReplacement*)calloc(size, BYTEPAIR_REPLACEMENT_SIZE);
+
+		output.size = size * BYTEPAIR_REPLACEMENT_SIZE;
+		output.addr = (ptr)replacements;
+
+		for (SizeT i = 0; i < size; i++) {
+			BytePair pair = freqs[i].pair;
+			uint8 byte = bytes[i];
+			BPReplacement repl = {pair, byte};
+
+			replacements[i] = repl;
+		}
+	}
+
+	return output;
+}
+
+MemBlock encodeBPE(MemBlock rawBytes);
+MemBlock decodeBPE(MemBlock encodedBytes, MemBlock BPmap);
