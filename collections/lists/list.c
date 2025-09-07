@@ -9,8 +9,8 @@ void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	list->n_elements = 0;
 	list->elementSize = elementSize;
 
-	list->fragmented = false;
-	list->initialized = true;
+	listInitialised(list, true);
+	listFragmented(list, false);
 
 	ptr tempPtr = (ptr)calloc(initSize, elementSize);
 
@@ -19,7 +19,7 @@ void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 	} else {
 		fprintf(stderr, "Couldn't properly initialize the list, `calloc()` can't find enough space!\n");
 
-		list->initialized = false;
+		listInitialised(list, false);
 		list->capacity = 0;
 		list->elementSize = 0;
 
@@ -29,7 +29,7 @@ void initializeList(List* list, SizeT initSize, SizeT elementSize) {
 }
 
 void freeList(List* list) {
-	if (!list->initialized) {
+	if (!isListInitialised(list)) {
 		fprintf(stderr, "Can't free a list that was never initialized!\n");
 		exit(EXIT_FAILURE);
 	}
@@ -41,7 +41,8 @@ void freeList(List* list) {
 	list->capacity = 0;
 	list->elementSize = 0;
 	list->n_elements = 0;
-	list->initialized = false;
+	listFragmented(list, false);
+	listInitialised(list, false);
 }
 
 void resizeList(List* list, SizeT newCapacity) {
@@ -102,7 +103,7 @@ void removeElement(List* list, SizeT index, bool shiftElements) {
 
 		list->n_elements--;
 	} else {
-		list->fragmented |= true;
+		listFragmented(list, true);
 	}
 }
 
@@ -128,7 +129,7 @@ void replaceElement(List* list, SizeT index, ptr newElement) {
 	removeElement(list, index, false);
 	copyMemory((ptr)(list->elements + nBytes), newElement, list->elementSize);
 
-	list->fragmented = false;
+	listFragmented(list, false);
 }
 
 bool contains(List* list, ptr refElement) {
@@ -159,7 +160,7 @@ void swapListElements(List* list, SizeT i, SizeT j) {
 }
 
 SizeT shrinkToFit(List* list) {
-	if (list->fragmented) {
+	if (isListFragmented(list)) {
 		fprintf(stderr, "Can't shrink a list if it is fragmented\n");
 		exit(EXIT_FAILURE);
 	}
