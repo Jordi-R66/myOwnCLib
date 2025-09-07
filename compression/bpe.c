@@ -168,5 +168,83 @@ MemBlock mapBytePairs(MemBlock bytePairs, MemBlock availableBytes) {
 	return output;
 }
 
-MemBlock encodeBPE(MemBlock rawBytes);
-MemBlock decodeBPE(MemBlock encodedBytes, MemBlock BPmap);
+Encoded encodeBPE(MemBlock rawBytes) {
+	Encoded output = {NULL_MEMBLOCK, NULL_MEMBLOCK};
+	MemBlock unusedBytesBlock = NULL_MEMBLOCK, freqsBlock = NULL_MEMBLOCK, mapBlock = NULL_MEMBLOCK, encodedData = NULL_MEMBLOCK;
+
+	unusedBytesBlock = findUnusedBytes(rawBytes);
+
+	if (compareMemory((ptr)&unusedBytesBlock, (ptr)&NULL_MEMBLOCK, MEMBLOCK_SIZE) == EQUALS) {
+		printf("unused is NULL\n");
+		return output;
+	}
+
+	freqsBlock = generateFreqList(rawBytes, unusedBytesBlock.size);
+	mapBlock = mapBytePairs(freqsBlock, unusedBytesBlock);
+
+	BPFreq* freqs = (BPFreq*)freqsBlock.addr;
+	BytePair* rawPairs = (BytePair*)rawBytes.addr;
+	SizeT rawPairsCount = rawBytes.size / 2;
+
+	BPReplacement* mappings = (BPReplacement*)mapBlock.addr;
+	SizeT mappingCount = mapBlock.size / BYTEPAIR_REPLACEMENT_SIZE;
+
+	SizeT finalSize = rawBytes.size;
+
+	for (SizeT i = 0; i < mappingCount; i++) {
+		finalSize -= freqs[i].freq;
+		printf("BytePair : 0x%X\nCount : %zu\n", freqs[i].pair, freqs[i].freq);
+	}
+
+	free(unusedBytesBlock.addr);
+	free(freqsBlock.addr);
+
+	unusedBytesBlock.size = 0;
+	unusedBytesBlock.addr = NULL;
+
+	freqsBlock.addr = NULL;
+	freqsBlock.size = 0;
+
+	encodedData.size = finalSize;
+	printf("encodedData.size = %zu\n", finalSize);
+	encodedData.addr = (ptr)calloc(finalSize, BYTE_SIZE);
+
+	SizeT k = 0;
+
+	Byte toWrite[2];
+	uint8 byteAmount;
+
+	for (SizeT i = 0; i < rawPairsCount; i++) {
+		BytePair pair = rawPairs[i];
+		Byte replacement;
+		bool replacementFound = false;
+
+		for (SizeT j = 0; (j < mappingCount) && (!replacementFound); j++) {
+			BPReplacement mapping = mappings[j];
+
+			if (mapping.pair == pair) {
+				replacement = mapping.replacement;
+				replacementFound = true;
+			}
+		}
+
+		if (replacementFound) {
+			byteAmount = 1;
+			toWrite[0] = replacement;
+		} else {
+			byteAmount = 2;
+			copyMemory((ptr)&pair, toWrite, byteAmount);
+		}
+
+		for (uint8 m = 0; m < byteAmount; m++) {
+			encodedData.addr[k++] = toWrite[m];
+		}
+
+		output.Replacements = mapBlock;
+		output.encodedData = encodedData;
+
+	}
+
+	return output;
+}
+MemBlock decodeBPE(Encoded encodedData);
