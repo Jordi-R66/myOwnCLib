@@ -149,8 +149,8 @@ MemBlock mapBytePairs(MemBlock bytePairs, MemBlock availableBytes) {
 	uint8* bytes = (uint8*)availableBytes.addr;
 	BPFreq* freqs = (BPFreq*)bytePairs.addr;
 
-	if ((bytePairs.size / BYTEPAIR_SIZE) == (availableBytes.size / I8_SIZE)) {
-		SizeT size = bytePairs.size / BYTEPAIR_SIZE;
+	if ((bytePairs.size / BYTEPAIR_FREQ_SIZE) == (availableBytes.size / I8_SIZE)) {
+		SizeT size = bytePairs.size / BYTEPAIR_FREQ_SIZE;
 		BPReplacement* replacements = (BPReplacement*)calloc(size, BYTEPAIR_REPLACEMENT_SIZE);
 
 		output.size = size * BYTEPAIR_REPLACEMENT_SIZE;
