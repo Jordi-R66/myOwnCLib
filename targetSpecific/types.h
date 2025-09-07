@@ -109,7 +109,7 @@ typedef signed short int16;
 #pragma endregion
 
 typedef char* string;
-typedef Byte* ptr;
+typedef void* ptr;
 
 
 #endif
