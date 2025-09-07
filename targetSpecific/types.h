@@ -41,6 +41,8 @@ typedef signed short int16;
 	#endif
 #pragma endregion
 
+#define BYTE_SIZE sizeof(Byte)
+
 #define I8_SIZE sizeof(uint8)
 #define I16_SIZE sizeof(uint16)
 #define I32_SIZE sizeof(uint32)
