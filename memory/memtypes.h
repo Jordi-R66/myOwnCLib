@@ -5,9 +5,10 @@
 #ifndef MEMTYPES
 
 #pragma pack(1)
-typedef struct {
-	SizeT size;
-	ptr addr;
+
+typedef struct MemBlock {
+	SizeT size; // Size of the block in bytes
+	ptr addr; // Pointer to the stored data
 } MemBlock;
 
 typedef enum Comparison {
