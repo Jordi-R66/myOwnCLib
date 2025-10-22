@@ -3,6 +3,7 @@
 #ifndef LISTS
 #define LISTS
 
+#include "../collectionCommon.h"
 #include "../../common.h"
 #include "../../memory/memfuncs.h"
 
@@ -11,19 +12,13 @@ typedef struct List {
 	SizeT capacity; // List capacity in number of elements
 	SizeT n_elements; // Current number of elements
 	SizeT elementSize; // Size of elements in bytes
-	uint8 flags; // Refer to the LIST_FLAGS region
+	CollectionFlag flags; // Refer to the LIST_FLAGS region
 
 	ptr elements; // The actual array
 } List, *ListPtr;
 #pragma pack()
 
-#pragma region LIST_FLAGS
-
-#define NO_FLAGS			(uint8)0b00000000
-#define LIST_INITIALISED	(uint8)0b00000001
-#define LIST_FRAGMENTED		(uint8)0b00000010
-
-#pragma endregion
+#define LIST_SIZE sizeof(List)
 
 #pragma region public variables
 
@@ -32,13 +27,13 @@ extern SizeT foundAtPosition;
 #pragma endregion
 
 #pragma region LIST_FLAGS_GETTER
-bool isListFragmented(ListPtr list); //(((ListPtr)(ListPtr)->flags & LIST_FRAGMENTED) == LIST_FRAGMENTED)
-bool isListInitialised(ListPtr list); //(((ListPtr)(ListPtr)->flags & LIST_INITIALISED) == LIST_INITIALISED)
+bool isListFragmented(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLL_FRAGMENTED) == COLL_FRAGMENTED)
+bool isListInitialised(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLL_INITIALISED) == COLL_INITIALISED)
 #pragma endregion
 
 #pragma region LIST_FLAGS_SETTER
-uint8 listFragmented(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | LIST_FRAGMENTED) : ((ListPtr)(ListPtr)->flags & ~LIST_FRAGMENTED)
-uint8 listInitialised(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | LIST_INITIALISED) : ((ListPtr)(ListPtr)->flags & ~LIST_INITIALISED)
+CollectionFlag listFragmented(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLL_FRAGMENTED) : ((ListPtr)(ListPtr)->flags & ~COLL_FRAGMENTED)
+CollectionFlag listInitialised(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLL_INITIALISED) : ((ListPtr)(ListPtr)->flags & ~COLL_INITIALISED)
 #pragma endregion
 
 #define LIST_SIZE sizeof(List)

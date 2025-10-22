@@ -11,20 +11,20 @@ const List NULL_LIST = {
 };
 
 bool isListFragmented(ListPtr list) {
-	return (list->flags & LIST_FRAGMENTED) == LIST_FRAGMENTED;
+	return (list->flags & COLL_FRAGMENTED) == COLL_FRAGMENTED;
 }
 
 bool isListInitialised(ListPtr list) {
-	return (list->flags & LIST_INITIALISED) == LIST_INITIALISED;
+	return (list->flags & COLL_INITIALISED) == COLL_INITIALISED;
 }
 
-uint8 listFragmented(ListPtr list, bool val) {
-	uint8 flags = list->flags;
+CollectionFlag listFragmented(ListPtr list, bool val) {
+	CollectionFlag flags = list->flags;
 
 	if (val) {
-		flags = flags | LIST_FRAGMENTED;
+		flags = flags | COLL_FRAGMENTED;
 	} else {
-		flags = flags & ~LIST_FRAGMENTED;
+		flags = flags & ~COLL_FRAGMENTED;
 	}
 
 	list->flags = flags;
@@ -33,13 +33,13 @@ uint8 listFragmented(ListPtr list, bool val) {
 }
 
 
-uint8 listInitialised(ListPtr list, bool val) {
-	uint8 flags = list->flags;
+CollectionFlag listInitialised(ListPtr list, bool val) {
+	CollectionFlag flags = list->flags;
 
 	if (val) {
-		flags = flags | LIST_INITIALISED;
+		flags = flags | COLL_INITIALISED;
 	} else {
-		flags = flags & ~LIST_INITIALISED;
+		flags = flags & ~COLL_INITIALISED;
 	}
 
 	list->flags = flags;
