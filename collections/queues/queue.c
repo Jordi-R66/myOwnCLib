@@ -20,7 +20,7 @@ ptr dequeue(Queue* queue) {
 	ptr temp = calloc(1, queue->elementSize);
 
 	copyMemory(peek(queue), temp, queue->elementSize);
-	removeElement(asList(queue), 0, true);
+	removeElement(asList(queue), 0);
 
 	return temp;
 }
