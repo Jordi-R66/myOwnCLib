@@ -20,7 +20,7 @@ ptr pop(Stack* stack) {
 	ptr temp = calloc(1, stack->elementSize);
 
 	copyMemory(peek(stack), temp, stack->elementSize);
-	removeElement(asList(stack), stack->n_elements - 1, false);
+	removeElement(asList(stack), stack->n_elements - 1);
 
 	return temp;
 }
