@@ -3,18 +3,11 @@
 #ifndef LISTS
 #define LISTS
 
-#include "../collectionCommon.h"
-#include "../../common.h"
-#include "../../memory/memfuncs.h"
+#include "../collection.h"
 
 #pragma pack(1)
 typedef struct List {
-	SizeT capacity; // List capacity in number of elements
-	SizeT n_elements; // Current number of elements
-	SizeT elementSize; // Size of elements in bytes
-	CollectionFlag flags; // Refer to the LIST_FLAGS region
-
-	ptr elements; // The actual array
+	Collection collection;
 } List, *ListPtr;
 #pragma pack()
 
@@ -44,15 +37,15 @@ void freeList(ListPtr list);
 
 void resizeList(ListPtr list, SizeT newCapacity);
 
-void addElement(ListPtr list, ptr newElement);
-void removeElement(ListPtr list, SizeT index);
-ptr getElement(ListPtr list, SizeT index);
-void replaceElement(ListPtr list, SizeT index, ptr newElement);
-bool contains(ListPtr list, ptr refElement);
+void addListElement(ListPtr list, ptr newElement);
+void removeListElement(ListPtr list, SizeT index);
+ptr getListElement(ListPtr list, SizeT index);
+void replaceListElement(ListPtr list, SizeT index, ptr newElement);
+bool listContains(ListPtr list, ptr refElement);
 
 void swapListElements(ListPtr list, SizeT i, SizeT j);
 
-SizeT shrinkToFit(ListPtr list);
+SizeT shrinkListToFit(ListPtr list);
 void copyList(ListPtr listDest, ListPtr listSrc);
 
 /**
