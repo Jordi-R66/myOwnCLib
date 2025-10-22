@@ -20,13 +20,13 @@ extern SizeT foundAtPosition;
 #pragma endregion
 
 #pragma region LIST_FLAGS_GETTER
-bool isListFragmented(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLL_FRAGMENTED) == COLL_FRAGMENTED)
-bool isListInitialised(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLL_INITIALISED) == COLL_INITIALISED)
+bool isListFragmented(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLLECTION_FRAGMENTED) == COLLECTION_FRAGMENTED)
+bool isListInitialised(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLLECTION_INITIALISED) == COLLECTION_INITIALISED)
 #pragma endregion
 
 #pragma region LIST_FLAGS_SETTER
-CollectionFlag listFragmented(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLL_FRAGMENTED) : ((ListPtr)(ListPtr)->flags & ~COLL_FRAGMENTED)
-CollectionFlag listInitialised(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLL_INITIALISED) : ((ListPtr)(ListPtr)->flags & ~COLL_INITIALISED)
+CollectionFlag listFragmented(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLLECTION_FRAGMENTED) : ((ListPtr)(ListPtr)->flags & ~COLLECTION_FRAGMENTED)
+CollectionFlag listInitialised(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLLECTION_INITIALISED) : ((ListPtr)(ListPtr)->flags & ~COLLECTION_INITIALISED)
 #pragma endregion
 
 #define LIST_SIZE sizeof(List)

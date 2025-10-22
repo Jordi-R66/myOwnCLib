@@ -30,13 +30,13 @@ extern const Collection NULL_COLLECTION;
 #define COLLECTION_SIZE sizeof(Collection)
 
 #pragma region COLLECTION_FLAGS_GETTER
-bool isCollectionFragmented(CollectionPtr collection); //(((CollectionPtr)(CollectionPtr)->flags & COLL_FRAGMENTED) == COLL_FRAGMENTED)
-bool isCollectionInitialised(CollectionPtr collection); //(((CollectionPtr)(CollectionPtr)->flags & COLL_INITIALISED) == COLL_INITIALISED)
+bool isCollectionFragmented(CollectionPtr collection); //(((CollectionPtr)(CollectionPtr)->flags & COLLECTION_FRAGMENTED) == COLLECTION_FRAGMENTED)
+bool isCollectionInitialised(CollectionPtr collection); //(((CollectionPtr)(CollectionPtr)->flags & COLLECTION_INITIALISED) == COLLECTION_INITIALISED)
 #pragma endregion
 
 #pragma region COLLECTION_FLAGS_SETTER
-CollectionFlag collectionFragmented(CollectionPtr collection, bool val); //(CollectionPtr)(CollectionPtr)->flags = boolean ? ((CollectionPtr)(CollectionPtr)->flags | COLL_FRAGMENTED) : ((CollectionPtr)(CollectionPtr)->flags & ~COLL_FRAGMENTED)
-CollectionFlag collectionInitialised(CollectionPtr collection, bool val); //(CollectionPtr)(CollectionPtr)->flags = boolean ? ((CollectionPtr)(CollectionPtr)->flags | COLL_INITIALISED) : ((CollectionPtr)(CollectionPtr)->flags & ~COLL_INITIALISED)
+CollectionFlag collectionFragmented(CollectionPtr collection, bool val); //(CollectionPtr)(CollectionPtr)->flags = boolean ? ((CollectionPtr)(CollectionPtr)->flags | COLLECTION_FRAGMENTED) : ((CollectionPtr)(CollectionPtr)->flags & ~COLLECTION_FRAGMENTED)
+CollectionFlag collectionInitialised(CollectionPtr collection, bool val); //(CollectionPtr)(CollectionPtr)->flags = boolean ? ((CollectionPtr)(CollectionPtr)->flags | COLLECTION_INITIALISED) : ((CollectionPtr)(CollectionPtr)->flags & ~COLLECTION_INITIALISED)
 #pragma endregion
 
 void initializeCollection(CollectionPtr collection, SizeT initCapacity, SizeT elementSize);
