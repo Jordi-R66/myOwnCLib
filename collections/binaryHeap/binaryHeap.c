@@ -7,8 +7,37 @@ const BinaryHeap NULL_BINHEAP = {
 		.elementSize = 0,
 		.flags = NO_FLAGS,
 		.elements = NULL},
-	.rule = 0
+	.rule = 0,
+	.compFunc = NULL
 };
+
+bool violatesHeapIntegrity(BinHeapPtr binHeap, SizeT i, SizeT j) {
+	ptr a, b;
+	bool output = false;
+
+	a = getCollectionElement(&binHeap->collection, i);
+	b = getCollectionElement(&binHeap->collection, j);
+
+	Comparison comp = binHeap->compFunc(a, b, binHeap->collection.elementSize);
+
+	switch (binHeap->rule) {
+		case MIN_HEAP:
+			// VIOLATES INTEGRITY IF PARENT > CHILDREN
+			output = comp == GREATER;
+			break;
+
+		case MAX_HEAP:
+			// VIOLATES INTEGRITY IF PARENT < CHILDREN
+			output = comp == LESS;
+			break;
+
+		default:
+			output = true;
+			break;
+	}
+
+	return output;
+}
 
 bool isBinHeapFragmented(BinHeapPtr binHeap) {
 	return isCollectionFragmented(&binHeap->collection);

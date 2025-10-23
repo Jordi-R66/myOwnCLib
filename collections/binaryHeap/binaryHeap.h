@@ -25,7 +25,15 @@ typedef struct BinHeap {
 
 #define BINHEAP_SIZE sizeof(BinaryHeap)
 
-
+/**
+ * @brief 
+ * 
+ * @param binHeap 
+ * @param i the parent's index
+ * @param j the child's index
+ * @return true 
+ * @return false 
+ */
 bool violatesHeapIntegrity(BinHeapPtr binHeap, SizeT i, SizeT j);
 
 bool isBinHeapFragmented(BinHeapPtr binHeap);
