@@ -15,25 +15,27 @@ bool violatesHeapIntegrity(BinHeapPtr binHeap, SizeT i, SizeT j) {
 	ptr a, b;
 	bool output = false;
 
-	a = getCollectionElement(&binHeap->collection, i);
-	b = getCollectionElement(&binHeap->collection, j);
+	if ((i < binHeap->collection.n_elements) && (j < binHeap->collection.n_elements)) {
+		a = getCollectionElement(&binHeap->collection, i);
+		b = getCollectionElement(&binHeap->collection, j);
 
-	Comparison comp = binHeap->compFunc(a, b, binHeap->collection.elementSize);
+		Comparison comp = binHeap->compFunc(a, b, binHeap->collection.elementSize);
 
-	switch (binHeap->rule) {
-		case MIN_HEAP:
-			// VIOLATES INTEGRITY IF PARENT > CHILDREN
-			output = comp == GREATER;
-			break;
+		switch (binHeap->rule) {
+			case MIN_HEAP:
+				// VIOLATES INTEGRITY IF PARENT > CHILDREN
+				output = comp == GREATER;
+				break;
 
-		case MAX_HEAP:
-			// VIOLATES INTEGRITY IF PARENT < CHILDREN
-			output = comp == LESS;
-			break;
+			case MAX_HEAP:
+				// VIOLATES INTEGRITY IF PARENT < CHILDREN
+				output = comp == LESS;
+				break;
 
-		default:
-			output = true;
-			break;
+			default:
+				output = true;
+				break;
+		}
 	}
 
 	return output;
@@ -68,4 +70,12 @@ void initBinaryHeap(BinHeapPtr binHeap, SizeT initCapacity, SizeT elementSize, B
 	binHeap->rule = rule;
 }
 
-void freeBinaryHeap(BinHeapPtr binHeap);
+void freeBinaryHeap(BinHeapPtr binHeap) {
+	if (isBinHeapInitialised(binHeap)) {
+		freeCollection(&binHeap->collection);
+	}
+
+	setMemory(binHeap, 0, BINHEAP_SIZE);
+}
+
+void insert(Bin);
