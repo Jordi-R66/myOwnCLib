@@ -1,18 +1,17 @@
 #include "dict.h"
 
 void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT initCapacity) {
-	initializeList(&dict->pairs, initCapacity, sizeof(KeyValuePair_t));
+	initializeCollection(&dict->collection, initCapacity, sizeof(KeyValuePair_t));
 
 	dict->keySize = keySize;
 	dict->valSize = valSize;
 }
 
-
 void setPair(Dict* dict, ptr currentKey, KeyValuePair_t newKvp) {
-	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
-		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
+	for (SizeT i=0; i < dict->collection.n_elements; i++) {
+		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getCollectionElement(&dict->collection, i);
 
-		if (memcmp(currentKey, kvp_ptr->key, dict->keySize)) {
+		if (compareMemory(currentKey, kvp_ptr->key, dict->keySize) != EQUALS) {
 			kvp_ptr->key = newKvp.key;
 			kvp_ptr->value = newKvp.value;
 			break;
@@ -29,10 +28,10 @@ void setValue(Dict* dict, ptr key, ptr newValue) {
 ptr getValue(Dict* dict, ptr key) {
 	ptr val = NULL;
 
-	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
-		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
+	for (SizeT i=0; i < dict->collection.n_elements; i++) {
+		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getCollectionElement(&dict->collection, i);
 
-		if (memcmp(key, kvp_ptr->key, dict->keySize)) {
+		if (compareMemory(key, kvp_ptr->key, dict->keySize)) {
 			val = kvp_ptr->value;
 			break;
 		}
@@ -42,7 +41,7 @@ ptr getValue(Dict* dict, ptr key) {
 }
 
 void addPair(Dict* dict, KeyValuePair_t kvp) {
-	addElement(&dict->pairs, &kvp);
+	addCollectionElement(&dict->collection, &kvp);
 }
 
 void addEntry(Dict* dict, ptr key, ptr value) {
@@ -56,8 +55,8 @@ void addEntry(Dict* dict, ptr key, ptr value) {
 	ptr temp_val = calloc(1, dict->valSize);
 
 	// Ensuite on copie le contenu
-	memcpy(temp_key, key, dict->keySize);
-	memcpy(temp_val, value, dict->valSize);
+	copyMemory(key, temp_key, dict->keySize);
+	copyMemory(value, temp_val, dict->valSize);
 
 	kvp.key = temp_key;
 	kvp.value = temp_val;
@@ -66,23 +65,23 @@ void addEntry(Dict* dict, ptr key, ptr value) {
 }
 
 void removePair(Dict* dict, ptr key) {
-	for (SizeT i=0; i < dict->pairs.n_elements; i++) {
-		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
+	for (SizeT i=0; i < dict->collection.n_elements; i++) {
+		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->collection, i);
 
-		if (memcmp(key, kvp_ptr->key, dict->keySize)) {
+		if (compareMemory(key, kvp_ptr->key, dict->keySize) != EQUALS) {
 			free(kvp_ptr->key);
 			free(kvp_ptr->value);
-			removeElement(&dict->pairs, i, true);
+			removeCollectionElement(&dict->collection, i);
 			break;
 		}
 	}
 }
 
 void freeDict(Dict* dict, bool freeKeys, bool freeValues) {
-	for (SizeT i=0; (i < dict->pairs.n_elements) && ((freeKeys) || (freeValues)); i++) {
-		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->pairs, i);
+	for (SizeT i=0; (i < dict->collection.n_elements) && ((freeKeys) || (freeValues)); i++) {
+		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getCollectionElement(&dict->collection, i);
 		removePair(dict, kvp_ptr->key);
 	}
 
-	freeList(&dict->pairs);
+	freeCollection(&dict->collection);
 }
