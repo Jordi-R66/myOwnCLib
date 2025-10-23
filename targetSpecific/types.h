@@ -110,6 +110,6 @@ typedef signed short int16;
 
 typedef char* string;
 typedef void* ptr;
-
+typedef SizeT IndexT;
 
 #endif
