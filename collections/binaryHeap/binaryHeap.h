@@ -45,6 +45,7 @@ void initBinaryHeap(BinHeapPtr binHeap, SizeT initCapacity, SizeT elementSize, B
 void freeBinaryHeap(BinHeapPtr binHeap);
 
 void insert(BinHeapPtr binHeap, ptr newElement);
+ptr extract(BinHeapPtr binHeap);
 
 #define BIN_HEAP
 #endif
