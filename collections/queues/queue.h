@@ -10,9 +10,11 @@
 #ifndef QUEUES
 #define QUEUES
 
-#include "../lists/list.h"
+#include "../collection.h"
 
-typedef List Queue;
+typedef struct Queue {
+	Collection collection;
+} Queue, *QueuePTR;
 
 #define QUEUE_SIZE sizeof(Queue)
 

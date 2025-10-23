@@ -1,26 +1,26 @@
 #include "queue.h"
 
 void initQueue(Queue* queue, SizeT initCapacity, SizeT elementSize) {
-	initializeList(asList(queue), initCapacity, elementSize);
+	initializeCollection(&queue->collection, initCapacity, elementSize);
 }
 
 void freeQueue(Queue* queue) {
-	freeList(asList(queue));
+	freeCollection(&queue->collection);
 }
 
 void enqueue(Queue* queue, ptr newElement) {
-	addElement(asList(queue), newElement);
+	addCollectionElement(&queue->collection, newElement);
 }
 
 ptr peek(Queue* queue) {
-	return getElement(asList(queue), 0);
+	return getCollectionElement(&queue->collection, 0);
 }
 
 ptr dequeue(Queue* queue) {
-	ptr temp = calloc(1, queue->elementSize);
+	ptr temp = calloc(1, queue->collection.elementSize);
 
-	copyMemory(peek(queue), temp, queue->elementSize);
-	removeElement(asList(queue), 0);
+	copyMemory(peek(queue), temp, queue->collection.elementSize);
+	removeCollectionElement(&queue->collection, 0);
 
 	return temp;
 }
