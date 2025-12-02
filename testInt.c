@@ -50,28 +50,40 @@ bool intEqualsCustom(int32 val, CustomInteger valCust) {
 }
 
 int main(void) {
-	CustomInteger a, b, c;
+	CustomInteger a, b;
+	CustomIntegerPtr c, r;
+	EuclideanDivision euclid;
 
-	a = allocIntegerFromValue(343, false, true);
-	b = allocIntegerFromValue(20, false, true);
+	a = allocIntegerFromValue(2549, false, true);
+	b = allocIntegerFromValue(4, false, true);
 
-	c = divideInteger(a, b);
+	printf("INTEGERS INITIALIZED!\n");
 
-	String A, B, C;
+	euclid = euclideanDivInteger(a, b);
+
+	c = &euclid.quotient;
+	r = &euclid.remainder;
+
+	printf("INTEGERS DIVIDED!\n");
+
+	String A, B, C, R;
 
 	A = integerToString(a, HEX);
 	B = integerToString(b, HEX);
-	C = integerToString(c, HEX);
+	C = integerToString(*c, HEX);
+	R = integerToString(*r, HEX);
 
 	freeInteger(&a);
 	freeInteger(&b);
-	freeInteger(&c);
+	freeInteger(c);
+	freeInteger(r);
 
-	printf("%s / %s = %s\n", A.chars, B.chars, C.chars);
+	printf("%s = %s * %s + %s\n", A.chars, B.chars, C.chars, R.chars);
 
 	freeString(&A);
 	freeString(&B);
 	freeString(&C);
+	freeString(&R);
 
 	return 0;
 }

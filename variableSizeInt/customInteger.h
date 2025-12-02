@@ -10,6 +10,7 @@
 #ifndef CUSTOM_INT
 #define CUSTOM_INT
 
+#define custIntInitialized(PTR) (PTR->value == (uint8*)NULL)
 #define ADD_BIT_S(A, B, C_IN) (A ^ B ^ C_IN)
 #define ADD_BIT_C(A, B, C_IN) (A && B) || (A && C_IN) || (B && C_IN)
 
@@ -26,11 +27,15 @@ typedef enum Base {
 } Base;
 
 typedef struct customInt {
-	uint8* value;
 	SizeT size;
 	SizeT capacity;
+	uint8* value;
 	bool isNegative;
 } CustomInteger, *CustomIntegerPtr;
+
+typedef struct div {
+	CustomInteger quotient, remainder;
+} EuclideanDivision;
 
 #pragma pack()
 
@@ -85,6 +90,7 @@ void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
+EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b);
 CustomInteger divideInteger(CustomInteger a, CustomInteger b);
 CustomInteger modInteger(CustomInteger a, CustomInteger b);
 

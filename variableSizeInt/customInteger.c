@@ -108,6 +108,13 @@ void freeInteger(CustomIntegerPtr integer) {
 		return;
 	}
 
+	FILE* fp = fopen("dump.hex", "w");
+	fwrite((ptr)integer, CUSTOM_INT_SIZE, 1, fp);
+	fclose(fp);
+
+	fprintf(stderr, "%zu\t%zu\t%X\t%u\n", integer->capacity, integer->size, (uint64)(ptr)integer->value, integer->isNegative);
+	printInteger(*integer, HEX);
+
 	setMemory((ptr)integer->value, 0, integer->capacity);
 	free((ptr)integer->value);
 
@@ -414,9 +421,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
-	CustomInteger result;
-
-	CustomInteger Zero = allocIntegerFromValue(0, false, true);
+	CustomInteger result, a_temp, b_temp;
 
 	bool redirected = false;
 	bool returnedZero = false;
@@ -426,8 +431,8 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		result = addInteger(a, b);
 		redirected = true;
 	} else if (equalsInteger(a, b)) {
-		Zero.isNegative = a.isNegative;
-		result = Zero;
+		result = allocIntegerFromValue(0, false, true);
+		result.isNegative = a.isNegative;
 		redirected = true;
 		returnedZero = true;
 	} else if (isZero(a) && !redirected) {
@@ -456,11 +461,11 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	if (!redirected && (a.isNegative == b.isNegative) && (a.isNegative == false) && greaterThanInteger(a, b)) {
 		SizeT longest = a.size >= b.size ? a.size : b.size;
 
-		a = copyIntegerToNew(a);
-		b = copyIntegerToNew(b);
+		a_temp = copyIntegerToNew(a);
+		b_temp = copyIntegerToNew(b);
 
-		reallocInteger(&a, longest);
-		reallocInteger(&b, longest);
+		reallocInteger(&a_temp, longest);
+		reallocInteger(&b_temp, longest);
 
 		result = allocInteger(longest+1);
 
@@ -468,8 +473,8 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		uint8 A, B;
 
 		for (SizeT i = 0; i <= longest; i++) {
-			A = getByteFromInteger(a, i);
-			B = getByteFromInteger(b, i);
+			A = getByteFromInteger(a_temp, i);
+			B = getByteFromInteger(b_temp, i);
 
 			result.value[i] = A - B - BORROW;
 
@@ -484,14 +489,10 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 
 		reallocToFitInteger(&result);
 
-		freeInteger(&a);
-		freeInteger(&b);
+		freeInteger(&a_temp);
+		freeInteger(&b_temp);
 	} else if (!redirected) {
 		exit(EXIT_FAILURE);
-	}
-
-	if (!returnedZero) {
-		freeInteger(&Zero);
 	}
 
 	return result;
@@ -568,8 +569,11 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
-	CustomInteger compteur, temp, temp2, result;
+EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
+	CustomInteger quotient, modulo, divider;
+	CustomInteger temp_modulo, temp_quotient;
+
+	EuclideanDivision result;
 
 	bool BisNeg = b.isNegative;
 
@@ -577,58 +581,81 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 	CustomInteger One = allocIntegerFromValue(1, false, true);
 
 	if (isZero(a) && isZero(b)) {
+		freeInteger(&a);
+		freeInteger(&b);
 		freeInteger(&Zero);
 		freeInteger(&One);
 
 		fprintf(stderr, "Math error: you tried to compute 0 / 0, which is undefined\n");
 		exit(EXIT_FAILURE);
 	} else if (isZero(b)) {
+		freeInteger(&a);
+		freeInteger(&b);
 		freeInteger(&Zero);
 		freeInteger(&One);
 
 		fprintf(stderr, "Math error: you tried to divide by 0, which is undefined\n");
 		exit(EXIT_FAILURE);
 	} else if (isZero(a) || (compareAbs(b, a) == GREATER)) {
-		result = Zero;
+		quotient = Zero;
+		modulo = allocIntegerFromValue(0, false, true);;
 		freeInteger(&One);
 	} else if (compareAbs(a, b) == EQUALS) {
-		result = One;
-		freeInteger(&Zero);
+		quotient = One;
+		modulo = Zero;
 	} else {
 		freeInteger(&Zero);
+		bool compInt = true;
 
-		compteur = allocIntegerFromValue(0, false, false);
-		temp = copyIntegerToNew(a);
+		quotient = allocIntegerFromValue(0, false, false);
+		divider = copyIntegerToNew(b);
+		modulo = copyIntegerToNew(a);
 
-		temp.isNegative = false;
+		modulo.isNegative = false;
 		b.isNegative = false;
 
-		while (compareAbs(temp, b) == GREATER || compareAbs(temp, b) == EQUALS) {
-			temp2 = subtractInteger(temp, b);
-			copyInteger(&temp2, &temp);
-			freeInteger(&temp2);
+		printInteger(modulo, HEX);
+		printInteger(divider, HEX);
 
-			temp2 = addInteger(compteur, One);
-			copyInteger(&temp2, &compteur);
-			freeInteger(&temp2);
+		while (compInt = !(compareAbs(modulo, divider) == LESS)) {
+			temp_modulo = subtractInteger(modulo, divider);
+			temp_quotient = addInteger(quotient, One);
+
+			copyInteger(&temp_modulo, &modulo);
+			copyInteger(&temp_quotient, &quotient);
+
+			freeInteger(&temp_modulo);
+			freeInteger(&temp_quotient);
 		}
-
-		result = copyIntegerToNew(compteur);
-		freeInteger(&temp);
-		freeInteger(&compteur);
 
 		b.isNegative = BisNeg;
 
 		freeInteger(&One);
+		freeInteger(&divider);
 	}
 
-	result.isNegative = a.isNegative ^ b.isNegative;
-	reallocToFitInteger(&result);
+	result.quotient = quotient;
+	result.remainder = modulo;
+
+	result.quotient.isNegative = a.isNegative ^ b.isNegative;
+
+	reallocToFitInteger(&result.quotient);
+	reallocToFitInteger(&result.remainder);
 
 	return result;
 }
 
-CustomInteger modInteger(CustomInteger a, CustomInteger b);
+CustomInteger modInteger(CustomInteger a, CustomInteger b) {
+	EuclideanDivision euclid = euclideanDivInteger(a, b);
+	freeInteger(&euclid.quotient);
+	return euclid.remainder;
+}
+
+CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
+	EuclideanDivision euclid = euclideanDivInteger(a, b);
+	freeInteger(&euclid.remainder);
+	return euclid.quotient;
+}
 
 CustomInteger powInteger(CustomInteger a, CustomInteger exp);
 #pragma endregion

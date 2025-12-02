@@ -4,7 +4,7 @@
 		{
 			"label": "buildTestInt",
 			"type": "shell",
-			"command": "./compileTestBpe.sh",
+			"command": "./compileTestInt.sh",
 			"group": {
 				"kind": "build",
 				"isDefault": true
