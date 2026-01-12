@@ -569,15 +569,30 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		}
 	}
 
+	if (resultNegative) {
+		CustomInteger One = allocIntegerFromValue(1, false, true), temp;
+
+		quotient.isNegative = true;
+		remainder.isNegative = true;
+
+		temp = subtractInteger(quotient, One);
+		freeInteger(&quotient);
+		copyInteger(&temp, &quotient);
+		freeInteger(&temp);
+
+		temp = addInteger(remainder, b);
+		freeInteger(&remainder);
+		copyInteger(&temp, &remainder);
+		freeInteger(&temp);
+		freeInteger(&One);
+	}
+
 	// Restauration des signes
 	a.isNegative = origANeg;
 	b.isNegative = origBNeg;
 
 	result.quotient = quotient;
-	result.quotient.isNegative = resultNegative;
 	result.remainder = remainder;
-	// Par convention, le signe du reste est celui du dividende
-	result.remainder.isNegative = a.isNegative;
 
 	reallocToFitInteger(&result.quotient);
 	reallocToFitInteger(&result.remainder);
