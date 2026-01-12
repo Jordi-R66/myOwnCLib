@@ -33,7 +33,8 @@ typedef enum ShiftDirection {
 
 typedef enum Base {
 	BIN = 2,
-	DECI = 10,
+	OCT = 8,
+	DEC = 10,
 	HEX = 16
 } Base;
 
