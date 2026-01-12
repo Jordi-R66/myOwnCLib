@@ -18,6 +18,14 @@
 
 #pragma pack(1)
 
+#pragma region Type Definition
+struct customInt {
+	SizeT size;			// Size in bytes
+	SizeT capacity;		// Capacity in bytes
+	uint8* value;
+	bool isNegative;
+};
+
 typedef enum ShiftDirection {
 	LEFT = 0,
 	RIGHT = 1
@@ -33,6 +41,7 @@ typedef struct customInt CustomInteger, *CustomIntegerPtr;
 typedef struct div {
 	CustomInteger quotient, remainder;
 } EuclideanDivision;
+#pragma endregion
 
 #pragma pack()
 
@@ -63,8 +72,8 @@ CustomInteger BitwiseOR(CustomInteger a, CustomInteger b);
 CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b);
 CustomInteger BitwiseNOT(CustomInteger a);
 
-uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace);
-void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace);
+uint8 getBit(CustomInteger integer, SizeT bitIndex);
+void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitIndex);
 
 
 /**

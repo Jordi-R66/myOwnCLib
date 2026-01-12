@@ -4,15 +4,6 @@
 #include <stdlib.h>
 #include <strings.h>
 
-#pragma region Type Definition
-struct customInt {
-	SizeT size;			// Size in bytes
-	SizeT capacity;		// Capacity in bytes
-	uint8* value;
-	bool isNegative;
-};
-#pragma endregion
-
 #pragma region Misc Operations
 
 CustomInteger allocInteger(SizeT capacity) {
@@ -561,18 +552,21 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 	// 3. Boucle de division bit-à-bit (Division Longue)
 	SizeT totalBits = a.size * 8;
 
-	for (SizeT i = totalBits - 1; i >= 0; i--) {
+	SizeT i = totalBits;
+	while (i > 0) {
+		i--; // On décrémente au début. i passera de (totalBits-1) à 0 inclus.
+
 		// Décalage du reste : remainder = remainder << 1
 		BitshiftPtr(&remainder, 1, LEFT, true);
 
 		// On récupère le i-ème bit de 'a' et on l'injecte dans le reste
 		uint8 bit = getBit(a, i);
-		setBit(&remainder, bit, 0, 0);
+		setBit(&remainder, bit, 0);
 
 		// Si remainder >= b
 		if (compareAbs(remainder, b) != LESS) {
 			CustomInteger temp = subtractInteger(remainder, b);
-			copyInteger(&temp, &remainder); // Libère l'ancien et copie le nouveau
+			copyInteger(&temp, &remainder); 
 			freeInteger(&temp);
 
 			// On met le bit correspondant à 1 dans le quotient
