@@ -844,6 +844,10 @@ bool equalsInteger(CustomInteger a, CustomInteger b) {
 	return (compAbs == EQUALS && (a.isNegative == b.isNegative)) || (isZero(a) && isZero(b));
 }
 
+bool differentFromInteger(CustomInteger a, CustomInteger b) {
+	return !equalsInteger(a, b);
+}
+
 bool lessThanInteger(CustomInteger a, CustomInteger b) {
 	bool less = compareAbs(a, b) == LESS;
 	bool equal = compareAbs(a, b) == EQUALS;
