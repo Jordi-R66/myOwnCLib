@@ -54,36 +54,42 @@ int main(void) {
 	CustomIntegerPtr c, r;
 	EuclideanDivision euclid;
 
-	a = allocIntegerFromValue(2549, false, true);
-	b = allocIntegerFromValue(4, false, true);
+	a = allocIntegerFromValue(77, false, true);
+	b = allocIntegerFromValue(12, false, true);
 
-	printf("INTEGERS INITIALIZED!\n");
+	String A, B, Q, R;
 
-	euclid = euclideanDivInteger(a, b);
+	for (uint8 i = 0; i < 2; i++) {
+		a.isNegative = (bool)i;
+		for (uint8 j = 0; j < 2; j++) {
+			b.isNegative = (bool)j;
 
-	c = &euclid.quotient;
-	r = &euclid.remainder;
+			A = integerToString(a, DEC, false);
+			B = integerToString(b, DEC, false);
 
-	printf("INTEGERS DIVIDED!\n");
+			euclid = euclideanDivInteger(a, b);
 
-	String A, B, C, R;
+			c = &euclid.quotient;
+			r = &euclid.remainder;
 
-	A = integerToString(a, DEC);
-	B = integerToString(b, DEC);
-	C = integerToString(*c, DEC);
-	R = integerToString(*r, DEC);
+			Q = integerToString(*c, DEC, false);
+			R = integerToString(*r, DEC, false);
+
+			freeInteger(c);
+			freeInteger(r);
+
+			printf("Calcul de A / B:\n\tA=%s\n\tB=%s\n\tQ=%s\n\tR=%s\n", A.chars, B.chars, Q.chars, R.chars);
+
+			freeString(&A);
+			freeString(&B);
+			freeString(&Q);
+			freeString(&R);
+		}
+	}
+
 
 	freeInteger(&a);
 	freeInteger(&b);
-	freeInteger(c);
-	freeInteger(r);
-
-	printf("%s = %s * %s + %s\n", A.chars, B.chars, C.chars, R.chars);
-
-	freeString(&A);
-	freeString(&B);
-	freeString(&C);
-	freeString(&R);
 
 	return 0;
 }
