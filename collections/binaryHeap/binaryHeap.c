@@ -3,7 +3,7 @@
 const BinaryHeap NULL_BINHEAP = {
 	.collection = {
 		.capacity = 0,
-		.n_elements = 0,
+		.length = 0,
 		.elementSize = 0,
 		.flags = NO_FLAGS,
 		.elements = NULL},
@@ -15,7 +15,7 @@ bool violatesHeapIntegrity(BinHeapPtr binHeap, SizeT i, SizeT j) {
 	ptr a, b;
 	bool output = false;
 
-	if ((i < binHeap->collection.n_elements) && (j < binHeap->collection.n_elements) && (i == PARENT_BUBBLE(j))) {
+	if ((i < binHeap->collection.length) && (j < binHeap->collection.length) && (i == PARENT_BUBBLE(j))) {
 		a = getCollectionElement(&binHeap->collection, i);
 		b = getCollectionElement(&binHeap->collection, j);
 

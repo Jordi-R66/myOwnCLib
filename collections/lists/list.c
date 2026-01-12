@@ -2,15 +2,32 @@
 
 SizeT foundAtPosition = 0;
 
+#pragma pack(1)
+struct List {
+	Collection collection;
+};
+
+#pragma pack()
+
 const List NULL_LIST = {
 	.collection = {
 		.capacity = 0,
-		.n_elements = 0,
+		.length = 0,
 		.elementSize = 0,
 		.flags = NO_FLAGS,
 		.elements = NULL
 	}
 };
+
+#define LIST_SIZE sizeof(List)
+
+ListPtr generateNullList() {
+	ListPtr output = calloc(1, LIST_SIZE);
+
+	copyMemory(&NULL_LIST, output, LIST_SIZE);
+
+	return output;
+}
 
 bool isListFragmented(ListPtr list) {
 	return isCollectionFragmented(&list->collection);
@@ -28,8 +45,15 @@ CollectionFlag listInitialised(ListPtr list, bool val) {
 	return collectionInitialised(&list->collection, val);
 }
 
-void initializeList(ListPtr list, SizeT initSize, SizeT elementSize) {
-	initializeCollection(&list->collection, initSize, elementSize);
+ListPtr initializeList(SizeT initSize, SizeT elementSize) {
+	ListPtr output = NULL;
+
+	output = (ListPtr)calloc(1, LIST_SIZE);
+
+	if (output != NULL)
+		initializeCollection(&output->collection, initSize, elementSize);
+
+	return output;
 }
 
 void freeList(ListPtr list) {
@@ -83,23 +107,21 @@ void reverseList(ListPtr list) {
 	reverseCollection(&list->collection);
 }
 
-List sliceList(ListPtr list, SizeT start, SizeT end) {
-	List output = NULL_LIST;
+ListPtr sliceList(ListPtr list, SizeT start, SizeT end) {
+	ListPtr output = &NULL_LIST;
 
-	if ((start >= end) || (start >= list->collection.n_elements)) {
-		return output;
-	}
+	if ((start >= end) || (start >= list->collection.length)) {
+		output = &NULL_LIST;
+	} else if (end >= list->collection.length) {
+		output = sliceList(list, start, list->collection.length-1);
+	} else {
+		SizeT capacity = end - start + 1;
 
-	if (end >= list->collection.n_elements) {
-		return sliceList(list, start, list->collection.n_elements-1);
-	}
+		output = initializeList(capacity, list->collection.elementSize);
 
-	SizeT capacity = end - start + 1;
-
-	initializeList(&output, capacity, list->collection.elementSize);
-
-	for (SizeT i = 0; i < capacity; i++) {
-		replaceListElement(&output, i, getElement(list, start + i));
+		for (SizeT i = 0; i < capacity; i++) {
+			replaceListElement(&output, i, getElement(list, start + i));
+		}
 	}
 
 	return output;

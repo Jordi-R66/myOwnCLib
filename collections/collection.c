@@ -2,7 +2,7 @@
 
 const Collection NULL_COLLECTION = {
 	.capacity = 0,
-	.n_elements = 0,
+	.length = 0,
 	.elementSize = 0,
 	.flags = NO_FLAGS,
 	.elements = NULL
@@ -60,7 +60,7 @@ void initializeCollection(CollectionPtr collection, SizeT initCapacity, SizeT el
 	}
 
 	collection->capacity = initCapacity;
-	collection->n_elements = 0;
+	collection->length = 0;
 	collection->elementSize = elementSize;
 
 	collectionInitialised(collection, true);
@@ -94,14 +94,14 @@ void freeCollection(CollectionPtr collection) {
 
 	collection->capacity = 0;
 	collection->elementSize = 0;
-	collection->n_elements = 0;
+	collection->length = 0;
 	collectionFragmented(collection, false);
 	collectionInitialised(collection, false);
 }
 
 void resizeCollection(CollectionPtr collection, SizeT newCapacity) {
-	if (newCapacity < collection->n_elements) {
-		newCapacity = collection->n_elements;
+	if (newCapacity < collection->length) {
+		newCapacity = collection->length;
 	}
 
 	if (newCapacity <= 0) {
@@ -159,18 +159,18 @@ void copyCollection(CollectionPtr collectionDest, CollectionPtr collectionSrc) {
 #pragma region CRUD
 
 void addCollectionElement(CollectionPtr collection, ptr newElement) {
-	if ((collection->n_elements + 1) > collection->capacity) {
-		resizeCollection(collection, collection->n_elements + 50);
+	if ((collection->length + 1) > collection->capacity) {
+		resizeCollection(collection, collection->length + 50);
 	}
 
-	SizeT nBytes = collection->n_elements * collection->elementSize;
+	SizeT nBytes = collection->length * collection->elementSize;
 	copyMemory((ptr)(collection->elements + nBytes), newElement, collection->elementSize);
 
-	collection->n_elements++;
+	collection->length++;
 }
 
 void removeCollectionElement(CollectionPtr collection, SizeT index) {
-	if (index >= collection->n_elements) {
+	if (index >= collection->length) {
 		fprintf(stderr, "Can't remove an element that is not in a collection\n");
 		exit(EXIT_FAILURE);
 	}
@@ -178,7 +178,7 @@ void removeCollectionElement(CollectionPtr collection, SizeT index) {
 	ptr indexPtr = getElement(collection, index);
 	ptr jPtr = getElement(collection, index + 1);
 
-	SizeT nBytes = (collection->n_elements - (index + 1)) * collection->elementSize;
+	SizeT nBytes = (collection->length - (index + 1)) * collection->elementSize;
 
 	setMemory(indexPtr, 0, collection->elementSize);
 
@@ -186,7 +186,7 @@ void removeCollectionElement(CollectionPtr collection, SizeT index) {
 		memcpy(indexPtr, jPtr, nBytes);
 	}
 
-	collection->n_elements--;
+	collection->length--;
 }
 
 /*
@@ -215,7 +215,7 @@ void replaceCollectionElement(CollectionPtr collection, SizeT index, ptr newElem
 }
 
 bool collectionContains(CollectionPtr collection, ptr refElement) {
-	for (SizeT i = 0; i < collection->n_elements; i++) {
+	for (SizeT i = 0; i < collection->length; i++) {
 		if (equalMemory(refElement, getElement(collection, i), collection->elementSize)) {
 			return true;
 		}
@@ -253,7 +253,7 @@ SizeT partition(CollectionPtr collection, SizeT lo, SizeT hi, ComparisonFunc com
 }
 
 void QuickSort(CollectionPtr collection, SizeT lo, SizeT hi, ComparisonFunc compFunc) {
-	if ((lo >= hi) || (hi >= collection->n_elements)) {
+	if ((lo >= hi) || (hi >= collection->length)) {
 		return;
 	}
 
@@ -268,7 +268,7 @@ void QuickSort(CollectionPtr collection, SizeT lo, SizeT hi, ComparisonFunc comp
 }
 
 void sortCollection(CollectionPtr collection, ComparisonFunc compFunc) {
-	if (collection->n_elements < 2 || collection->capacity < 2) {
+	if (collection->length < 2 || collection->capacity < 2) {
 		return;
 	}
 
@@ -276,16 +276,16 @@ void sortCollection(CollectionPtr collection, ComparisonFunc compFunc) {
 		compFunc = compareMemory;
 	}
 
-	QuickSort(collection, 0, collection->n_elements - 1, compFunc);
+	QuickSort(collection, 0, collection->length - 1, compFunc);
 }
 
 void reverseCollection(CollectionPtr collection) {
-	if (collection->n_elements < 2 || collection->capacity < 2) {
+	if (collection->length < 2 || collection->capacity < 2) {
 		return;
 	}
 
-	for (SizeT i = 0; i < collection->n_elements/2; i++) {
-		SizeT j = collection->n_elements - i - 1;
+	for (SizeT i = 0; i < collection->length/2; i++) {
+		SizeT j = collection->length - i - 1;
 
 		swapCollectionElements(collection, i, j);
 	}

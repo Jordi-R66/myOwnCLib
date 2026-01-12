@@ -13,14 +13,14 @@ void push(StackPTR stack, ptr newElement) {
 }
 
 ptr peek(StackPTR stack) {
-	return getCollectionElement(&stack->collection, stack->collection.n_elements - 1);
+	return getCollectionElement(&stack->collection, stack->collection.length - 1);
 }
 
 ptr pop(StackPTR stack) {
 	ptr temp = calloc(1, stack->collection.elementSize);
 
 	copyMemory(peek(stack), temp, stack->collection.elementSize);
-	removeCollectionElement(&stack->collection, stack->collection.n_elements - 1);
+	removeCollectionElement(&stack->collection, stack->collection.length - 1);
 
 	return temp;
 }

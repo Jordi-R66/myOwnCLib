@@ -15,11 +15,19 @@ typedef uint8 CollectionFlag;
 #pragma endregion
 
 #pragma pack(1)
+
+typedef struct CollectionInfo {
+	SizeT capacity;
+	SizeT length;
+	SizeT elementSize;
+	CollectionFlag flags;
+} CollectionInfo;
+
 typedef struct Collection {
-	SizeT capacity; // Collection capacity in number of elements
-	SizeT n_elements; // Current number of elements
-	SizeT elementSize; // Size of elements in bytes
-	CollectionFlag flags; // Refer to the COLLECTION_FLAGS region
+	SizeT capacity;			// Collection capacity in number of elements
+	SizeT length;			// Current number of elements
+	SizeT elementSize;		// Size of elements in bytes
+	CollectionFlag flags;	// Refer to the COLLECTION_FLAGS region
 
 	ptr elements; // The actual array
 } Collection, *CollectionPtr;

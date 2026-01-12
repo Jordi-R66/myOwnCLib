@@ -10,7 +10,9 @@
 #ifndef CUSTOM_INT
 #define CUSTOM_INT
 
-#define custIntInitialized(PTR) (PTR->value == (uint8*)NULL)
+#define MAX_CUSTOM_INT_CAPACITY ((SizeT)2305843009213693951)
+
+#define custIntInitialized(PTR) (PTR->value != (uint8*)NULL)
 #define ADD_BIT_S(A, B, C_IN) (A ^ B ^ C_IN)
 #define ADD_BIT_C(A, B, C_IN) (A && B) || (A && C_IN) || (B && C_IN)
 
@@ -26,12 +28,7 @@ typedef enum Base {
 	HEX = 16
 } Base;
 
-typedef struct customInt {
-	SizeT size;
-	SizeT capacity;
-	uint8* value;
-	bool isNegative;
-} CustomInteger, *CustomIntegerPtr;
+typedef struct customInt CustomInteger, *CustomIntegerPtr;
 
 typedef struct div {
 	CustomInteger quotient, remainder;

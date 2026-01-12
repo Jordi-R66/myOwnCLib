@@ -5,13 +5,7 @@
 
 #include "../collection.h"
 
-#pragma pack(1)
-typedef struct List {
-	Collection collection;
-} List, *ListPtr;
-#pragma pack()
-
-#define LIST_SIZE sizeof(List)
+typedef struct List List, *ListPtr;
 
 #pragma region public variables
 
@@ -29,10 +23,9 @@ CollectionFlag listFragmented(ListPtr list, bool val); //(ListPtr)(ListPtr)->fla
 CollectionFlag listInitialised(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLLECTION_INITIALISED) : ((ListPtr)(ListPtr)->flags & ~COLLECTION_INITIALISED)
 #pragma endregion
 
-#define LIST_SIZE sizeof(List)
 #define asList(PTR) ((ListPtr)PTR)
 
-void initializeList(ListPtr list, SizeT initSize, SizeT elementSize);
+ListPtr initializeList(SizeT initSize, SizeT elementSize);
 void freeList(ListPtr list);
 
 void resizeList(ListPtr list, SizeT newCapacity);
@@ -65,5 +58,5 @@ void reverseList(ListPtr list);
  * @param end 
  * @return List 
  */
-List sliceList(ListPtr list, SizeT start, SizeT end);
+ListPtr sliceList(ListPtr list, SizeT start, SizeT end);
 #endif

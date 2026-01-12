@@ -4,11 +4,24 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#pragma region Type Definition
+struct customInt {
+	SizeT size;			// Size in bytes
+	SizeT capacity;		// Capacity in bytes
+	uint8* value;
+	bool isNegative;
+};
+#pragma endregion
+
 #pragma region Misc Operations
 
 CustomInteger allocInteger(SizeT capacity) {
 	if (capacity == 0) {
 		fprintf(stderr, "Undefined behaviour for 0 bit integer\n");
+		exit(EXIT_FAILURE);
+	}
+	else if (capacity > MAX_CUSTOM_INT_CAPACITY) {
+		fprintf(stderr, "The requested capacity can't be allocated\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -49,31 +62,34 @@ void printInteger(CustomInteger integer, Base base) {
 }
 
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest) {
-	freeInteger(dest);
-
-	*dest = copyIntegerToNew(*src);
-}
-
-void reallocToFitInteger(CustomIntegerPtr integer) {
-	if (integer->capacity <= 1) {
+	if (dest == src || !custIntInitialized(src)) {
 		return;
 	}
 
-	SizeT newSize = integer->size;
-	SizeT i = newSize - 1;
-	uint8* bytes = (uint8*)integer->value;
+	if (dest->capacity < src->size) {
+		setMemory(dest->value, 0, dest->capacity);
+		reallocInteger(dest, src->size);
+	}
 
-	do {
-		uint8 val = bytes[i];
+	copyMemory(src->value, dest->value, src->size);
+	dest->size = src->size;
+	dest->isNegative = src->isNegative;
+}
 
-		if ((val != 0) || (i == 0)) {
-			break;
-		} else {
-			i--;
-		}
-	} while (i >= 0);
+void reallocToFitInteger(CustomIntegerPtr integer) {
+	if (integer->size <= 1) return;
 
-	reallocInteger(integer, i + 1);
+	// On part de la fin de l'entier
+	SizeT i = integer->size;
+	while (i > 1 && integer->value[i - 1] == 0) {
+		i--;
+	}
+
+	// Si la taille réelle est inférieure à la capacité, on réduit
+	if (i < integer->capacity) {
+		reallocInteger(integer, i);
+	}
+	integer->size = i;
 }
 
 void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity) {
@@ -104,21 +120,18 @@ void setToZero(CustomIntegerPtr integer) {
 }
 
 void freeInteger(CustomIntegerPtr integer) {
-	if (integer->value == NULL) {
-		return;
-	}
+	if (integer->value == NULL) return;
 
-	FILE* fp = fopen("dump.hex", "w");
-	fwrite((ptr)integer, CUSTOM_INT_SIZE, 1, fp);
-	fclose(fp);
+	// Effacement sécurisé du contenu
+	setMemory(integer->value, 0, integer->capacity);
+	free(integer->value);
 
-	fprintf(stderr, "%zu\t%zu\t%X\t%u\n", integer->capacity, integer->size, (uint64)(ptr)integer->value, integer->isNegative);
-	printInteger(*integer, HEX);
+	// Neutralisation de la structure pour éviter les "double free"
+	integer->value = NULL;
+	integer->capacity = 0;
+	integer->size = 0;
 
-	setMemory((ptr)integer->value, 0, integer->capacity);
-	free((ptr)integer->value);
-
-	setMemory((ptr)integer, 0, CUSTOM_INT_SIZE);
+	integer = (CustomIntegerPtr)NULL;
 }
 
 String integerToString(CustomInteger integer, Base base) {
@@ -128,18 +141,18 @@ String integerToString(CustomInteger integer, Base base) {
 	string baseChars = "0123456789ABCDEF";
 
 	switch (base) {
-		case BIN:
-			byteLength = 8;
-			break;
+	case BIN:
+		byteLength = 8;
+		break;
 
-		case HEX:
-			byteLength = 2;
-			break;
+	case HEX:
+		byteLength = 2;
+		break;
 
-		default:
-			fprintf(stderr, "Unsupported base\n");
-			exit(EXIT_FAILURE);
-			break;
+	default:
+		fprintf(stderr, "Unsupported base\n");
+		exit(EXIT_FAILURE);
+		break;
 	}
 
 	SizeT strLength = integer.capacity * byteLength + 2;
@@ -270,41 +283,22 @@ CustomInteger BitwiseNOT(CustomInteger a) {
 	return result;
 }
 
-uint8 getBit(CustomInteger integer, SizeT bitPlace, SizeT bytePlace) {
-	SizeT bytes = bytePlace + BYTES_FROM_BITS(bitPlace);
-
-	SizeT bit = bitPlace % 8;
-
-	if (bytes >= integer.capacity) {
-		return 0;
-	} 
-
-	return GET_BIT(integer.value[bytes], bit+1);
+uint8 getBit(CustomInteger integer, SizeT bitIndex) {
+	SizeT byteIdx = bitIndex >> 3; // bitIndex / 8
+	if (byteIdx >= integer.size) return 0;
+	return (integer.value[byteIdx] >> (bitIndex & 7)) & 1;
 }
 
-void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitPlace, SizeT bytePlace) {
-	newVal %= 2;
+void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitIndex) {
+	SizeT byteIdx = bitIndex >> 3;
+	if (byteIdx >= integer->capacity) return;
 
-	SizeT bytes = bytePlace + BYTES_FROM_BITS(bitPlace);
-	SizeT bit = bitPlace % 8;
+	if (byteIdx >= integer->size) integer->size = byteIdx + 1;
 
-	if ((integer->capacity > bytes) && (bytes >= integer->size)) {
-		integer->size = bytes + 1;
-	} else if (bytes >= integer->capacity) {
-		return;
-	}
-
-	uint8 curVal = getBit(*integer, bit, bytes);
-
-	if (curVal ^ newVal) {
-		if (curVal == 1) {
-			integer->value[bytes] -= CTRL_VAL(bit+1);
-		} else {
-			integer->value[bytes] += CTRL_VAL(bit+1);
-		}
-	}
-
-	return;
+	if (newVal & 1)
+		integer->value[byteIdx] |= (1 << (bitIndex & 7));
+	else
+		integer->value[byteIdx] &= ~(1 << (bitIndex & 7));
 }
 
 CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
@@ -314,8 +308,8 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 	if (shift == 0) {
 		return copyIntegerToNew(integer);
-	} else if (direction == LEFT || direction == RIGHT) {
-
+	}
+	else if (direction == LEFT || direction == RIGHT) {
 		SizeT deltaSize = shift / 8;
 		SizeT resultCapacity = integer.capacity;
 
@@ -342,12 +336,13 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 				uint8 bitVal = GET_BIT(integer.value[j], k);
 
-				SizeT destBit = direction == LEFT ? currentBit + shift: currentBit - shift;
+				SizeT destBit = direction == LEFT ? currentBit + shift : currentBit - shift;
 
-				setBit(&result, bitVal, destBit, 0);
+				setBit(&result, bitVal, destBit);
 			}
 		}
-	} else {
+	}
+	else {
 		exit(EXIT_FAILURE);
 	}
 
@@ -356,7 +351,8 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 		if (result.value[j] == 0) {
 			result.size = i;
-		} else {
+		}
+		else {
 			break;
 		}
 	}
@@ -380,7 +376,8 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 		b.isNegative = false;
 
 		return subtractInteger(a, b);
-	} else if ((a.isNegative != b.isNegative) && a.isNegative) {
+	}
+	else if ((a.isNegative != b.isNegative) && a.isNegative) {
 		a.isNegative = false;
 
 		return subtractInteger(b, a);
@@ -393,7 +390,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	uint16 TEMP = 0;
 
-	CustomInteger result = allocInteger(longest+1);
+	CustomInteger result = allocInteger(longest + 1);
 
 	for (SizeT i = 0; i <= longest; i++) {
 		result.value[i] = 0;
@@ -430,26 +427,31 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		b.isNegative = false;
 		result = addInteger(a, b);
 		redirected = true;
-	} else if (equalsInteger(a, b)) {
+	}
+	else if (equalsInteger(a, b)) {
 		result = allocIntegerFromValue(0, false, true);
 		result.isNegative = a.isNegative;
 		redirected = true;
 		returnedZero = true;
-	} else if (isZero(a) && !redirected) {
+	}
+	else if (isZero(a) && !redirected) {
 		result = copyIntegerToNew(b);
 		result.isNegative = !result.isNegative;
 		redirected = true;
-	} else if (isZero(b) && !redirected) {
+	}
+	else if (isZero(b) && !redirected) {
 		result = copyIntegerToNew(a);
 		redirected = true;
-	} else if (!redirected && (a.isNegative != b.isNegative)) {
+	}
+	else if (!redirected && (a.isNegative != b.isNegative)) {
 		if (lessThanInteger(a, b)) {
 			a.isNegative = false;
 			result = addInteger(a, b);
 			result.isNegative = true;
 			redirected = true;
 		}
-	} else if (!redirected && (a.isNegative == b.isNegative)) {
+	}
+	else if (!redirected && (a.isNegative == b.isNegative)) {
 		if (!a.isNegative && lessThanInteger(a, b)) {
 			redirected = true;
 
@@ -467,7 +469,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		reallocInteger(&a_temp, longest);
 		reallocInteger(&b_temp, longest);
 
-		result = allocInteger(longest+1);
+		result = allocInteger(longest + 1);
 
 		uint8 BORROW = 0;
 		uint8 A, B;
@@ -491,7 +493,8 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 
 		freeInteger(&a_temp);
 		freeInteger(&b_temp);
-	} else if (!redirected) {
+	}
+	else if (!redirected) {
 		exit(EXIT_FAILURE);
 	}
 
@@ -499,145 +502,93 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
-	CustomInteger result;
-
-	CustomInteger Zero = allocIntegerFromValue(0, false, true);
-	CustomInteger One = allocIntegerFromValue(1, false, true);
-
 	if (isZero(a) || isZero(b)) {
-		result = Zero;
-	} else if (compareAbs(a, One) == EQUALS) {
-		result = copyIntegerToNew(b);
-	} else if (compareAbs(b, One) == EQUALS) {
-		result = copyIntegerToNew(a);
-	} else {
-		freeInteger(&Zero);
-		freeInteger(&One);
-
-		result = allocInteger(a.size + b.size + 1);
-
-		CustomInteger	*multiplier = a.size < b.size ? &a: &b,
-						*multipliee = a.size < b.size ? &b: &a;
-
-		CustomInteger carry, prod, sum, temp;
-
-		setMemory(&carry, 0, CUSTOM_INT_SIZE);
-		setMemory(&prod, 0, CUSTOM_INT_SIZE);
-		setMemory(&sum, 0, CUSTOM_INT_SIZE);
-		setMemory(&temp, 0, CUSTOM_INT_SIZE);
-
-		uint8 A = 0, B = 0, CARRY = 0, PROD = 0;
-		uint16 TEMP = 0;
-
-		for (SizeT i = 0; i < multiplier->size; i++) {
-			A = multiplier->value[i];
-
-			if (A != 0) {
-
-				CustomInteger carry = allocInteger(multipliee->size + 1);
-				CustomInteger prod = allocInteger(carry.capacity);
-
-				for (SizeT j = 0; j < multipliee->size; j++) {
-					B = multipliee->value[j];
-
-					TEMP = (uint16)A * (uint16)B;
-					PROD = (uint8)(TEMP & 0xFF);
-					CARRY = (uint8)(TEMP >> 8);
-
-					prod.value[j] = PROD;
-					carry.value[j+1] = CARRY;
-
-					prod.size++;
-					carry.size = prod.size + 1;
-				}
-
-				sum = addInteger(carry, prod);
-				BitshiftPtr(&sum, i * 8, LEFT, true);
-				freeInteger(&carry);
-				freeInteger(&prod);
-
-				temp = addInteger(result, sum);
-				copyInteger(&temp, &result);
-				freeInteger(&sum);
-				freeInteger(&temp);
-			}
-		}
+		return allocIntegerFromValue(0, false, true);
 	}
 
+	// Une seule allocation pour le résultat final
+	// La taille max d'un produit est la somme des tailles des opérandes
+	CustomInteger result = allocInteger(a.size + b.size);
+	result.size = a.size + b.size;
 	result.isNegative = a.isNegative ^ b.isNegative;
+	setToZero(&result); // Initialise le buffer à 0
 
+	for (SizeT i = 0; i < a.size; i++) {
+		uint32 carry = 0;
+		if (a.value[i] == 0) continue; // Optimisation si l'octet est nul
+
+		for (SizeT j = 0; j < b.size; j++) {
+			// On utilise un type plus large (uint32) pour le calcul intermédiaire
+			// Index actuel dans le résultat : i + j
+			uint32 current = (uint32)result.value[i + j] +
+				((uint32)a.value[i] * (uint32)b.value[j]) +
+				carry;
+
+			result.value[i + j] = (uint8)(current & 0xFF);
+			carry = current >> 8;
+		}
+
+		// Propagation de la retenue finale de la ligne
+		result.value[i + b.size] += (uint8)carry;
+	}
+
+	reallocToFitInteger(&result); // Nettoie les zéros de tête
 	return result;
 }
 
 EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
-	CustomInteger quotient, modulo, divider;
-	CustomInteger temp_modulo, temp_quotient;
-
 	EuclideanDivision result;
 
-	bool BisNeg = b.isNegative;
+	// Gestion du signe (votre logique actuelle est correcte)
+	bool resultNegative = a.isNegative ^ b.isNegative;
 
-	CustomInteger Zero = allocIntegerFromValue(0, false, true);
-	CustomInteger One = allocIntegerFromValue(1, false, true);
-
-	if (isZero(a) && isZero(b)) {
-		freeInteger(&a);
-		freeInteger(&b);
-		freeInteger(&Zero);
-		freeInteger(&One);
-
-		fprintf(stderr, "Math error: you tried to compute 0 / 0, which is undefined\n");
+	// 1. Cas d'erreur : division par zéro
+	if (isZero(b)) {
+		fprintf(stderr, "Math error: division by 0\n");
 		exit(EXIT_FAILURE);
-	} else if (isZero(b)) {
-		freeInteger(&a);
-		freeInteger(&b);
-		freeInteger(&Zero);
-		freeInteger(&One);
-
-		fprintf(stderr, "Math error: you tried to divide by 0, which is undefined\n");
-		exit(EXIT_FAILURE);
-	} else if (isZero(a) || (compareAbs(b, a) == GREATER)) {
-		quotient = Zero;
-		modulo = allocIntegerFromValue(0, false, true);;
-		freeInteger(&One);
-	} else if (compareAbs(a, b) == EQUALS) {
-		quotient = One;
-		modulo = Zero;
-	} else {
-		freeInteger(&Zero);
-		bool compInt = true;
-
-		quotient = allocIntegerFromValue(0, false, false);
-		divider = copyIntegerToNew(b);
-		modulo = copyIntegerToNew(a);
-
-		modulo.isNegative = false;
-		b.isNegative = false;
-
-		printInteger(modulo, HEX);
-		printInteger(divider, HEX);
-
-		while (compInt = !(compareAbs(modulo, divider) == LESS)) {
-			temp_modulo = subtractInteger(modulo, divider);
-			temp_quotient = addInteger(quotient, One);
-
-			copyInteger(&temp_modulo, &modulo);
-			copyInteger(&temp_quotient, &quotient);
-
-			freeInteger(&temp_modulo);
-			freeInteger(&temp_quotient);
-		}
-
-		b.isNegative = BisNeg;
-
-		freeInteger(&One);
-		freeInteger(&divider);
 	}
 
-	result.quotient = quotient;
-	result.remainder = modulo;
+	// 2. Initialisation du quotient et du reste
+	CustomInteger quotient = allocInteger(a.size);
+	CustomInteger remainder = allocIntegerFromValue(0, false, true);
 
-	result.quotient.isNegative = a.isNegative ^ b.isNegative;
+	// Sauvegarde des signes originaux et passage en valeur absolue pour le calcul
+	bool origANeg = a.isNegative;
+	bool origBNeg = b.isNegative;
+	a.isNegative = false;
+	b.isNegative = false;
+
+	// 3. Boucle de division bit-à-bit (Division Longue)
+	SizeT totalBits = a.size * 8;
+
+	for (SizeT i = totalBits - 1; i >= 0; i--) {
+		// Décalage du reste : remainder = remainder << 1
+		BitshiftPtr(&remainder, 1, LEFT, true);
+
+		// On récupère le i-ème bit de 'a' et on l'injecte dans le reste
+		uint8 bit = getBit(a, i);
+		setBit(&remainder, bit, 0, 0);
+
+		// Si remainder >= b
+		if (compareAbs(remainder, b) != LESS) {
+			CustomInteger temp = subtractInteger(remainder, b);
+			copyInteger(&temp, &remainder); // Libère l'ancien et copie le nouveau
+			freeInteger(&temp);
+
+			// On met le bit correspondant à 1 dans le quotient
+			setBit(&quotient, 1, i);
+		}
+	}
+
+	// Restauration des signes
+	a.isNegative = origANeg;
+	b.isNegative = origBNeg;
+
+	result.quotient = quotient;
+	result.quotient.isNegative = resultNegative;
+	result.remainder = remainder;
+	// Par convention, le signe du reste est celui du dividende
+	result.remainder.isNegative = a.isNegative;
 
 	reallocToFitInteger(&result.quotient);
 	reallocToFitInteger(&result.remainder);
@@ -678,14 +629,16 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 
 		if (different && A > B) {
 			return GREATER;
-		} else if (different) {
+		}
+		else if (different) {
 			return LESS;
 		}
 	}
 
 	if (!different) {
 		return EQUALS;
-	} else {
+	}
+	else {
 		return UNDEF;
 	}
 }
@@ -693,11 +646,14 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 Comparison compareIntegers(CustomInteger a, CustomInteger b) {
 	if (equalsInteger(a, b)) {
 		return EQUALS;
-	} else if (lessThanInteger(a, b)) {
+	}
+	else if (lessThanInteger(a, b)) {
 		return LESS;
-	} else if (greaterThanInteger(a, b)) {
+	}
+	else if (greaterThanInteger(a, b)) {
 		return GREATER;
-	} else {
+	}
+	else {
 		return UNDEF;
 	}
 }
@@ -762,7 +718,7 @@ bool greaterThanInteger(CustomInteger a, CustomInteger b) {
 		}
 	}*/
 
-	return (!a.isNegative && (!equalSigns || greater)) || ( a.isNegative &&  equalSigns && !greater && !equal);
+	return (!a.isNegative && (!equalSigns || greater)) || (a.isNegative && equalSigns && !greater && !equal);
 }
 
 #pragma endregion

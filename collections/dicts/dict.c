@@ -8,7 +8,7 @@ void initDict(Dict* dict, SizeT keySize, SizeT valSize, SizeT initCapacity) {
 }
 
 void setPair(Dict* dict, ptr currentKey, KeyValuePair_t newKvp) {
-	for (SizeT i=0; i < dict->collection.n_elements; i++) {
+	for (SizeT i=0; i < dict->collection.length; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getCollectionElement(&dict->collection, i);
 
 		if (compareMemory(currentKey, kvp_ptr->key, dict->keySize) != EQUALS) {
@@ -28,7 +28,7 @@ void setValue(Dict* dict, ptr key, ptr newValue) {
 ptr getValue(Dict* dict, ptr key) {
 	ptr val = NULL;
 
-	for (SizeT i=0; i < dict->collection.n_elements; i++) {
+	for (SizeT i=0; i < dict->collection.length; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getCollectionElement(&dict->collection, i);
 
 		if (compareMemory(key, kvp_ptr->key, dict->keySize)) {
@@ -65,7 +65,7 @@ void addEntry(Dict* dict, ptr key, ptr value) {
 }
 
 void removePair(Dict* dict, ptr key) {
-	for (SizeT i=0; i < dict->collection.n_elements; i++) {
+	for (SizeT i=0; i < dict->collection.length; i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getElement(&dict->collection, i);
 
 		if (compareMemory(key, kvp_ptr->key, dict->keySize) != EQUALS) {
@@ -78,7 +78,7 @@ void removePair(Dict* dict, ptr key) {
 }
 
 void freeDict(Dict* dict, bool freeKeys, bool freeValues) {
-	for (SizeT i=0; (i < dict->collection.n_elements) && ((freeKeys) || (freeValues)); i++) {
+	for (SizeT i=0; (i < dict->collection.length) && ((freeKeys) || (freeValues)); i++) {
 		KeyValuePair_t* kvp_ptr = (KeyValuePair_t*)getCollectionElement(&dict->collection, i);
 		removePair(dict, kvp_ptr->key);
 	}
