@@ -68,10 +68,10 @@ int main(void) {
 
 	String A, B, C, R;
 
-	A = integerToString(a, HEX);
-	B = integerToString(b, HEX);
-	C = integerToString(*c, HEX);
-	R = integerToString(*r, HEX);
+	A = integerToString(a, DEC);
+	B = integerToString(b, DEC);
+	C = integerToString(*c, DEC);
+	R = integerToString(*r, DEC);
 
 	freeInteger(&a);
 	freeInteger(&b);

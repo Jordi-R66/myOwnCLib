@@ -10,7 +10,8 @@ CustomInteger allocInteger(SizeT capacity) {
 	if (capacity == 0) {
 		fprintf(stderr, "Undefined behaviour for 0 bit integer\n");
 		exit(EXIT_FAILURE);
-	} else if (capacity > MAX_CUSTOM_INT_CAPACITY) {
+	}
+	else if (capacity > MAX_CUSTOM_INT_CAPACITY) {
 		fprintf(stderr, "The requested capacity can't be allocated\n");
 		exit(EXIT_FAILURE);
 	}
@@ -124,11 +125,13 @@ void freeInteger(CustomIntegerPtr integer) {
 	integer = (CustomIntegerPtr)NULL;
 }
 
-String integerToString(CustomInteger integer, Base base) {
-	SizeT byteLength = 0;
-	SizeT divider = (SizeT)base;
+static string baseChars = "0123456789ABCDEF";
 
-	string baseChars = "0123456789ABCDEF";
+/*typedef String (*FormatterFunc)(CustomInteger, Base);
+
+String byteFormatter(CustomInteger integer, Base base) {
+	SizeT byteLength = 0; // Longueur d'un octet en nombre de caractères dans la base donnée
+	SizeT divider = (SizeT)base;
 
 	switch (base) {
 	case BIN:
@@ -166,6 +169,134 @@ String integerToString(CustomInteger integer, Base base) {
 
 	char sign = integer.isNegative ? '-' : '+';
 
+	appendChar(&obj, sign);
+
+	stringLength(&obj);
+	reverseString(&obj);
+
+	return obj;
+}
+
+String moduloFormatter(CustomInteger integer, Base base) {
+	String output = {0};
+
+	SizeT byteLength = 0; // Longueur d'un octet en nombre de caractères dans la base donnée
+	SizeT divider = (SizeT)base;
+
+	CustomInteger dividerInt = allocIntegerFromValue((uint64)base, false, true), workInt = copyIntegerToNew(integer), tempInt;
+
+	freeInteger(&dividerInt);
+	freeInteger(&workInt);
+	freeInteger(&tempInt);
+
+	return output;
+}
+
+String integerToString(CustomInteger integer, Base base) {
+	SizeT divider = (SizeT)base;
+
+	if (divider == 0) {
+		fprintf(stderr, "Base 0 doesn't exist, you dumbass!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	FormatterFunc formatter = (8 % divider) == 0 ? byteFormatter : moduloFormatter;
+
+	return formatter(integer, base);
+}*/
+
+/**
+ * Refactor de la fonction réalisé par Gemini 3.0 Pro pour l'ajout du support des Bases exotiques
+ */
+String integerToString(CustomInteger integer, Base base) {
+	string baseChars = "0123456789ABCDEF";
+	String obj;
+
+	// 1. Vérification : Est-ce une puissance de 2 ?
+	// L'astuce (base & (base - 1)) == 0 renvoie true si c'est une puissance de 2.
+	bool isPowerOfTwo = (base > 1) && ((base & (base - 1)) == 0);
+
+	// 2. Calcul du nombre de bits par caractère (log2 de la base)
+	SizeT bitsPerChar = 0;
+	if (isPowerOfTwo) {
+		SizeT temp = base;
+		while (temp > 1) {
+			temp >>= 1;
+			bitsPerChar++;
+		}
+	}
+
+	// 3. Choix de l'algorithme
+	// On utilise le chemin RAPIDE si :
+	// - C'est une puissance de 2
+	// - ET que les bits s'alignent parfaitement dans un octet (8 % bits == 0)
+	// Ex: Base 16 (4 bits) -> OK. Base 8 (3 bits) -> NON (utilisera l'algo lent).
+	if (isPowerOfTwo && (8 % bitsPerChar == 0)) {
+
+		// --- ALGORITHME RAPIDE (Bitmasking / Modulo local) ---
+
+		SizeT divider = (SizeT)base;
+		SizeT charsPerByte = 8 / bitsPerChar; // Ex: 2 chars pour Hex, 8 pour Bin
+
+		// Taille exacte : (capacité * chars_par_octet) + signe + null terminator
+		SizeT strLength = integer.capacity * charsPerByte + 2;
+		obj = allocString(strLength);
+
+		char c;
+		for (SizeT byteI = 0; byteI < integer.capacity; byteI++) {
+			uint8 byte = integer.value[byteI];
+			SizeT index;
+
+			for (SizeT i = 0; i < charsPerByte; i++) {
+				// Ici le modulo fonctionne car la base est alignée sur l'octet
+				index = byte % divider;
+				byte /= divider;
+
+				c = baseChars[index];
+				appendChar(&obj, c);
+			}
+		}
+	} else {
+
+		// --- ALGORITHME LENT (Divisions Euclidiennes Générales) ---
+		// Utilisé pour Base 10, Base 8, ou toute base exotique.
+
+		if (isZero(integer)) {
+			obj = allocString(2);
+			appendChar(&obj, '0');
+			// Le signe sera ajouté après
+		} else {
+			// Estimation pire cas (Base 2) : size * 8
+			SizeT estimatedLen = integer.size * 8 + 2;
+			obj = allocString(estimatedLen);
+
+			CustomInteger temp = copyIntegerToNew(integer);
+			temp.isNegative = false;
+
+			// Création d'un BigInt pour représenter la base
+			CustomInteger baseBigInt = allocIntegerFromValue(base, false, true);
+
+			while (!isZero(temp)) {
+				EuclideanDivision div = euclideanDivInteger(temp, baseBigInt);
+
+				// Le reste est forcément plus petit que la base, il tient dans un uint8
+				// sauf si tu as une base > 255, mais baseChars limite à 16 ici.
+				uint8 remainderVal = div.remainder.value[0];
+				appendChar(&obj, baseChars[remainderVal]);
+
+				freeInteger(&temp);
+				freeInteger(&div.remainder);
+
+				temp = div.quotient;
+			}
+
+			freeInteger(&baseBigInt);
+			freeInteger(&temp);
+		}
+	}
+
+	// --- FINITION (Signe + Inversion) ---
+	char sign = integer.isNegative ? '-' : '+';
 	appendChar(&obj, sign);
 
 	stringLength(&obj);
@@ -302,7 +433,8 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 	if (shift == 0) {
 		return copyIntegerToNew(integer);
-	} else if (direction == LEFT || direction == RIGHT) {
+	}
+	else if (direction == LEFT || direction == RIGHT) {
 		SizeT deltaSize = shift / 8;
 		SizeT resultCapacity = integer.capacity;
 
@@ -334,7 +466,8 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 				setBit(&result, bitVal, destBit);
 			}
 		}
-	} else {
+	}
+	else {
 		exit(EXIT_FAILURE);
 	}
 
@@ -343,7 +476,8 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 		if (result.value[j] == 0) {
 			result.size = i;
-		} else {
+		}
+		else {
 			break;
 		}
 	}
@@ -418,26 +552,31 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		b.isNegative = false;
 		result = addInteger(a, b);
 		redirected = true;
-	} else if (equalsInteger(a, b)) {
+	}
+	else if (equalsInteger(a, b)) {
 		result = allocIntegerFromValue(0, false, true);
 		result.isNegative = a.isNegative;
 		redirected = true;
 		returnedZero = true;
-	} else if (isZero(a) && !redirected) {
+	}
+	else if (isZero(a) && !redirected) {
 		result = copyIntegerToNew(b);
 		result.isNegative = !result.isNegative;
 		redirected = true;
-	} else if (isZero(b) && !redirected) {
+	}
+	else if (isZero(b) && !redirected) {
 		result = copyIntegerToNew(a);
 		redirected = true;
-	} else if (!redirected && (a.isNegative != b.isNegative)) {
+	}
+	else if (!redirected && (a.isNegative != b.isNegative)) {
 		if (lessThanInteger(a, b)) {
 			a.isNegative = false;
 			result = addInteger(a, b);
 			result.isNegative = true;
 			redirected = true;
 		}
-	} else if (!redirected && (a.isNegative == b.isNegative)) {
+	}
+	else if (!redirected && (a.isNegative == b.isNegative)) {
 		if (!a.isNegative && lessThanInteger(a, b)) {
 			redirected = true;
 
@@ -561,7 +700,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		// Si remainder >= b
 		if (compareAbs(remainder, b) != LESS) {
 			CustomInteger temp = subtractInteger(remainder, b);
-			copyInteger(&temp, &remainder); 
+			copyInteger(&temp, &remainder);
 			freeInteger(&temp);
 
 			// On met le bit correspondant à 1 dans le quotient
@@ -632,14 +771,16 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 
 		if (different && A > B) {
 			return GREATER;
-		} else if (different) {
+		}
+		else if (different) {
 			return LESS;
 		}
 	}
 
 	if (!different) {
 		return EQUALS;
-	} else {
+	}
+	else {
 		return UNDEF;
 	}
 }
@@ -649,9 +790,11 @@ Comparison compareIntegers(CustomInteger a, CustomInteger b) {
 
 	if (equalsInteger(a, b)) {
 		output = EQUALS;
-	} else if (lessThanInteger(a, b)) {
+	}
+	else if (lessThanInteger(a, b)) {
 		output = LESS;
-	} else if (greaterThanInteger(a, b)) {
+	}
+	else if (greaterThanInteger(a, b)) {
 		output = GREATER;
 	}
 
