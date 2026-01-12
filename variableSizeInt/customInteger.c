@@ -794,18 +794,12 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 
 		if (different && A > B) {
 			return GREATER;
-		}
-		else if (different) {
+		} else if (different) {
 			return LESS;
 		}
 	}
 
-	if (!different) {
-		return EQUALS;
-	}
-	else {
-		return UNDEF;
-	}
+	return different ? UNDEF : EQUALS;
 }
 
 Comparison compareIntegers(CustomInteger a, CustomInteger b) {
