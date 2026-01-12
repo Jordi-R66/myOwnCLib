@@ -846,7 +846,9 @@ bool equalsInteger(CustomInteger a, CustomInteger b) {
 }
 
 bool differentFromInteger(CustomInteger a, CustomInteger b) {
-	return !equalsInteger(a, b);
+	Comparison compAbs = compareAbs(a, b);
+
+	return ((compAbs == LESS) || (compAbs == GREATER));
 }
 
 bool lessThanInteger(CustomInteger a, CustomInteger b) {
