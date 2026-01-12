@@ -45,8 +45,8 @@ CustomInteger copyIntegerToNew(CustomInteger original) {
 	return output;
 }
 
-void printInteger(CustomInteger integer, Base base) {
-	String repr = integerToString(integer, base);
+void printInteger(CustomInteger integer, Base base, bool alwaysPutSign) {
+	String repr = integerToString(integer, base, alwaysPutSign);
 
 	printf("%s\n", repr.chars);
 	freeString(&repr);
@@ -208,7 +208,7 @@ String integerToString(CustomInteger integer, Base base) {
 /**
  * Refactor de la fonction réalisé par Gemini 3.0 Pro pour l'ajout du support des Bases exotiques
  */
-String integerToString(CustomInteger integer, Base base) {
+String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 	string baseChars = "0123456789ABCDEF";
 	String obj;
 
@@ -297,7 +297,9 @@ String integerToString(CustomInteger integer, Base base) {
 
 	// --- FINITION (Signe + Inversion) ---
 	char sign = integer.isNegative ? '-' : '+';
-	appendChar(&obj, sign);
+
+	if (integer.isNegative || alwaysPutSign)
+		appendChar(&obj, sign);
 
 	stringLength(&obj);
 	reverseString(&obj);

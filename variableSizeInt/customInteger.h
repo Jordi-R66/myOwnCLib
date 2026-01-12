@@ -59,7 +59,7 @@ void freeInteger(CustomIntegerPtr integer);
 
 CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue);
 
-String integerToString(CustomInteger integer, Base base);
+String integerToString(CustomInteger integer, Base base, bool alwaysPutSign);
 
 uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
 
