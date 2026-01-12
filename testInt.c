@@ -54,8 +54,8 @@ int main(void) {
 	CustomIntegerPtr c, r;
 	EuclideanDivision euclid;
 
-	a = allocIntegerFromValue(77, false, true);
-	b = allocIntegerFromValue(12, false, true);
+	a = allocIntegerFromValue(149597870700, false, true);
+	b = allocIntegerFromValue(299792458, false, true);
 
 	String A, B, Q, R;
 
