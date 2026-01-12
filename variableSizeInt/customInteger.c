@@ -10,8 +10,7 @@ CustomInteger allocInteger(SizeT capacity) {
 	if (capacity == 0) {
 		fprintf(stderr, "Undefined behaviour for 0 bit integer\n");
 		exit(EXIT_FAILURE);
-	}
-	else if (capacity > MAX_CUSTOM_INT_CAPACITY) {
+	} else if (capacity > MAX_CUSTOM_INT_CAPACITY) {
 		fprintf(stderr, "The requested capacity can't be allocated\n");
 		exit(EXIT_FAILURE);
 	}
@@ -276,8 +275,12 @@ CustomInteger BitwiseNOT(CustomInteger a) {
 
 uint8 getBit(CustomInteger integer, SizeT bitIndex) {
 	SizeT byteIdx = bitIndex >> 3; // bitIndex / 8
-	if (byteIdx >= integer.size) return 0;
-	return (integer.value[byteIdx] >> (bitIndex & 7)) & 1;
+	uint8 output = 0;
+
+	if (byteIdx < integer.size)
+		output = (integer.value[byteIdx] >> (bitIndex & 7)) & 1;
+
+	return output;
 }
 
 void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitIndex) {
@@ -299,8 +302,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 	if (shift == 0) {
 		return copyIntegerToNew(integer);
-	}
-	else if (direction == LEFT || direction == RIGHT) {
+	} else if (direction == LEFT || direction == RIGHT) {
 		SizeT deltaSize = shift / 8;
 		SizeT resultCapacity = integer.capacity;
 
@@ -332,8 +334,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 				setBit(&result, bitVal, destBit);
 			}
 		}
-	}
-	else {
+	} else {
 		exit(EXIT_FAILURE);
 	}
 
@@ -342,8 +343,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 		if (result.value[j] == 0) {
 			result.size = i;
-		}
-		else {
+		} else {
 			break;
 		}
 	}
@@ -418,31 +418,26 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		b.isNegative = false;
 		result = addInteger(a, b);
 		redirected = true;
-	}
-	else if (equalsInteger(a, b)) {
+	} else if (equalsInteger(a, b)) {
 		result = allocIntegerFromValue(0, false, true);
 		result.isNegative = a.isNegative;
 		redirected = true;
 		returnedZero = true;
-	}
-	else if (isZero(a) && !redirected) {
+	} else if (isZero(a) && !redirected) {
 		result = copyIntegerToNew(b);
 		result.isNegative = !result.isNegative;
 		redirected = true;
-	}
-	else if (isZero(b) && !redirected) {
+	} else if (isZero(b) && !redirected) {
 		result = copyIntegerToNew(a);
 		redirected = true;
-	}
-	else if (!redirected && (a.isNegative != b.isNegative)) {
+	} else if (!redirected && (a.isNegative != b.isNegative)) {
 		if (lessThanInteger(a, b)) {
 			a.isNegative = false;
 			result = addInteger(a, b);
 			result.isNegative = true;
 			redirected = true;
 		}
-	}
-	else if (!redirected && (a.isNegative == b.isNegative)) {
+	} else if (!redirected && (a.isNegative == b.isNegative)) {
 		if (!a.isNegative && lessThanInteger(a, b)) {
 			redirected = true;
 
@@ -606,7 +601,6 @@ CustomInteger powInteger(CustomInteger a, CustomInteger exp);
 #pragma endregion
 
 #pragma region Comparison operations
-
 Comparison compareAbs(CustomInteger a, CustomInteger b) {
 	SizeT highestCapacity = a.capacity >= b.capacity ? a.capacity : b.capacity;
 
@@ -631,25 +625,23 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 
 	if (!different) {
 		return EQUALS;
-	}
-	else {
+	} else {
 		return UNDEF;
 	}
 }
 
 Comparison compareIntegers(CustomInteger a, CustomInteger b) {
+	Comparison output = UNDEF;
+
 	if (equalsInteger(a, b)) {
-		return EQUALS;
+		output = EQUALS;
+	} else if (lessThanInteger(a, b)) {
+		output = LESS;
+	} else if (greaterThanInteger(a, b)) {
+		output = GREATER;
 	}
-	else if (lessThanInteger(a, b)) {
-		return LESS;
-	}
-	else if (greaterThanInteger(a, b)) {
-		return GREATER;
-	}
-	else {
-		return UNDEF;
-	}
+
+	return output;
 }
 
 bool isZero(CustomInteger integer) {
