@@ -19,12 +19,12 @@
 #pragma pack(1)
 
 #pragma region Type Definition
-struct customInt {
+typedef struct customInt {
 	SizeT size;			// Size in bytes
 	SizeT capacity;		// Capacity in bytes
 	uint8* value;
 	bool isNegative;
-};
+} CustomInteger, *CustomIntegerPtr;
 
 typedef enum ShiftDirection {
 	LEFT = 0,
@@ -36,8 +36,6 @@ typedef enum Base {
 	DECI = 10,
 	HEX = 16
 } Base;
-
-typedef struct customInt CustomInteger, *CustomIntegerPtr;
 
 typedef struct div {
 	CustomInteger quotient, remainder;
