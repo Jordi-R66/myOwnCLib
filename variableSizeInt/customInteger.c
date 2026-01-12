@@ -667,7 +667,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 	EuclideanDivision result;
 
 	// Gestion du signe (votre logique actuelle est correcte)
-	bool resultNegative = a.isNegative ^ b.isNegative;
+	bool quotientIsNegative = a.isNegative ^ b.isNegative;
 
 	// 1. Cas d'erreur : division par zéro
 	if (isZero(b)) {
@@ -710,7 +710,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		}
 	}
 
-	if (resultNegative) {
+	/*if (quotientIsNegative) {
 		CustomInteger One = allocIntegerFromValue(1, false, true), temp;
 
 		quotient.isNegative = true;
@@ -726,6 +726,26 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		copyInteger(&temp, &remainder);
 		freeInteger(&temp);
 		freeInteger(&One);
+	}*/
+
+	// Nouvelle version - fidèle à l'approche de Python
+	quotient.isNegative = quotientIsNegative;
+	remainder.isNegative = origANeg;
+
+	if (!isZero(remainder) && (remainder.isNegative ^ origBNeg)) {
+		CustomInteger	One = allocIntegerFromValue(1, false, true),
+						tempQ = subtractInteger(quotient, One), tempR;
+
+		freeInteger(&quotient);
+		quotient = tempQ;
+		freeInteger(&One);
+
+		b.isNegative = origBNeg;
+		tempR = addInteger(remainder, b);
+		freeInteger(&remainder);
+		remainder = tempR;
+
+		b.isNegative = false;
 	}
 
 	// Restauration des signes
