@@ -1,1 +1,2 @@
-gcc --std=c17 -O0 -g testInt.c strings/customStrings.c variableSizeInt/customInteger.c memory/memfuncs.c endianness/endianness.c
+gcc --std=c17 -O3 -g testInt.c strings/customStrings.c variableSizeInt/customInteger.c memory/memfuncs.c endianness/endianness.c
+gcc -masm=intel --std=c17 -O3 -g testInt.c strings/customStrings.c variableSizeInt/customInteger.c memory/memfuncs.c endianness/endianness.c -S
