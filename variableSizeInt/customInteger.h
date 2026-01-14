@@ -11,7 +11,7 @@
 #define CUSTOM_INT
 
 // Capacité max en Mots (et non plus octets)
-#define MAX_CUSTOM_INT_CAPACITY ((SizeT)SIZET_MAX_VAL / sizeof(Word))
+#define MAX_CUSTOM_INT_CAPACITY ((SizeT)SIZET_MAX_VAL / WORD_SIZE)
 
 // Initialisation vérifie si le pointeur n'est pas NULL (cast en Word*)
 #define custIntInitialized(PTR) (PTR->value != (Word*)NULL)
@@ -80,13 +80,15 @@ void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity);
  */
 void reallocToFitInteger(CustomIntegerPtr integer);
 
-CustomInteger allocIntegerFromValue(int64 value, bool isNegative, bool copy);
+CustomInteger allocIntegerFromValue(uint64 value, bool isNegative, bool copy);
 CustomInteger copyIntegerToNew(CustomInteger original);
-void copyInteger(CustomInteger original, CustomIntegerPtr output);
+void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest);
 
 // Bitwise Operations
 bool getBit(CustomInteger integer, SizeT index);
 void setBit(CustomIntegerPtr integer, bool bitValue, SizeT index);
+
+String integerToString(CustomInteger integer, Base base, bool alwaysPutSign);
 
 // New: Helper pour obtenir un Mot entier (et non un octet)
 Word getWordFromInteger(CustomInteger integer, SizeT index);

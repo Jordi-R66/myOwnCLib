@@ -6,8 +6,7 @@
 #include <strings.h>
 
 // Pour la multiplication Karatsuba
-// Seuil en octets. En dessous de 32 octets (256 bits), l'algo naïf est souvent plus rapide
-// à cause de l'overhead des allocations mémoire de la récursion.
+// Seuil en Mots. En dessous de 32 mots (1024 bits), l'algo naïf est souvent plus rapide
 #define KARATSUBA_THRESHOLD 32
 
 #pragma region Misc Operations
@@ -28,14 +27,15 @@ CustomInteger allocInteger(SizeT capacity) {
 	output.size = 0;
 	output.isNegative = false;
 
-	ptr temp = calloc(capacity, I8_SIZE);
+	// Allocation en octets = capacité * taille d'un mot
+	ptr temp = calloc(capacity, WORD_SIZE);
 
 	if (temp == NULL) {
-		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", capacity * 8);
+		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", capacity * 32);
 		exit(EXIT_FAILURE);
 	}
 
-	output.value = (uint8*)temp;
+	output.value = (Word*)temp;
 
 	return output;
 }
@@ -46,7 +46,8 @@ CustomInteger copyIntegerToNew(CustomInteger original) {
 	output.size = original.size;
 	output.isNegative = original.isNegative;
 
-	copyMemory(original.value, output.value, output.size);
+	// Copie mémoire : attention copyMemory prend généralement une taille en octets
+	copyMemory(original.value, output.value, output.size * WORD_SIZE);
 
 	return output;
 }
@@ -64,11 +65,11 @@ void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest) {
 	}
 
 	if (dest->capacity < src->size) {
-		setMemory(dest->value, 0, dest->capacity);
+		setMemory(dest->value, 0, dest->capacity * WORD_SIZE);
 		reallocInteger(dest, src->size);
 	}
 
-	copyMemory(src->value, dest->value, src->size);
+	copyMemory(src->value, dest->value, src->size * WORD_SIZE);
 	dest->size = src->size;
 	dest->isNegative = src->isNegative;
 }
@@ -97,24 +98,25 @@ void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity) {
 	}
 
 	ptr oldPtr = (ptr)integer->value;
-	ptr newPtr = calloc(newCapacity, I8_SIZE);
+	ptr newPtr = calloc(newCapacity, WORD_SIZE);
 
 	if (newPtr == NULL) {
-		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", newCapacity * 8);
+		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", newCapacity * 32);
 		exit(EXIT_FAILURE);
 	}
 
-	copyMemory(oldPtr, newPtr, sizeToCopy);
-	setMemory(oldPtr, 0, integer->capacity);
+	copyMemory(oldPtr, newPtr, sizeToCopy * WORD_SIZE);
+	// Effacement de l'ancien buffer pour sécurité avant free (optionnel mais bonne pratique)
+	setMemory(oldPtr, 0, integer->capacity * WORD_SIZE);
 
 	integer->capacity = newCapacity;
-	integer->value = (uint8*)newPtr;
+	integer->value = (Word*)newPtr;
 
 	free(oldPtr);
 }
 
 void setToZero(CustomIntegerPtr integer) {
-	setMemory(integer->value, 0, integer->capacity);
+	setMemory(integer->value, 0, integer->capacity * WORD_SIZE);
 	integer->isNegative = false;
 }
 
@@ -122,7 +124,7 @@ void freeInteger(CustomIntegerPtr integer) {
 	if (integer->value == NULL) return;
 
 	// Effacement sécurisé du contenu
-	setMemory(integer->value, 0, integer->capacity);
+	setMemory(integer->value, 0, integer->capacity * WORD_SIZE);
 	free(integer->value);
 
 	// Neutralisation de la structure pour éviter les "double free"
@@ -144,7 +146,7 @@ static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr l
 	else {
 		*low = allocInteger(lowSize);
 		low->size = lowSize;
-		copyMemory(src.value, low->value, lowSize);
+		copyMemory(src.value, low->value, lowSize * WORD_SIZE);
 	}
 
 	low->isNegative = false;
@@ -156,7 +158,8 @@ static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr l
 		*high = allocInteger(highSize);
 		high->size = highSize;
 
-		copyMemory(&(src.value[splitIndex]), high->value, highSize);
+		// Arithmétique des pointeurs sur Word* (src.value) fonctionne correctement
+		copyMemory(&(src.value[splitIndex]), high->value, highSize * WORD_SIZE);
 	}
 	else {
 		*high = allocIntegerFromValue(0, false, true);
@@ -168,87 +171,6 @@ static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr l
 	reallocToFitInteger(high);
 }
 
-/*typedef String (*FormatterFunc)(CustomInteger, Base);
-
-String byteFormatter(CustomInteger integer, Base base) {
-	SizeT byteLength = 0; // Longueur d'un octet en nombre de caractères dans la base donnée
-	SizeT divider = (SizeT)base;
-
-	switch (base) {
-	case BIN:
-		byteLength = 8;
-		break;
-
-	case HEX:
-		byteLength = 2;
-		break;
-
-	default:
-		fprintf(stderr, "Unsupported base\n");
-		exit(EXIT_FAILURE);
-		break;
-	}
-
-	SizeT strLength = integer.capacity * byteLength + 2;
-
-	String obj = allocString(strLength);
-
-	char c;
-
-	for (SizeT byteI = 0; byteI < integer.capacity; byteI++) {
-		uint8 byte = integer.value[byteI];
-		SizeT index;
-
-		for (SizeT i = 0; i < byteLength; i++) {
-			index = byte % divider;
-			byte /= divider;
-
-			c = baseChars[index];
-			appendChar(&obj, c);
-		}
-	}
-
-	char sign = integer.isNegative ? '-' : '+';
-
-	appendChar(&obj, sign);
-
-	stringLength(&obj);
-	reverseString(&obj);
-
-	return obj;
-}
-
-String moduloFormatter(CustomInteger integer, Base base) {
-	String output = {0};
-
-	SizeT byteLength = 0; // Longueur d'un octet en nombre de caractères dans la base donnée
-	SizeT divider = (SizeT)base;
-
-	CustomInteger dividerInt = allocIntegerFromValue((uint64)base, false, true), workInt = copyIntegerToNew(integer), tempInt;
-
-	freeInteger(&dividerInt);
-	freeInteger(&workInt);
-	freeInteger(&tempInt);
-
-	return output;
-}
-
-String integerToString(CustomInteger integer, Base base) {
-	SizeT divider = (SizeT)base;
-
-	if (divider == 0) {
-		fprintf(stderr, "Base 0 doesn't exist, you dumbass!\n");
-		exit(EXIT_FAILURE);
-	}
-
-	FormatterFunc formatter = (8 % divider) == 0 ? byteFormatter : moduloFormatter;
-
-	return formatter(integer, base);
-}*/
-
-/**
- * Refactor de la fonction réalisé par Gemini 3.0 Pro pour l'ajout du support des Bases exotiques
- */
 String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 	string baseChars = "0123456789ABCDEF";
 	String obj;
@@ -270,34 +192,34 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 	// 3. Choix de l'algorithme
 	// On utilise le chemin RAPIDE si :
 	// - C'est une puissance de 2
-	// - ET que les bits s'alignent parfaitement dans un octet (8 % bits == 0)
-	// Ex: Base 16 (4 bits) -> OK. Base 8 (3 bits) -> NON (utilisera l'algo lent).
-	if (isPowerOfTwo && (8 % bitsPerChar == 0)) {
+	// - ET que les bits s'alignent parfaitement dans un Mot (32 % bits == 0)
+	// Ex: Base 16 (4 bits) -> OK (8 chars/word). Base 8 (3 bits) -> NON (32%3 != 0).
+	if (isPowerOfTwo && (32 % bitsPerChar == 0)) {
 
 		// --- ALGORITHME RAPIDE (Bitmasking / Modulo local) ---
 
 		SizeT divider = (SizeT)base;
-		SizeT charsPerByte = 8 / bitsPerChar; // Ex: 2 chars pour Hex, 8 pour Bin
+		SizeT charsPerWord = 32 / bitsPerChar;
 
-		// Taille exacte : (capacité * chars_par_octet) + signe + null terminator
-		SizeT strLength = integer.capacity * charsPerByte + 2;
+		// Taille exacte : (capacité * chars_par_mot) + signe + null terminator
+		SizeT strLength = integer.capacity * charsPerWord + 2;
 		obj = allocString(strLength);
 
 		char c;
-		for (SizeT byteI = 0; byteI < integer.capacity; byteI++) {
-			uint8 byte = integer.value[byteI];
+		for (SizeT wordI = 0; wordI < integer.capacity; wordI++) {
+			Word word = integer.value[wordI];
 			SizeT index;
 
-			for (SizeT i = 0; i < charsPerByte; i++) {
-				// Ici le modulo fonctionne car la base est alignée sur l'octet
-				index = byte % divider;
-				byte /= divider;
+			for (SizeT i = 0; i < charsPerWord; i++) {
+				index = word % divider;
+				word /= divider;
 
 				c = baseChars[index];
 				appendChar(&obj, c);
 			}
 		}
-	} else {
+	}
+	else {
 		// --- ALGORITHME LENT (Divisions Euclidiennes Générales) ---
 		// Utilisé pour Base 10, Base 8, ou toute base exotique.
 
@@ -305,9 +227,10 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 			obj = allocString(2);
 			appendChar(&obj, '0');
 			// Le signe sera ajouté après
-		} else {
-			// Estimation pire cas (Base 2) : size * 8
-			SizeT estimatedLen = integer.size * 8 + 2;
+		}
+		else {
+			// Estimation pire cas (Base 2) : size * 32
+			SizeT estimatedLen = integer.size * 32 + 2;
 			obj = allocString(estimatedLen);
 
 			CustomInteger temp = copyIntegerToNew(integer);
@@ -319,10 +242,19 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 			while (!isZero(temp)) {
 				EuclideanDivision div = euclideanDivInteger(temp, baseBigInt);
 
-				// Le reste est forcément plus petit que la base, il tient dans un uint8
-				// sauf si tu as une base > 255, mais baseChars limite à 16 ici.
-				uint8 remainderVal = div.remainder.value[0];
-				appendChar(&obj, baseChars[remainderVal]);
+				// Le reste est forcément plus petit que la base.
+				// Pour les bases <= 36 (alphanumérique standard), le reste tient dans un mot
+				// et indexe baseChars directement.
+				Word remainderVal = div.remainder.value[0];
+
+				// Sécurité pour ne pas dépasser baseChars si base > 16 (non géré par baseChars ici)
+				if (remainderVal < 16) {
+					appendChar(&obj, baseChars[remainderVal]);
+				}
+				else {
+					// Fallback générique si on étendait baseChars
+					appendChar(&obj, '?');
+				}
 
 				freeInteger(&temp);
 				freeInteger(&div.remainder);
@@ -348,10 +280,13 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 }
 
 CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue) {
-	SizeT capacity = sizeof(uint64);
+	SizeT capacity = sizeof(uint64) / WORD_SIZE; // Typiquement 2 pour 64 bits / 32 bits
+	if (capacity < 1) capacity = 1;
+
 	SizeT size = 1;
 
-	while (value >> (size * 8)) {
+	// Calcul de la taille nécessaire en Mots
+	while (value >> (size * 32)) {
 		size++;
 	}
 
@@ -360,13 +295,12 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 	}
 
 	CustomInteger output = allocInteger(capacity);
-
 	output.size = size;
-
 	output.isNegative = negative;
 
 	for (SizeT i = 0; i < size; i++) {
-		output.value[i] = (uint8)((value >> (i * 8)) % 256);
+		// Extraction de 32 bits
+		output.value[i] = (Word)((value >> (i * 32)) & WORD_MAX_VAL);
 	}
 
 	if (fitToValue) {
@@ -376,12 +310,12 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 	return output;
 }
 
-uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex) {
-	if (byteIndex >= integer.size || byteIndex >= integer.capacity) {
+Word getWordFromInteger(CustomInteger integer, SizeT wordIndex) {
+	if (wordIndex >= integer.size || wordIndex >= integer.capacity) {
 		return 0;
 	}
 
-	return integer.value[byteIndex];
+	return integer.value[wordIndex];
 }
 
 #pragma endregion
@@ -397,7 +331,6 @@ CustomInteger BitwiseAND(CustomInteger a, CustomInteger b) {
 
 	for (SizeT i = 0; i < smallest; i++) {
 		result.value[i] = a.value[i] & b.value[i];
-
 		result.size++;
 	}
 
@@ -413,7 +346,6 @@ CustomInteger BitwiseOR(CustomInteger a, CustomInteger b) {
 
 	for (SizeT i = 0; i < smallest; i++) {
 		result.value[i] = a.value[i] | b.value[i];
-
 		result.size++;
 	}
 
@@ -429,7 +361,6 @@ CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b) {
 
 	for (SizeT i = 0; i < smallest; i++) {
 		result.value[i] = a.value[i] ^ b.value[i];
-
 		result.size++;
 	}
 
@@ -443,33 +374,32 @@ CustomInteger BitwiseNOT(CustomInteger a) {
 
 	for (SizeT i = 0; i < a.capacity; i++) {
 		result.value[i] = ~a.value[i];
-
 		result.size++;
 	}
 
 	return result;
 }
 
-uint8 getBit(CustomInteger integer, SizeT bitIndex) {
-	SizeT byteIdx = bitIndex >> 3; // bitIndex / 8
-	uint8 output = 0;
+bool getBit(CustomInteger integer, SizeT bitIndex) {
+	SizeT wordIdx = bitIndex >> 5; // bitIndex / 32
+	bool output = false;
 
-	if (byteIdx < integer.size)
-		output = (integer.value[byteIdx] >> (bitIndex & 7)) & 1;
+	if (wordIdx < integer.size)
+		output = (integer.value[wordIdx] >> (bitIndex & 31)) & 1;
 
 	return output;
 }
 
-void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitIndex) {
-	SizeT byteIdx = bitIndex >> 3;
-	if (byteIdx >= integer->capacity) return;
+void setBit(CustomIntegerPtr integer, bool bitValue, SizeT bitIndex) {
+	SizeT wordIdx = bitIndex >> 5; // bitIndex / 32
+	if (wordIdx >= integer->capacity) return;
 
-	if (byteIdx >= integer->size) integer->size = byteIdx + 1;
+	if (wordIdx >= integer->size) integer->size = wordIdx + 1;
 
-	if (newVal & 1)
-		integer->value[byteIdx] |= (1 << (bitIndex & 7));
+	if (bitValue)
+		integer->value[wordIdx] |= (1 << (bitIndex & 31));
 	else
-		integer->value[byteIdx] &= ~(1 << (bitIndex & 7));
+		integer->value[wordIdx] &= ~(1 << (bitIndex & 31));
 }
 
 CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
@@ -481,7 +411,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 		return copyIntegerToNew(integer);
 	}
 	else if (direction == LEFT || direction == RIGHT) {
-		SizeT deltaSize = shift / 8;
+		SizeT deltaSize = shift / 32;
 		SizeT resultCapacity = integer.capacity;
 
 		if (adaptCapacity && direction == LEFT) {
@@ -493,19 +423,21 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 		result.isNegative = integer.isNegative;
 		result.size = result.capacity;
 
-		setMemory(result.value, 0, result.capacity);
+		setMemory(result.value, 0, result.capacity * WORD_SIZE);
 
 		for (SizeT i = integer.size; i > 0; i--) {
 			SizeT j = i - 1;
 
-			for (SizeT k = 8; k > 0; k--) {
-				SizeT currentBit = j * 8 + (k - 1);
+			// On parcourt les 32 bits du mot
+			for (SizeT k = 32; k > 0; k--) {
+				SizeT currentBit = j * 32 + (k - 1);
 
 				if (direction == RIGHT && currentBit < shift) {
 					break;
 				}
 
-				uint8 bitVal = GET_BIT(integer.value[j], k);
+				// Lecture bit par bit (pourrait être optimisé par des shifts de mots)
+				bool bitVal = (integer.value[j] >> (k - 1)) & 1;
 
 				SizeT destBit = direction == LEFT ? currentBit + shift : currentBit - shift;
 
@@ -517,17 +449,6 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 		exit(EXIT_FAILURE);
 	}
 
-	for (SizeT i = result.size; i > 0; i--) {
-		SizeT j = i - 1;
-
-		if (result.value[j] == 0) {
-			result.size = i;
-		}
-		else {
-			break;
-		}
-	}
-
 	reallocToFitInteger(&result);
 
 	return result;
@@ -536,6 +457,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
 	CustomInteger shifted = Bitshift(*integer, shift, direction, adaptCapacity);
 	copyInteger(&shifted, integer);
+	freeInteger(&shifted);
 }
 
 #pragma endregion
@@ -556,23 +478,23 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 
 	SizeT longest = a.size >= b.size ? a.size : b.size;
 
-	uint8 SUM = 0, CARRY = 0;
-	uint8 A_BYTE, B_BYTE;
+	Word SUM = 0, CARRY = 0;
+	Word A_VAL, B_VAL;
 
-	uint16 TEMP = 0;
+	DoubleWord TEMP = 0;
 
 	CustomInteger result = allocInteger(longest + 1);
 
 	for (SizeT i = 0; i <= longest; i++) {
 		result.value[i] = 0;
 
-		A_BYTE = getByteFromInteger(a, i);
-		B_BYTE = getByteFromInteger(b, i);
+		A_VAL = getWordFromInteger(a, i);
+		B_VAL = getWordFromInteger(b, i);
 
-		TEMP = A_BYTE + B_BYTE + CARRY;
+		TEMP = (DoubleWord)A_VAL + (DoubleWord)B_VAL + (DoubleWord)CARRY;
 
-		SUM = (uint8)(TEMP & 0xFF);
-		CARRY = (uint8)(TEMP > 0xFF);
+		SUM = (Word)(TEMP & WORD_MAX_VAL);
+		CARRY = (Word)(TEMP >> 32);
 
 		result.value[i] = SUM;
 
@@ -592,8 +514,8 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	CustomInteger result, a_temp, b_temp;
 
 	bool redirected = false;
-	bool returnedZero = false;
 
+	// La logique de redirection des signes reste la même
 	if (b.isNegative && !redirected) {
 		b.isNegative = false;
 		result = addInteger(a, b);
@@ -603,7 +525,6 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		result = allocIntegerFromValue(0, false, true);
 		result.isNegative = a.isNegative;
 		redirected = true;
-		returnedZero = true;
 	}
 	else if (isZero(a) && !redirected) {
 		result = copyIntegerToNew(b);
@@ -625,7 +546,6 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	else if (!redirected && (a.isNegative == b.isNegative)) {
 		if (!a.isNegative && lessThanInteger(a, b)) {
 			redirected = true;
-
 			result = subtractInteger(b, a);
 			result.isNegative = !result.isNegative;
 		}
@@ -642,16 +562,28 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 
 		result = allocInteger(longest + 1);
 
-		uint8 BORROW = 0;
-		uint8 A, B;
+		Word BORROW = 0;
+		Word A, B;
 
 		for (SizeT i = 0; i <= longest; i++) {
-			A = getByteFromInteger(a_temp, i);
-			B = getByteFromInteger(b_temp, i);
+			A = getWordFromInteger(a_temp, i);
+			B = getWordFromInteger(b_temp, i);
 
-			result.value[i] = A - B - BORROW;
+			// Soustraction avec emprunt sur 32 bits
+			// Si A < B + BORROW, on emprunte
+			DoubleWord subVal = (DoubleWord)B + (DoubleWord)BORROW;
 
-			BORROW = ((A <= B && BORROW) || (A < B));
+			if ((DoubleWord)A < subVal) {
+				// On emprunte 1 au rang suivant (donc on ajoute 2^32 à A)
+				// A - subVal en arithmétique modulo 2^32 revient à faire la soustraction standard
+				// le résultat sera correct, mais on note le borrow
+				result.value[i] = (Word)(((DoubleWord)1 << 32) + (DoubleWord)A - subVal);
+				BORROW = 1;
+			}
+			else {
+				result.value[i] = A - (Word)subVal;
+				BORROW = 0;
+			}
 
 			result.size++;
 
@@ -677,30 +609,26 @@ CustomInteger multiplyNaive(CustomInteger a, CustomInteger b) {
 		return allocIntegerFromValue(0, false, true);
 	}
 
-	// Une seule allocation pour le résultat final
-	// La taille max d'un produit est la somme des tailles des opérandes
 	CustomInteger result = allocInteger(a.size + b.size);
 	result.size = a.size + b.size;
 	result.isNegative = a.isNegative ^ b.isNegative;
-	setToZero(&result); // Initialise le buffer à 0
+	setToZero(&result);
 
 	for (SizeT i = 0; i < a.size; i++) {
-		uint32 carry = 0;
-		if (a.value[i] == 0) continue; // Optimisation si l'octet est nul
+		DoubleWord carry = 0;
+		if (a.value[i] == 0) continue;
 
 		for (SizeT j = 0; j < b.size; j++) {
-			// On utilise un type plus large (uint32) pour le calcul intermédiaire
-			// Index actuel dans le résultat : i + j
-			uint32 current = (uint32)result.value[i + j] +
-				((uint32)a.value[i] * (uint32)b.value[j]) +
+			// Calcul intermédiaire sur 64 bits (DoubleWord)
+			DoubleWord current = (DoubleWord)result.value[i + j] +
+				((DoubleWord)a.value[i] * (DoubleWord)b.value[j]) +
 				carry;
 
-			result.value[i + j] = (uint8)(current & 0xFF);
-			carry = current >> 8;
+			result.value[i + j] = (Word)(current & WORD_MAX_VAL);
+			carry = current >> 32;
 		}
 
-		// Propagation de la retenue finale de la ligne
-		result.value[i + b.size] += (uint8)carry;
+		result.value[i + b.size] += (Word)carry;
 	}
 
 	return result;
@@ -708,62 +636,44 @@ CustomInteger multiplyNaive(CustomInteger a, CustomInteger b) {
 
 CustomInteger multiplyKaratsuba(CustomInteger a, CustomInteger b) {
 	if (a.size < KARATSUBA_THRESHOLD || b.size < KARATSUBA_THRESHOLD) {
-		//printInteger(a, HEX, true);
-		//printInteger(b, HEX, true);
 		return multiplyNaive(a, b);
 	}
 
-	// 1. Calcul du point de coupe (m)
-	// On coupe au milieu du plus grand nombre
 	SizeT m = (a.size > b.size ? a.size : b.size) / 2;
 
-	// 2. Découpage (Split)
 	CustomInteger low1, high1, low2, high2;
 	splitInteger(a, m, &low1, &high1);
 	splitInteger(b, m, &low2, &high2);
 
-	// 3. Appels Récursifs (Les 3 multiplications)
-	// z0 = low1 * low2
 	CustomInteger z0 = multiplyKaratsuba(low1, low2);
-
-	// z2 = high1 * high2
 	CustomInteger z2 = multiplyKaratsuba(high1, high2);
 
-	// Pour z1, il faut calculer (low1 + high1) * (low2 + high2)
 	CustomInteger sum1 = addInteger(low1, high1);
 	CustomInteger sum2 = addInteger(low2, high2);
 	CustomInteger z1_inter = multiplyKaratsuba(sum1, sum2);
 
-	// Nettoyage des opérandes intermédiaires
 	freeInteger(&low1); freeInteger(&high1);
 	freeInteger(&low2); freeInteger(&high2);
 	freeInteger(&sum1); freeInteger(&sum2);
 
-	// 4. Calcul final de z1 = z1_inter - z2 - z0
 	CustomInteger tempSub = subtractInteger(z1_inter, z2);
 	CustomInteger z1 = subtractInteger(tempSub, z0);
 
 	freeInteger(&z1_inter);
 	freeInteger(&tempSub);
 
-	// 5. Assemblage du résultat : z2*(B^2m) + z1*(B^m) + z0
-	// B^m correspond à un décalage de m octets (donc m*8 bits)
-
-	// On décale z2 de 2*m octets
-	CustomInteger resultZ2 = allocInteger(z2.capacity + m * 2); // Pré-alloc large
+	// B^m correspond à un décalage de m Mots (donc m*32 bits)
+	CustomInteger resultZ2 = allocInteger(z2.capacity + m * 2);
 	copyInteger(&z2, &resultZ2);
-	BitshiftPtr(&resultZ2, m * 8 * 2, LEFT, true);
+	BitshiftPtr(&resultZ2, m * 32 * 2, LEFT, true);
 
-	// On décale z1 de m octets
 	CustomInteger resultZ1 = allocInteger(z1.capacity + m);
 	copyInteger(&z1, &resultZ1);
-	BitshiftPtr(&resultZ1, m * 8, LEFT, true);
+	BitshiftPtr(&resultZ1, m * 32, LEFT, true);
 
-	// Somme finale
 	CustomInteger tempRes = addInteger(resultZ2, resultZ1);
 	CustomInteger result = addInteger(tempRes, z0);
 
-	// Nettoyage final
 	freeInteger(&z0);
 	freeInteger(&z2);
 	freeInteger(&z1);
@@ -775,26 +685,17 @@ CustomInteger multiplyKaratsuba(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
-	// 1. Cas triviaux
 	if (isZero(a) || isZero(b)) {
 		return allocIntegerFromValue(0, false, true);
 	}
 
-	// 2. Calcul du signe attendu (XOR)
 	bool resultNegative = a.isNegative ^ b.isNegative;
 
-	// 3. Passage en positif pour le calcul
-	// Note : Comme 'a' et 'b' sont passés par valeur (copie de la struct),
-	// modifier .isNegative ici n'affecte pas les variables de la fonction appelante (testInt.c).
 	a.isNegative = false;
 	b.isNegative = false;
 
-	// 4. Exécution de l'algorithme
-	// multiplyKaratsuba est la fonction itérative avec la pile que je t'ai donnée.
-	// Elle gère elle-même le seuil (THRESHOLD) pour appeler multiplyNaive si besoin.
 	CustomInteger result = multiplyKaratsuba(a, b);
 
-	// 5. APPLICATION DU SIGNE (Le correctif est ici)
 	result.isNegative = resultNegative;
 
 	reallocToFitInteger(&result);
@@ -802,75 +703,67 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-// Multiplie un CustomInteger par un petit entier (uint8)
-// Utile pour l'algorithme de division en base 256
-static CustomInteger multiplyByByte(CustomInteger a, uint8 b) {
+// Multiplie un CustomInteger par un mot (uint32)
+static CustomInteger multiplyByWord(CustomInteger a, Word b) {
 	if (b == 0) return allocIntegerFromValue(0, false, true);
 	if (b == 1) return copyIntegerToNew(a);
 
 	CustomInteger res = allocInteger(a.size + 1);
 	res.size = a.size;
-	res.isNegative = a.isNegative; // En général false ici
+	res.isNegative = a.isNegative;
 
-	uint16 carry = 0;
+	DoubleWord carry = 0;
 	for (SizeT i = 0; i < a.size; i++) {
-		uint16 val = (uint16)a.value[i] * (uint16)b + carry;
-		res.value[i] = (uint8)(val & 0xFF);
-		carry = val >> 8;
+		DoubleWord val = (DoubleWord)a.value[i] * (DoubleWord)b + carry;
+		res.value[i] = (Word)(val & WORD_MAX_VAL);
+		carry = val >> 32;
 	}
 
 	if (carry > 0) {
 		res.size++;
-		res.value[a.size] = (uint8)carry;
+		res.value[a.size] = (Word)carry;
 	}
 
-	// Pas de reallocToFit ici pour gagner du temps, la taille est connue
 	return res;
 }
 
 EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
-	// 1. Gestion des cas d'erreur
 	if (isZero(b)) {
 		fprintf(stderr, "Math error: division by 0\n");
 		exit(EXIT_FAILURE);
 	}
 
 	EuclideanDivision result;
-	CustomInteger Q, R; // Variables de travail pour le résultat brut (absolu)
+	CustomInteger Q, R;
 
-	// Pré-calcul des signes attendus
 	bool quotientIsNegative = a.isNegative ^ b.isNegative;
 	bool remIsNegative = a.isNegative;
-	bool origBNeg = b.isNegative; // Nécessaire pour l'ajustement Python
+	bool origBNeg = b.isNegative;
 
-	// 2. Logique de Division (Valeurs Absolues)
 	Comparison comp = compareAbs(a, b);
 
 	if (comp == LESS) {
-		// Cas A < B : Q = 0, R = A
 		Q = allocIntegerFromValue(0, false, true);
 		R = copyIntegerToNew(a);
-		R.isNegative = false; // On travaille en absolu pour l'instant
+		R.isNegative = false;
 	}
 	else if (comp == EQUALS) {
-		// Cas A == B : Q = 1, R = 0
 		Q = allocIntegerFromValue(1, false, true);
 		R = allocIntegerFromValue(0, false, true);
 	}
 	else {
-		// Cas A > B : Algorithme de Knuth (Base 256)
-
-		// --- Préparation ---
-		CustomInteger U = copyIntegerToNew(a); // Dividende
-		CustomInteger V = copyIntegerToNew(b); // Diviseur
+		// Cas A > B : Algorithme de Knuth (Base 2^32)
+		CustomInteger U = copyIntegerToNew(a);
+		CustomInteger V = copyIntegerToNew(b);
 		U.isNegative = false;
 		V.isNegative = false;
 
 		// --- Normalisation ---
 		reallocToFitInteger(&V);
-		uint8 msbV = V.value[V.size - 1];
+		Word msbV = V.value[V.size - 1];
 		SizeT shift = 0;
-		while ((msbV & 0x80) == 0) {
+		// On cherche à aligner le MSB sur le bit de poids fort du mot (bit 31)
+		while ((msbV & 0x80000000) == 0) {
 			msbV <<= 1;
 			shift++;
 		}
@@ -883,46 +776,42 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		SizeT n = U.size;
 		SizeT m = V.size;
 
-		// Allocation du quotient
-		// Si par hasard n < m après shift (très improbable ici grâce au check GREATER), 
-		// calloc renvoie un bloc valide et la boucle ne s'exécute pas -> Q=0.
 		SizeT qSize = (n >= m) ? (n - m + 1) : 1;
 		Q = allocInteger(qSize);
 		Q.size = qSize;
-		setMemory(Q.value, 0, Q.capacity);
+		setMemory(Q.value, 0, Q.capacity * WORD_SIZE);
 
-		// --- Boucle Principale ---
-		// Sécurité : on ne rentre dans la boucle que si n >= m
 		if (n >= m) {
 			for (SizeT j = n - m; j < n - m + 1; j--) {
-				if (j > n) break; // Protection underflow
+				if (j > n) break;
 
-				// A. Estimation
-				uint64 num = 0;
-				if (j + m < U.size) num |= ((uint64)U.value[j + m]) << 8;
-				if (j + m - 1 < U.size) num |= ((uint64)U.value[j + m - 1]);
+				// A. Estimation (q_est = (u_n * B + u_{n-1}) / v_{n-1})
+				DoubleWord num = 0;
+				if (j + m < U.size) num |= ((DoubleWord)U.value[j + m]) << 32;
+				if (j + m - 1 < U.size) num |= ((DoubleWord)U.value[j + m - 1]);
 
-				uint64 den = V.value[m - 1];
-				uint64 q_est = num / den;
-				if (q_est > 255) q_est = 255;
+				DoubleWord den = V.value[m - 1];
+				DoubleWord q_est = num / den;
+
+				if (q_est > WORD_MAX_VAL) q_est = WORD_MAX_VAL;
 
 				// B. Multiplication
-				uint8 q_byte = (uint8)q_est;
-				CustomInteger prod = multiplyByByte(V, q_byte);
+				Word q_word = (Word)q_est;
+				CustomInteger prod = multiplyByWord(V, q_word);
 
 				CustomInteger shiftedProd = allocInteger(prod.size + j);
 				shiftedProd.size = prod.size + j;
-				setMemory(shiftedProd.value, 0, j);
-				copyMemory(prod.value, shiftedProd.value + j, prod.size);
+				setMemory(shiftedProd.value, 0, j * WORD_SIZE);
+				copyMemory(prod.value, shiftedProd.value + j, prod.size * WORD_SIZE);
 
 				// C. Correction
 				while (compareAbs(shiftedProd, U) == GREATER) {
-					q_byte--;
+					q_word--;
 
 					CustomInteger vShifted = allocInteger(V.size + j);
 					vShifted.size = V.size + j;
-					setMemory(vShifted.value, 0, j);
-					copyMemory(V.value, vShifted.value + j, V.size);
+					setMemory(vShifted.value, 0, j * WORD_SIZE);
+					copyMemory(V.value, vShifted.value + j, V.size * WORD_SIZE);
 
 					CustomInteger newProd = subtractInteger(shiftedProd, vShifted);
 					freeInteger(&shiftedProd);
@@ -935,7 +824,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 				freeInteger(&U);
 				U = newU;
 
-				Q.value[j] = q_byte;
+				Q.value[j] = q_word;
 
 				freeInteger(&prod);
 				freeInteger(&shiftedProd);
@@ -944,32 +833,24 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 			}
 		}
 
-		// --- Dénormalisation ---
 		if (shift > 0) {
 			BitshiftPtr(&U, shift, RIGHT, false);
 		}
 
 		freeInteger(&V);
-
-		// Le reste final est ce qui reste dans U
 		R = U;
 	}
 
-	// 3. Application des Signes (Post-Traitement Centralisé)
 	Q.isNegative = quotientIsNegative;
 	R.isNegative = remIsNegative;
 
-	// 4. Ajustement Python (Floored Division)
-	// Si Reste != 0 ET signe(Reste) != signe(DiviseurOriginal)
 	if (!isZero(R) && (R.isNegative ^ origBNeg)) {
-		// Q = Q - 1
 		CustomInteger One = allocIntegerFromValue(1, false, true);
 		CustomInteger tempQ = subtractInteger(Q, One);
 		freeInteger(&Q);
 		Q = tempQ;
 		freeInteger(&One);
 
-		// R = R + B (avec signe original)
 		CustomInteger origB = copyIntegerToNew(b);
 		origB.isNegative = origBNeg;
 
@@ -980,7 +861,6 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		freeInteger(&origB);
 	}
 
-	// 5. Finalisation
 	result.quotient = Q;
 	result.remainder = R;
 
@@ -989,106 +869,6 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 
 	return result;
 }
-
-/*
-EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
-	EuclideanDivision result;
-
-	// Gestion du signe (votre logique actuelle est correcte)
-	bool quotientIsNegative = a.isNegative ^ b.isNegative;
-
-	// 1. Cas d'erreur : division par zéro
-	if (isZero(b)) {
-		fprintf(stderr, "Math error: division by 0\n");
-		exit(EXIT_FAILURE);
-	}
-
-	// 2. Initialisation du quotient et du reste
-	CustomInteger quotient = allocInteger(a.size);
-	CustomInteger remainder = allocIntegerFromValue(0, false, true);
-
-	// Sauvegarde des signes originaux et passage en valeur absolue pour le calcul
-	bool origANeg = a.isNegative;
-	bool origBNeg = b.isNegative;
-	a.isNegative = false;
-	b.isNegative = false;
-
-	// 3. Boucle de division bit-à-bit (Division Longue)
-	SizeT totalBits = a.size * 8;
-
-	SizeT i = totalBits;
-	while (i > 0) {
-		i--; // On décrémente au début. i passera de (totalBits-1) à 0 inclus.
-
-		// Décalage du reste : remainder = remainder << 1
-		BitshiftPtr(&remainder, 1, LEFT, true);
-
-		// On récupère le i-ème bit de 'a' et on l'injecte dans le reste
-		uint8 bit = getBit(a, i);
-		setBit(&remainder, bit, 0);
-
-		// Si remainder >= b
-		if (compareAbs(remainder, b) != LESS) {
-			CustomInteger temp = subtractInteger(remainder, b);
-			copyInteger(&temp, &remainder);
-			freeInteger(&temp);
-
-			// On met le bit correspondant à 1 dans le quotient
-			setBit(&quotient, 1, i);
-		}
-	}
-
-	//if (quotientIsNegative) {
-	//	CustomInteger One = allocIntegerFromValue(1, false, true), temp;
-
-	//	quotient.isNegative = true;
-	//	remainder.isNegative = true;
-
-	//	temp = subtractInteger(quotient, One);
-	//	freeInteger(&quotient);
-	//	copyInteger(&temp, &quotient);
-	//	freeInteger(&temp);
-
-	//	temp = addInteger(remainder, b);
-	//	freeInteger(&remainder);
-	//	copyInteger(&temp, &remainder);
-	//	freeInteger(&temp);
-	//	freeInteger(&One);
-	//}
-
-	// Nouvelle version - fidèle à l'approche de Python
-	quotient.isNegative = quotientIsNegative;
-	remainder.isNegative = origANeg;
-
-	if (!isZero(remainder) && (remainder.isNegative ^ origBNeg)) {
-		CustomInteger	One = allocIntegerFromValue(1, false, true),
-			tempQ = subtractInteger(quotient, One), tempR;
-
-		freeInteger(&quotient);
-		quotient = tempQ;
-		freeInteger(&One);
-
-		b.isNegative = origBNeg;
-		tempR = addInteger(remainder, b);
-		freeInteger(&remainder);
-		remainder = tempR;
-
-		b.isNegative = false;
-	}
-
-	// Restauration des signes
-	a.isNegative = origANeg;
-	b.isNegative = origBNeg;
-
-	result.quotient = quotient;
-	result.remainder = remainder;
-
-	reallocToFitInteger(&result.quotient);
-	reallocToFitInteger(&result.remainder);
-
-	return result;
-}
-*/
 
 CustomInteger modInteger(CustomInteger a, CustomInteger b) {
 	EuclideanDivision euclid = euclideanDivInteger(a, b);
@@ -1105,69 +885,56 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
 	CustomInteger output;
 
-	// --- PRÉ-ANALYSE : Vérification Puissance de 2 ---
-	// On scanne 'base' pour voir si c'est une puissance de 2 (un seul bit à 1)
-	// Cela nous permet de décider quelle branche du if/else emprunter plus bas.
 	SizeT setBitCount = 0;
 	SizeT bitPosition = 0;
 
 	for (SizeT i = 0; i < base.size; i++) {
-		uint8 b = base.value[i];
+		Word b = base.value[i];
 		if (b != 0) {
-			for (int k = 0; k < 8; k++) {
+			for (int k = 0; k < 32; k++) {
 				if ((b >> k) & 1) {
 					setBitCount++;
-					if (setBitCount == 1) bitPosition = i * 8 + k;
+					if (setBitCount == 1) bitPosition = i * 32 + k;
 				}
 			}
-			if (setBitCount > 1) break; // Pas une puissance de 2
+			if (setBitCount > 1) break;
 		}
 	}
 
-	// --- LOGIQUE PRINCIPALE ---
-
 	if (isZero(exp)) {
-		// Cas trivial 1 : x^0 = 1
 		output = allocIntegerFromValue(1, false, true);
 	}
 	else if (isZero(base)) {
-		// Cas trivial 2 : 0^x = 0
 		output = allocIntegerFromValue(0, false, true);
 	}
 	else if (setBitCount == 1 && exp.size <= sizeof(SizeT)) {
-		// --- OPTIMISATION PUISSANCE DE 2 ---
-		// Condition : Base est 2^k ET Exposant tient dans un SizeT (pour calculer le shift)
-
 		SizeT expVal = 0;
+		// Limitation à SizeT pour l'exposant lors de l'opti puissance de 2
+		// Attention, si l'exposant est grand, expVal sera tronqué ou faux, 
+		// mais la condition exp.size <= sizeof(SizeT) protège un peu.
 		for (SizeT i = 0; i < exp.size; i++) {
-			expVal |= ((SizeT)exp.value[i]) << (i * 8);
+			if (i * 32 < sizeof(SizeT) * 8)
+				expVal |= ((SizeT)exp.value[i]) << (i * 32);
 		}
 
-		// Calcul du décalage : (2^k)^exp = 2^(k*exp)
 		SizeT totalShift = bitPosition * expVal;
 
 		output = allocIntegerFromValue(1, false, true);
 		BitshiftPtr(&output, totalShift, LEFT, true);
 	}
 	else {
-		// --- ALGORITHME GÉNÉRAL (Square and Multiply) ---
-
 		output = allocIntegerFromValue(1, false, true);
 		CustomInteger baseAccumulator = copyIntegerToNew(base);
 
-		// Optimisation : scan uniquement jusqu'au bit le plus significatif de l'exposant
-		SizeT maxBits = exp.size * 8;
+		SizeT maxBits = exp.size * 32;
 
 		for (SizeT i = 0; i < maxBits; i++) {
-			// 1. Si le bit est à 1, on multiplie le résultat courant par l'accumulateur
 			if (getBit(exp, i) == 1) {
 				CustomInteger newResult = multiplyInteger(output, baseAccumulator);
 				freeInteger(&output);
 				output = newResult;
 			}
 
-			// 2. On prépare la base pour le prochain tour (Carré)
-			// On ne le fait pas si c'était la dernière itération utile
 			if (i < maxBits - 1) {
 				CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
 				freeInteger(&baseAccumulator);
@@ -1178,10 +945,6 @@ CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
 		freeInteger(&baseAccumulator);
 	}
 
-	// --- POST-TRAITEMENT ---
-
-	// Gestion du signe commune à tous les cas non triviaux (et correcte pour les triviaux aussi)
-	// Résultat négatif si et seulement si : Base Négative ET Exposant Impair
 	if (!isZero(output)) {
 		output.isNegative = base.isNegative && (getBit(exp, 0) == 1);
 	}
@@ -1196,20 +959,21 @@ CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
 Comparison compareAbs(CustomInteger a, CustomInteger b) {
 	SizeT highestCapacity = a.capacity >= b.capacity ? a.capacity : b.capacity;
 
-	uint8 A, B;
+	Word A, B;
 	bool different = false;
 
 	for (SizeT i = highestCapacity; i > 0; i--) {
 		SizeT index = i - 1;
 
-		A = getByteFromInteger(a, index);
-		B = getByteFromInteger(b, index);
+		A = getWordFromInteger(a, index);
+		B = getWordFromInteger(b, index);
 
 		different = A != B;
 
 		if (different && A > B) {
 			return GREATER;
-		} else if (different) {
+		}
+		else if (different) {
 			return LESS;
 		}
 	}
@@ -1238,7 +1002,7 @@ bool isZero(CustomInteger integer) {
 
 	for (SizeT i = 0; i < integer.size; i++) {
 
-		output = getByteFromInteger(integer, i) == 0;
+		output = getWordFromInteger(integer, i) == 0;
 
 		if (i == SIZET_MAX_VAL || !output) {
 			break;
@@ -1266,18 +1030,6 @@ bool lessThanInteger(CustomInteger a, CustomInteger b) {
 
 	bool equalSigns = a.isNegative == b.isNegative;
 
-	/*if (equalSigns) {
-		if (a.isNegative && !less && !equal) {
-			return true;
-		} else if (!a.isNegative && less) {
-			return true;
-		}
-	} else {
-		if (a.isNegative) {
-			return true;
-		}
-	}*/
-
 	return (!equalSigns && a.isNegative) || (equalSigns && !a.isNegative && less) || (a.isNegative && !less && !equal);
 }
 
@@ -1287,18 +1039,6 @@ bool greaterThanInteger(CustomInteger a, CustomInteger b) {
 
 	bool equalSigns = a.isNegative == b.isNegative;
 
-	/*if (!equalSigns) {
-		if (b.isNegative) {
-			return true;
-		}
-	} else {
-		if (a.isNegative && !greater && !equal) {
-			return true;
-		} else if (!a.isNegative && greater) {
-			return true;
-		}
-	}*/
-
 	return (!a.isNegative && (!equalSigns || greater)) || (a.isNegative && equalSigns && !greater && !equal);
 }
 
@@ -1307,21 +1047,16 @@ bool greaterThanInteger(CustomInteger a, CustomInteger b) {
 #pragma region Modular Arithmetics
 
 Euclide ExtendedEuclide(CustomInteger a, CustomInteger b) {
-	// 1. Initialisation de output (correspond à r, u, v en Python)
-	// r = a, u = 1, v = 0
 	Euclide output;
 	output.gcd = copyIntegerToNew(a);
 	output.u = allocIntegerFromValue(1, false, true);
 	output.v = allocIntegerFromValue(0, false, true);
 
-	// 2. Initialisation de temp (correspond à r2, u2, v2 en Python)
-	// r2 = b, u2 = 0, v2 = 1
 	Euclide temp;
 	temp.gcd = copyIntegerToNew(b);
 	temp.u = allocIntegerFromValue(0, false, true);
 	temp.v = allocIntegerFromValue(1, false, true);
 
-	// 3. Boucle principale
 	while (!isZero(temp.gcd)) {
 		EuclideanDivision div = euclideanDivInteger(output.gcd, temp.gcd);
 		CustomInteger q = div.quotient;
@@ -1337,19 +1072,12 @@ Euclide ExtendedEuclide(CustomInteger a, CustomInteger b) {
 
 		freeInteger(&q);
 
-		// D. Mise à jour des variables (Le "Swap")
-
-		// 1. On libère les anciennes valeurs de 'output' car elles vont être écrasées
 		freeInteger(&output.gcd);
 		freeInteger(&output.u);
 		freeInteger(&output.v);
 
-		// 2. 'output' prend les valeurs actuelles de 'temp'
-		// (r, u, v) = (r2, u2, v2)
 		output = temp;
 
-		// 3. 'temp' prend les nouvelles valeurs calculées
-		// (r2, u2, v2) = (r_new, u_new, v_new)
 		temp.gcd = r_new;
 		temp.u = u_new;
 		temp.v = v_new;
@@ -1369,91 +1097,66 @@ CustomInteger gcdInteger(CustomInteger a, CustomInteger b) {
 	r_prev.isNegative = false;
 	r_curr.isNegative = false;
 
-	// 2. Boucle: while b != 0
 	while (!isZero(r_curr)) {
-		// Calcul du modulo : r_next = r_prev % r_curr
-		// On utilise euclideanDivInteger car elle gère déjà toute la complexité
 		EuclideanDivision div = euclideanDivInteger(r_prev, r_curr);
 
-		// On n'a pas besoin du quotient
 		freeInteger(&div.quotient);
-
-		// Nettoyage de l'ancienne valeur de 'a' (r_prev)
 		freeInteger(&r_prev);
 
-		// Rotation des variables :
-		// a = b  --> r_prev prend la valeur de r_curr
 		r_prev = r_curr;
-
-		// b = a % b --> r_curr prend la valeur du reste
 		r_curr = div.remainder;
 	}
 
-	// A la fin, r_curr est 0, et r_prev contient le PGCD
 	freeInteger(&r_curr);
 
 	return r_prev;
 }
 
-// Calcule X tel que (A * X) % M == 1
 CustomInteger modularInverse(CustomInteger a, CustomInteger m) {
 	Euclide res = ExtendedEuclide(a, m);
 
-	// L'inverse existe seulement si PGCD(a, m) == 1
 	CustomInteger One = allocIntegerFromValue(1, false, true);
 	if (!equalsInteger(res.gcd, One)) {
-		// Pas d'inverse (a et m ne sont pas premiers entre eux)
-		// Retourner 0 ou gérer l'erreur
 		freeInteger(&One);
-		// ... nettoyage ...
 		return allocIntegerFromValue(0, false, true);
 	}
 	freeInteger(&One);
 	freeInteger(&res.gcd);
-	freeInteger(&res.v); // On n'a pas besoin de v pour l'inverse modulaire
+	freeInteger(&res.v);
 
-	CustomInteger result = res.u; // C'est le coefficient 'u'
+	CustomInteger result = res.u;
 
-	// Si le résultat est négatif, on ajoute le modulo M pour l'avoir positif
-	// ex: -2 mod 5 => 3
 	if (result.isNegative) {
 		CustomInteger temp = addInteger(result, m);
 		freeInteger(&result);
 		result = temp;
 	}
 
-	// Si result >= m (peut arriver selon l'implémentation), on fait un modulo
-	// Mais généralement avec Euclide étendu, |u| < m, donc le simple 'if negative' suffit.
-
 	return result;
 }
 
 CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger mod) {
 	CustomInteger output;
-
-	// Variable utilitaire pour les comparaisons (allouée au début pour le flux)
 	CustomInteger One = allocIntegerFromValue(1, false, true);
 
-	// 1. Cas d'erreur : Modulo 0
 	if (isZero(mod)) {
 		freeInteger(&One);
 		fprintf(stderr, "Math error: modulo by 0\n");
 		exit(EXIT_FAILURE);
-	} else if (equalsInteger(mod, One)) {
+	}
+	else if (equalsInteger(mod, One)) {
 		output = allocIntegerFromValue(0, false, true);
-	} else if (isZero(exp)) {
+	}
+	else if (isZero(exp)) {
 		output = allocIntegerFromValue(1, false, true);
-	} else {
+	}
+	else {
 		output = allocIntegerFromValue(1, false, true);
-
-		// On travaille sur une base réduite modulo m dès le départ
 		CustomInteger baseAcc = modInteger(base, mod);
 
-		// On parcourt tous les bits de l'exposant
-		SizeT maxBits = exp.size * 8;
+		SizeT maxBits = exp.size * 32;
 
 		for (SizeT i = 0; i < maxBits; i++) {
-			// A. Si le bit courant est 1, on multiplie le résultat
 			if (getBit(exp, i) == 1) {
 				CustomInteger prod = multiplyInteger(output, baseAcc);
 				CustomInteger newOutput = modInteger(prod, mod);
@@ -1463,8 +1166,6 @@ CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger
 				output = newOutput;
 			}
 
-			// B. On élève la base au carré pour le prochain bit
-			// (inutile de le faire à la toute dernière itération)
 			if (i < maxBits - 1) {
 				CustomInteger sq = multiplyInteger(baseAcc, baseAcc);
 				CustomInteger newBaseAcc = modInteger(sq, mod);
@@ -1479,8 +1180,6 @@ CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger
 	}
 
 	freeInteger(&One);
-
-	// Nettoyage final de la taille (suppression des zéros de tête potentiels)
 	reallocToFitInteger(&output);
 
 	return output;
