@@ -88,6 +88,9 @@ typedef signed short int16;
 #define SDOUBLE_WORD_MAX_VAL I64_MAX_VAL
 #define SDOUBLE_WORD_MIN_VAL I64_MIN_VAL
 
+#define WORD_SIZE I32_SIZE
+#define DOUBLE_WORD_SIZE I64_SIZE
+
 typedef SWORD_TYPE sWord;
 typedef WORD_TYPE Word;
 typedef SDOUBLE_WORD_TYPE sDoubleWord;
