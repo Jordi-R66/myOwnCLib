@@ -801,6 +801,196 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 
 	return result;
 }
+
+// Multiplie un CustomInteger par un petit entier (uint8)
+// Utile pour l'algorithme de division en base 256
+static CustomInteger multiplyByByte(CustomInteger a, uint8 b) {
+	if (b == 0) return allocIntegerFromValue(0, false, true);
+	if (b == 1) return copyIntegerToNew(a);
+
+	CustomInteger res = allocInteger(a.size + 1);
+	res.size = a.size;
+	res.isNegative = a.isNegative; // En général false ici
+
+	uint16 carry = 0;
+	for (SizeT i = 0; i < a.size; i++) {
+		uint16 val = (uint16)a.value[i] * (uint16)b + carry;
+		res.value[i] = (uint8)(val & 0xFF);
+		carry = val >> 8;
+	}
+
+	if (carry > 0) {
+		res.size++;
+		res.value[a.size] = (uint8)carry;
+	}
+
+	// Pas de reallocToFit ici pour gagner du temps, la taille est connue
+	return res;
+}
+
+EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
+	// 1. Gestion des cas d'erreur
+	if (isZero(b)) {
+		fprintf(stderr, "Math error: division by 0\n");
+		exit(EXIT_FAILURE);
+	}
+
+	EuclideanDivision result;
+	CustomInteger Q, R; // Variables de travail pour le résultat brut (absolu)
+
+	// Pré-calcul des signes attendus
+	bool quotientIsNegative = a.isNegative ^ b.isNegative;
+	bool remIsNegative = a.isNegative;
+	bool origBNeg = b.isNegative; // Nécessaire pour l'ajustement Python
+
+	// 2. Logique de Division (Valeurs Absolues)
+	Comparison comp = compareAbs(a, b);
+
+	if (comp == LESS) {
+		// Cas A < B : Q = 0, R = A
+		Q = allocIntegerFromValue(0, false, true);
+		R = copyIntegerToNew(a);
+		R.isNegative = false; // On travaille en absolu pour l'instant
+	}
+	else if (comp == EQUALS) {
+		// Cas A == B : Q = 1, R = 0
+		Q = allocIntegerFromValue(1, false, true);
+		R = allocIntegerFromValue(0, false, true);
+	}
+	else {
+		// Cas A > B : Algorithme de Knuth (Base 256)
+
+		// --- Préparation ---
+		CustomInteger U = copyIntegerToNew(a); // Dividende
+		CustomInteger V = copyIntegerToNew(b); // Diviseur
+		U.isNegative = false;
+		V.isNegative = false;
+
+		// --- Normalisation ---
+		reallocToFitInteger(&V);
+		uint8 msbV = V.value[V.size - 1];
+		SizeT shift = 0;
+		while ((msbV & 0x80) == 0) {
+			msbV <<= 1;
+			shift++;
+		}
+
+		if (shift > 0) {
+			BitshiftPtr(&U, shift, LEFT, true);
+			BitshiftPtr(&V, shift, LEFT, true);
+		}
+
+		SizeT n = U.size;
+		SizeT m = V.size;
+
+		// Allocation du quotient
+		// Si par hasard n < m après shift (très improbable ici grâce au check GREATER), 
+		// calloc renvoie un bloc valide et la boucle ne s'exécute pas -> Q=0.
+		SizeT qSize = (n >= m) ? (n - m + 1) : 1;
+		Q = allocInteger(qSize);
+		Q.size = qSize;
+		setMemory(Q.value, 0, Q.capacity);
+
+		// --- Boucle Principale ---
+		// Sécurité : on ne rentre dans la boucle que si n >= m
+		if (n >= m) {
+			for (SizeT j = n - m; j < n - m + 1; j--) {
+				if (j > n) break; // Protection underflow
+
+				// A. Estimation
+				uint64 num = 0;
+				if (j + m < U.size) num |= ((uint64)U.value[j + m]) << 8;
+				if (j + m - 1 < U.size) num |= ((uint64)U.value[j + m - 1]);
+
+				uint64 den = V.value[m - 1];
+				uint64 q_est = num / den;
+				if (q_est > 255) q_est = 255;
+
+				// B. Multiplication
+				uint8 q_byte = (uint8)q_est;
+				CustomInteger prod = multiplyByByte(V, q_byte);
+
+				CustomInteger shiftedProd = allocInteger(prod.size + j);
+				shiftedProd.size = prod.size + j;
+				setMemory(shiftedProd.value, 0, j);
+				copyMemory(prod.value, shiftedProd.value + j, prod.size);
+
+				// C. Correction
+				while (compareAbs(shiftedProd, U) == GREATER) {
+					q_byte--;
+
+					CustomInteger vShifted = allocInteger(V.size + j);
+					vShifted.size = V.size + j;
+					setMemory(vShifted.value, 0, j);
+					copyMemory(V.value, vShifted.value + j, V.size);
+
+					CustomInteger newProd = subtractInteger(shiftedProd, vShifted);
+					freeInteger(&shiftedProd);
+					freeInteger(&vShifted);
+					shiftedProd = newProd;
+				}
+
+				// D. Soustraction
+				CustomInteger newU = subtractInteger(U, shiftedProd);
+				freeInteger(&U);
+				U = newU;
+
+				Q.value[j] = q_byte;
+
+				freeInteger(&prod);
+				freeInteger(&shiftedProd);
+
+				if (j == 0) break;
+			}
+		}
+
+		// --- Dénormalisation ---
+		if (shift > 0) {
+			BitshiftPtr(&U, shift, RIGHT, false);
+		}
+
+		freeInteger(&V);
+
+		// Le reste final est ce qui reste dans U
+		R = U;
+	}
+
+	// 3. Application des Signes (Post-Traitement Centralisé)
+	Q.isNegative = quotientIsNegative;
+	R.isNegative = remIsNegative;
+
+	// 4. Ajustement Python (Floored Division)
+	// Si Reste != 0 ET signe(Reste) != signe(DiviseurOriginal)
+	if (!isZero(R) && (R.isNegative ^ origBNeg)) {
+		// Q = Q - 1
+		CustomInteger One = allocIntegerFromValue(1, false, true);
+		CustomInteger tempQ = subtractInteger(Q, One);
+		freeInteger(&Q);
+		Q = tempQ;
+		freeInteger(&One);
+
+		// R = R + B (avec signe original)
+		CustomInteger origB = copyIntegerToNew(b);
+		origB.isNegative = origBNeg;
+
+		CustomInteger tempR = addInteger(R, origB);
+		freeInteger(&R);
+		R = tempR;
+
+		freeInteger(&origB);
+	}
+
+	// 5. Finalisation
+	result.quotient = Q;
+	result.remainder = R;
+
+	reallocToFitInteger(&result.quotient);
+	reallocToFitInteger(&result.remainder);
+
+	return result;
+}
+
+/*
 EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 	EuclideanDivision result;
 
@@ -848,23 +1038,23 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		}
 	}
 
-	/*if (quotientIsNegative) {
-		CustomInteger One = allocIntegerFromValue(1, false, true), temp;
+	//if (quotientIsNegative) {
+	//	CustomInteger One = allocIntegerFromValue(1, false, true), temp;
 
-		quotient.isNegative = true;
-		remainder.isNegative = true;
+	//	quotient.isNegative = true;
+	//	remainder.isNegative = true;
 
-		temp = subtractInteger(quotient, One);
-		freeInteger(&quotient);
-		copyInteger(&temp, &quotient);
-		freeInteger(&temp);
+	//	temp = subtractInteger(quotient, One);
+	//	freeInteger(&quotient);
+	//	copyInteger(&temp, &quotient);
+	//	freeInteger(&temp);
 
-		temp = addInteger(remainder, b);
-		freeInteger(&remainder);
-		copyInteger(&temp, &remainder);
-		freeInteger(&temp);
-		freeInteger(&One);
-	}*/
+	//	temp = addInteger(remainder, b);
+	//	freeInteger(&remainder);
+	//	copyInteger(&temp, &remainder);
+	//	freeInteger(&temp);
+	//	freeInteger(&One);
+	//}
 
 	// Nouvelle version - fidèle à l'approche de Python
 	quotient.isNegative = quotientIsNegative;
@@ -872,7 +1062,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 
 	if (!isZero(remainder) && (remainder.isNegative ^ origBNeg)) {
 		CustomInteger	One = allocIntegerFromValue(1, false, true),
-						tempQ = subtractInteger(quotient, One), tempR;
+			tempQ = subtractInteger(quotient, One), tempR;
 
 		freeInteger(&quotient);
 		quotient = tempQ;
@@ -898,6 +1088,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 
 	return result;
 }
+*/
 
 CustomInteger modInteger(CustomInteger a, CustomInteger b) {
 	EuclideanDivision euclid = euclideanDivInteger(a, b);
