@@ -10,9 +10,11 @@
 #ifndef CUSTOM_INT
 #define CUSTOM_INT
 
-#define MAX_CUSTOM_INT_CAPACITY ((SizeT)2305843009213693951)
+// Capacité max en Mots (et non plus octets)
+#define MAX_CUSTOM_INT_CAPACITY ((SizeT)SIZET_MAX_VAL / sizeof(Word))
 
-#define custIntInitialized(PTR) (PTR->value != (uint8*)NULL)
+// Initialisation vérifie si le pointeur n'est pas NULL (cast en Word*)
+#define custIntInitialized(PTR) (PTR->value != (Word*)NULL)
 #define ADD_BIT_S(A, B, C_IN) (A ^ B ^ C_IN)
 #define ADD_BIT_C(A, B, C_IN) (A && B) || (A && C_IN) || (B && C_IN)
 
@@ -20,11 +22,11 @@
 
 #pragma region Type Definition
 typedef struct customInt {
-	SizeT size;			// Size in bytes
-	SizeT capacity;		// Capacity in bytes
-	uint8* value;
+	SizeT size;			// Taille en Mots (Words)
+	SizeT capacity;		// Capacité en Mots (Words)
+	Word* value;		// Tableau de uint32
 	bool isNegative;
-} CustomInteger, *CustomIntegerPtr;
+} CustomInteger, * CustomIntegerPtr;
 
 typedef enum ShiftDirection {
 	LEFT = 0,
@@ -46,55 +48,50 @@ typedef struct gcdStruct {
 	CustomInteger gcd, u, v;
 } Euclide;
 
-typedef CustomInteger (*ArithmeticFunc)(CustomInteger, CustomInteger);
+typedef CustomInteger(*ArithmeticFunc)(CustomInteger, CustomInteger);
 #pragma endregion
 
 #pragma pack()
 
 #define CUSTOM_INT_SIZE sizeof(CustomInteger)
-#define GCD_STRUCT_SIZE sizeof(Euclide)
 
 #pragma region Misc Operations
 
+/**
+ * @brief Allocates space for a CustomInteger
+ * * @param capacity Number of Words to allocate
+ * @return CustomInteger
+ */
 CustomInteger allocInteger(SizeT capacity);
-CustomInteger copyIntegerToNew(CustomInteger original);
-void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest);
-void printInteger(CustomInteger integer, Base base, bool alwaysPutSign);
-void reallocToFitInteger(CustomIntegerPtr integer);
-void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity);
-void setToZero(CustomIntegerPtr integer);
-void freeInteger(CustomIntegerPtr integer);
-
-CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue);
-
-String integerToString(CustomInteger integer, Base base, bool alwaysPutSign);
-
-uint8 getByteFromInteger(CustomInteger integer, SizeT byteIndex);
-
-#pragma endregion
-
-#pragma region Bitwise Operations
-
-CustomInteger BitwiseAND(CustomInteger a, CustomInteger b);
-CustomInteger BitwiseOR(CustomInteger a, CustomInteger b);
-CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b);
-CustomInteger BitwiseNOT(CustomInteger a);
-
-uint8 getBit(CustomInteger integer, SizeT bitIndex);
-void setBit(CustomIntegerPtr integer, uint8 newVal, SizeT bitIndex);
-
 
 /**
- * @brief Returns a new CustomInteger object representing the shifted integer passed as argument
- * 
- * @param integer The integer to shift
- * @param shift The amount of bits to shift by
- * @param direction LEFT or RIGHT
- * @param adaptCapacity Tells the function to output a bigger integer if the bitshift would cause an overflow of the original capacity
- * @return CustomInteger 
+ * @brief Frees the memory allocated for the CustomInteger
+ * * @param integer Pointer to the structure to free
  */
-CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
+void freeInteger(CustomIntegerPtr integer);
 
+/**
+ * @brief Reallocates the integer to the new capacity, copying data
+ */
+void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity);
+
+/**
+ * @brief Shrinks the size and capacity to fit the actual data (removes leading zeros)
+ */
+void reallocToFitInteger(CustomIntegerPtr integer);
+
+CustomInteger allocIntegerFromValue(int64 value, bool isNegative, bool copy);
+CustomInteger copyIntegerToNew(CustomInteger original);
+void copyInteger(CustomInteger original, CustomIntegerPtr output);
+
+// Bitwise Operations
+bool getBit(CustomInteger integer, SizeT index);
+void setBit(CustomIntegerPtr integer, bool bitValue, SizeT index);
+
+// New: Helper pour obtenir un Mot entier (et non un octet)
+Word getWordFromInteger(CustomInteger integer, SizeT index);
+
+CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 
 #pragma endregion
