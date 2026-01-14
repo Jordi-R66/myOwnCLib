@@ -15,8 +15,7 @@ CustomInteger allocInteger(SizeT capacity) {
 	if (capacity == 0) {
 		fprintf(stderr, "Undefined behaviour for 0 bit integer\n");
 		exit(EXIT_FAILURE);
-	}
-	else if (capacity > MAX_CUSTOM_INT_CAPACITY) {
+	} else if (capacity > MAX_CUSTOM_INT_CAPACITY) {
 		fprintf(stderr, "The requested capacity can't be allocated\n");
 		exit(EXIT_FAILURE);
 	}
@@ -142,8 +141,7 @@ static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr l
 	if (lowSize == 0) {
 		// On crée proprement un Zéro (taille 1, valeur 0)
 		*low = allocIntegerFromValue(0, false, true);
-	}
-	else {
+	} else {
 		*low = allocInteger(lowSize);
 		low->size = lowSize;
 		copyMemory(src.value, low->value, lowSize * WORD_SIZE);
@@ -160,8 +158,7 @@ static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr l
 
 		// Arithmétique des pointeurs sur Word* (src.value) fonctionne correctement
 		copyMemory(&(src.value[splitIndex]), high->value, highSize * WORD_SIZE);
-	}
-	else {
+	} else {
 		*high = allocIntegerFromValue(0, false, true);
 	}
 
@@ -218,8 +215,7 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 				appendChar(&obj, c);
 			}
 		}
-	}
-	else {
+	} else {
 		// --- ALGORITHME LENT (Divisions Euclidiennes Générales) ---
 		// Utilisé pour Base 10, Base 8, ou toute base exotique.
 
@@ -227,8 +223,7 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 			obj = allocString(2);
 			appendChar(&obj, '0');
 			// Le signe sera ajouté après
-		}
-		else {
+		} else {
 			// Estimation pire cas (Base 2) : size * 32
 			SizeT estimatedLen = integer.size * 32 + 2;
 			obj = allocString(estimatedLen);
@@ -250,8 +245,7 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 				// Sécurité pour ne pas dépasser baseChars si base > 16 (non géré par baseChars ici)
 				if (remainderVal < 16) {
 					appendChar(&obj, baseChars[remainderVal]);
-				}
-				else {
+				} else {
 					// Fallback générique si on étendait baseChars
 					appendChar(&obj, '?');
 				}
@@ -409,8 +403,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 
 	if (shift == 0) {
 		return copyIntegerToNew(integer);
-	}
-	else if (direction == LEFT || direction == RIGHT) {
+	} else if (direction == LEFT || direction == RIGHT) {
 		SizeT deltaSize = shift / 32;
 		SizeT resultCapacity = integer.capacity;
 
@@ -444,8 +437,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 				setBit(&result, bitVal, destBit);
 			}
 		}
-	}
-	else {
+	} else {
 		exit(EXIT_FAILURE);
 	}
 
@@ -469,8 +461,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 		b.isNegative = false;
 
 		return subtractInteger(a, b);
-	}
-	else if ((a.isNegative != b.isNegative) && a.isNegative) {
+	} else if ((a.isNegative != b.isNegative) && a.isNegative) {
 		a.isNegative = false;
 
 		return subtractInteger(b, a);
@@ -520,30 +511,25 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 		b.isNegative = false;
 		result = addInteger(a, b);
 		redirected = true;
-	}
-	else if (equalsInteger(a, b)) {
+	} else if (equalsInteger(a, b)) {
 		result = allocIntegerFromValue(0, false, true);
 		result.isNegative = a.isNegative;
 		redirected = true;
-	}
-	else if (isZero(a) && !redirected) {
+	} else if (isZero(a) && !redirected) {
 		result = copyIntegerToNew(b);
 		result.isNegative = !result.isNegative;
 		redirected = true;
-	}
-	else if (isZero(b) && !redirected) {
+	} else if (isZero(b) && !redirected) {
 		result = copyIntegerToNew(a);
 		redirected = true;
-	}
-	else if (!redirected && (a.isNegative != b.isNegative)) {
+	} else if (!redirected && (a.isNegative != b.isNegative)) {
 		if (lessThanInteger(a, b)) {
 			a.isNegative = false;
 			result = addInteger(a, b);
 			result.isNegative = true;
 			redirected = true;
 		}
-	}
-	else if (!redirected && (a.isNegative == b.isNegative)) {
+	} else if (!redirected && (a.isNegative == b.isNegative)) {
 		if (!a.isNegative && lessThanInteger(a, b)) {
 			redirected = true;
 			result = subtractInteger(b, a);
@@ -579,8 +565,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 				// le résultat sera correct, mais on note le borrow
 				result.value[i] = (Word)(((DoubleWord)1 << 32) + (DoubleWord)A - subVal);
 				BORROW = 1;
-			}
-			else {
+			} else {
 				result.value[i] = A - (Word)subVal;
 				BORROW = 0;
 			}
@@ -596,8 +581,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 
 		freeInteger(&a_temp);
 		freeInteger(&b_temp);
-	}
-	else if (!redirected) {
+	} else if (!redirected) {
 		exit(EXIT_FAILURE);
 	}
 
@@ -746,12 +730,10 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		Q = allocIntegerFromValue(0, false, true);
 		R = copyIntegerToNew(a);
 		R.isNegative = false;
-	}
-	else if (comp == EQUALS) {
+	} else if (comp == EQUALS) {
 		Q = allocIntegerFromValue(1, false, true);
 		R = allocIntegerFromValue(0, false, true);
-	}
-	else {
+	} else {
 		// Cas A > B : Algorithme de Knuth (Base 2^32)
 		CustomInteger U = copyIntegerToNew(a);
 		CustomInteger V = copyIntegerToNew(b);
@@ -883,113 +865,110 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
-    CustomInteger output;
+	CustomInteger output;
 
-    // --- PRÉ-ANALYSE : Vérification Puissance de 2 ---
-    // On scanne 'base' pour voir si c'est une puissance de 2 (un seul bit à 1)
-    SizeT setBitCount = 0;
-    SizeT bitPosition = 0;
+	// --- PRÉ-ANALYSE : Vérification Puissance de 2 ---
+	// On scanne 'base' pour voir si c'est une puissance de 2 (un seul bit à 1)
+	SizeT setBitCount = 0;
+	SizeT bitPosition = 0;
 
-    for (SizeT i = 0; i < base.size; i++) {
-        Word b = base.value[i];
-        if (b != 0) {
-            for (int k = 0; k < 32; k++) { // Scan des 32 bits du mot
-                if ((b >> k) & 1) {
-                    setBitCount++;
-                    if (setBitCount == 1) bitPosition = i * 32 + k;
-                }
-            }
-            if (setBitCount > 1) break; // Pas une puissance de 2
-        }
-    }
+	for (SizeT i = 0; i < base.size; i++) {
+		Word b = base.value[i];
+		if (b != 0) {
+			for (int k = 0; k < 32; k++) { // Scan des 32 bits du mot
+				if ((b >> k) & 1) {
+					setBitCount++;
+					if (setBitCount == 1) bitPosition = i * 32 + k;
+				}
+			}
+			if (setBitCount > 1) break; // Pas une puissance de 2
+		}
+	}
 
-    // --- LOGIQUE PRINCIPALE ---
+	// --- LOGIQUE PRINCIPALE ---
 
-    if (isZero(exp)) {
-        // Cas trivial 1 : x^0 = 1
-        output = allocIntegerFromValue(1, false, true);
-    }
-    else if (isZero(base)) {
-        // Cas trivial 2 : 0^x = 0
-        output = allocIntegerFromValue(0, false, true);
-    }
-    // Condition : Base est 2^k ET Exposant tient dans un SizeT pour le shift
-    // Note : exp.size est en Mots (4 octets). On vérifie que la taille totale en octets tient dans SizeT.
-    else if (setBitCount == 1 && (exp.size * sizeof(Word)) <= sizeof(SizeT)) {
-        // --- OPTIMISATION PUISSANCE DE 2 ---
+	if (isZero(exp)) {
+		// Cas trivial 1 : x^0 = 1
+		output = allocIntegerFromValue(1, false, true);
+	} else if (isZero(base)) {
+		// Cas trivial 2 : 0^x = 0
+		output = allocIntegerFromValue(0, false, true);
+	} else if (setBitCount == 1 && (exp.size * sizeof(Word)) <= sizeof(SizeT)) {
+		// Condition : Base est 2^k ET Exposant tient dans un SizeT pour le shift
+		// Note : exp.size est en Mots (4 octets). On vérifie que la taille totale en octets tient dans SizeT.
+		// --- OPTIMISATION PUISSANCE DE 2 ---
 
-        SizeT expVal = 0;
-        for (SizeT i = 0; i < exp.size; i++) {
-            // Reconstitution de la valeur (Word vers SizeT)
-            // On cast en SizeT avant le shift pour éviter l'overflow si SizeT > 32 bits
-            expVal |= ((SizeT)exp.value[i]) << (i * 32);
-        }
+		SizeT expVal = 0;
+		for (SizeT i = 0; i < exp.size; i++) {
+			// Reconstitution de la valeur (Word vers SizeT)
+			// On cast en SizeT avant le shift pour éviter l'overflow si SizeT > 32 bits
+			expVal |= ((SizeT)exp.value[i]) << (i * 32);
+		}
 
-        // Calcul du décalage : (2^k)^exp = 2^(k*exp)
-        SizeT totalShift = bitPosition * expVal;
+		// Calcul du décalage : (2^k)^exp = 2^(k*exp)
+		SizeT totalShift = bitPosition * expVal;
 
-        output = allocIntegerFromValue(1, false, true);
-        BitshiftPtr(&output, totalShift, LEFT, true);
-    }
-    else {
-        // --- ALGORITHME GÉNÉRAL (Square and Multiply) ---
+		output = allocIntegerFromValue(1, false, true);
+		BitshiftPtr(&output, totalShift, LEFT, true);
+	} else {
+		// --- ALGORITHME GÉNÉRAL (Square and Multiply) ---
 
-        output = allocIntegerFromValue(1, false, true);
-        CustomInteger baseAccumulator = copyIntegerToNew(base);
+		output = allocIntegerFromValue(1, false, true);
+		CustomInteger baseAccumulator = copyIntegerToNew(base);
 
-        // Optimisation : scan uniquement jusqu'au bit le plus significatif de l'exposant
-        // Calcul précis de maxBits pour éviter de boucler inutilement (ex: 32 itérations pour 5^3)
-        SizeT maxBits = 0;
-        if (exp.size > 0) {
-            // 1. Trouver le mot le plus significatif non nul
-            SizeT msWordIdx = exp.size;
-            while (msWordIdx > 0 && exp.value[msWordIdx - 1] == 0) {
-                msWordIdx--;
-            }
+		// Optimisation : scan uniquement jusqu'au bit le plus significatif de l'exposant
+		// Calcul précis de maxBits pour éviter de boucler inutilement (ex: 32 itérations pour 5^3)
+		SizeT maxBits = 0;
+		if (exp.size > 0) {
+			// 1. Trouver le mot le plus significatif non nul
+			SizeT msWordIdx = exp.size;
+			while (msWordIdx > 0 && exp.value[msWordIdx - 1] == 0) {
+				msWordIdx--;
+			}
 
-            if (msWordIdx > 0) {
-                // 2. Trouver le bit le plus significatif dans ce mot
-                Word topWord = exp.value[msWordIdx - 1];
-                int msBit = 31;
-                while (msBit >= 0 && !((topWord >> msBit) & 1)) {
-                    msBit--;
-                }
-                
-                // Index absolu du dernier bit à 1
-                maxBits = (msWordIdx - 1) * 32 + msBit + 1;
-            }
-        }
+			if (msWordIdx > 0) {
+				// 2. Trouver le bit le plus significatif dans ce mot
+				Word topWord = exp.value[msWordIdx - 1];
+				int msBit = 31;
+				while (msBit >= 0 && !((topWord >> msBit) & 1)) {
+					msBit--;
+				}
 
-        for (SizeT i = 0; i < maxBits; i++) {
-            // 1. Si le bit est à 1, on multiplie le résultat courant par l'accumulateur
-            if (getBit(exp, i) == 1) {
-                CustomInteger newResult = multiplyInteger(output, baseAccumulator);
-                freeInteger(&output);
-                output = newResult;
-            }
+				// Index absolu du dernier bit à 1
+				maxBits = (msWordIdx - 1) * 32 + msBit + 1;
+			}
+		}
 
-            // 2. On prépare la base pour le prochain tour (Carré)
-            // On ne le fait pas si c'était la dernière itération utile
-            if (i < maxBits - 1) {
-                CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
-                freeInteger(&baseAccumulator);
-                baseAccumulator = newBase;
-            }
-        }
+		for (SizeT i = 0; i < maxBits; i++) {
+			// 1. Si le bit est à 1, on multiplie le résultat courant par l'accumulateur
+			if (getBit(exp, i) == 1) {
+				CustomInteger newResult = multiplyInteger(output, baseAccumulator);
+				freeInteger(&output);
+				output = newResult;
+			}
 
-        freeInteger(&baseAccumulator);
-    }
+			// 2. On prépare la base pour le prochain tour (Carré)
+			// On ne le fait pas si c'était la dernière itération utile
+			if (i < maxBits - 1) {
+				CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
+				freeInteger(&baseAccumulator);
+				baseAccumulator = newBase;
+			}
+		}
 
-    // --- POST-TRAITEMENT ---
+		freeInteger(&baseAccumulator);
+	}
 
-    // Gestion du signe commune à tous les cas non triviaux
-    if (!isZero(output)) {
-        output.isNegative = base.isNegative && (getBit(exp, 0) == 1);
-    }
+	// --- POST-TRAITEMENT ---
 
-    reallocToFitInteger(&output);
+	// Gestion du signe commune à tous les cas non triviaux
+	if (!isZero(output)) {
+		output.isNegative = base.isNegative && (getBit(exp, 0) == 1);
+	}
 
-    return output;
+	reallocToFitInteger(&output);
+
+	return output;
 }
 #pragma endregion
 
@@ -1010,8 +989,7 @@ Comparison compareAbs(CustomInteger a, CustomInteger b) {
 
 		if (different && A > B) {
 			return GREATER;
-		}
-		else if (different) {
+		} else if (different) {
 			return LESS;
 		}
 	}
@@ -1024,11 +1002,9 @@ Comparison compareIntegers(CustomInteger a, CustomInteger b) {
 
 	if (equalsInteger(a, b)) {
 		output = EQUALS;
-	}
-	else if (lessThanInteger(a, b)) {
+	} else if (lessThanInteger(a, b)) {
 		output = LESS;
-	}
-	else if (greaterThanInteger(a, b)) {
+	} else if (greaterThanInteger(a, b)) {
 		output = GREATER;
 	}
 
@@ -1181,14 +1157,11 @@ CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger
 		freeInteger(&One);
 		fprintf(stderr, "Math error: modulo by 0\n");
 		exit(EXIT_FAILURE);
-	}
-	else if (equalsInteger(mod, One)) {
+	} else if (equalsInteger(mod, One)) {
 		output = allocIntegerFromValue(0, false, true);
-	}
-	else if (isZero(exp)) {
+	} else if (isZero(exp)) {
 		output = allocIntegerFromValue(1, false, true);
-	}
-	else {
+	} else {
 		output = allocIntegerFromValue(1, false, true);
 		CustomInteger baseAcc = modInteger(base, mod);
 
