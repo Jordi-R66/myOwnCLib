@@ -41,6 +41,8 @@ typedef enum Base {
 typedef struct div {
 	CustomInteger quotient, remainder;
 } EuclideanDivision;
+
+typedef CustomInteger (*ArithmeticFunc)(CustomInteger, CustomInteger);
 #pragma endregion
 
 #pragma pack()
@@ -52,6 +54,7 @@ typedef struct div {
 CustomInteger allocInteger(SizeT capacity);
 CustomInteger copyIntegerToNew(CustomInteger original);
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest);
+void printInteger(CustomInteger integer, Base base, bool alwaysPutSign);
 void reallocToFitInteger(CustomIntegerPtr integer);
 void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity);
 void setToZero(CustomIntegerPtr integer);
@@ -95,6 +98,8 @@ void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction
 
 CustomInteger addInteger(CustomInteger a, CustomInteger b);
 CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
+CustomInteger multiplyNaive(CustomInteger a, CustomInteger b);
+CustomInteger multiplyKaratsuba(CustomInteger a, CustomInteger b);
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
 EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b);
 CustomInteger divideInteger(CustomInteger a, CustomInteger b);
