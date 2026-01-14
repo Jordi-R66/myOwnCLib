@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <strings.h>
 
+// Pour la multiplication Karatsuba
+// Seuil en octets. En dessous de 32 octets (256 bits), l'algo naïf est souvent plus rapide
+// à cause de l'overhead des allocations mémoire de la récursion.
+#define KARATSUBA_THRESHOLD 32
+
 #pragma region Misc Operations
 
 CustomInteger allocInteger(SizeT capacity) {
@@ -128,7 +133,40 @@ void freeInteger(CustomIntegerPtr integer) {
 	integer = (CustomIntegerPtr)NULL;
 }
 
-static string baseChars = "0123456789ABCDEF";
+static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr low, CustomIntegerPtr high) {
+	// Partie Basse
+	SizeT lowSize = (splitIndex < src.size) ? splitIndex : src.size;
+
+	if (lowSize == 0) {
+		// On crée proprement un Zéro (taille 1, valeur 0)
+		*low = allocIntegerFromValue(0, false, true);
+	}
+	else {
+		*low = allocInteger(lowSize);
+		low->size = lowSize;
+		copyMemory(src.value, low->value, lowSize);
+	}
+
+	low->isNegative = false;
+
+	// Partie Haute
+	if (src.size > splitIndex) {
+		SizeT highSize = src.size - splitIndex;
+
+		*high = allocInteger(highSize);
+		high->size = highSize;
+
+		copyMemory(&(src.value[splitIndex]), high->value, highSize);
+	}
+	else {
+		*high = allocIntegerFromValue(0, false, true);
+	}
+
+	high->isNegative = false;
+
+	reallocToFitInteger(low);
+	reallocToFitInteger(high);
+}
 
 /*typedef String (*FormatterFunc)(CustomInteger, Base);
 
@@ -634,7 +672,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
+CustomInteger multiplyNaive(CustomInteger a, CustomInteger b) {
 	if (isZero(a) || isZero(b)) {
 		return allocIntegerFromValue(0, false, true);
 	}
@@ -665,10 +703,104 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 		result.value[i + b.size] += (uint8)carry;
 	}
 
-	reallocToFitInteger(&result); // Nettoie les zéros de tête
 	return result;
 }
 
+CustomInteger multiplyKaratsuba(CustomInteger a, CustomInteger b) {
+	if (a.size < KARATSUBA_THRESHOLD || b.size < KARATSUBA_THRESHOLD) {
+		//printInteger(a, HEX, true);
+		//printInteger(b, HEX, true);
+		return multiplyNaive(a, b);
+	}
+
+	// 1. Calcul du point de coupe (m)
+	// On coupe au milieu du plus grand nombre
+	SizeT m = (a.size > b.size ? a.size : b.size) / 2;
+
+	// 2. Découpage (Split)
+	CustomInteger low1, high1, low2, high2;
+	splitInteger(a, m, &low1, &high1);
+	splitInteger(b, m, &low2, &high2);
+
+	// 3. Appels Récursifs (Les 3 multiplications)
+	// z0 = low1 * low2
+	CustomInteger z0 = multiplyKaratsuba(low1, low2);
+
+	// z2 = high1 * high2
+	CustomInteger z2 = multiplyKaratsuba(high1, high2);
+
+	// Pour z1, il faut calculer (low1 + high1) * (low2 + high2)
+	CustomInteger sum1 = addInteger(low1, high1);
+	CustomInteger sum2 = addInteger(low2, high2);
+	CustomInteger z1_inter = multiplyKaratsuba(sum1, sum2);
+
+	// Nettoyage des opérandes intermédiaires
+	freeInteger(&low1); freeInteger(&high1);
+	freeInteger(&low2); freeInteger(&high2);
+	freeInteger(&sum1); freeInteger(&sum2);
+
+	// 4. Calcul final de z1 = z1_inter - z2 - z0
+	CustomInteger tempSub = subtractInteger(z1_inter, z2);
+	CustomInteger z1 = subtractInteger(tempSub, z0);
+
+	freeInteger(&z1_inter);
+	freeInteger(&tempSub);
+
+	// 5. Assemblage du résultat : z2*(B^2m) + z1*(B^m) + z0
+	// B^m correspond à un décalage de m octets (donc m*8 bits)
+
+	// On décale z2 de 2*m octets
+	CustomInteger resultZ2 = allocInteger(z2.capacity + m * 2); // Pré-alloc large
+	copyInteger(&z2, &resultZ2);
+	BitshiftPtr(&resultZ2, m * 8 * 2, LEFT, true);
+
+	// On décale z1 de m octets
+	CustomInteger resultZ1 = allocInteger(z1.capacity + m);
+	copyInteger(&z1, &resultZ1);
+	BitshiftPtr(&resultZ1, m * 8, LEFT, true);
+
+	// Somme finale
+	CustomInteger tempRes = addInteger(resultZ2, resultZ1);
+	CustomInteger result = addInteger(tempRes, z0);
+
+	// Nettoyage final
+	freeInteger(&z0);
+	freeInteger(&z2);
+	freeInteger(&z1);
+	freeInteger(&resultZ2);
+	freeInteger(&resultZ1);
+	freeInteger(&tempRes);
+
+	return result;
+}
+
+CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
+	// 1. Cas triviaux
+	if (isZero(a) || isZero(b)) {
+		return allocIntegerFromValue(0, false, true);
+	}
+
+	// 2. Calcul du signe attendu (XOR)
+	bool resultNegative = a.isNegative ^ b.isNegative;
+
+	// 3. Passage en positif pour le calcul
+	// Note : Comme 'a' et 'b' sont passés par valeur (copie de la struct),
+	// modifier .isNegative ici n'affecte pas les variables de la fonction appelante (testInt.c).
+	a.isNegative = false;
+	b.isNegative = false;
+
+	// 4. Exécution de l'algorithme
+	// multiplyKaratsuba est la fonction itérative avec la pile que je t'ai donnée.
+	// Elle gère elle-même le seuil (THRESHOLD) pour appeler multiplyNaive si besoin.
+	CustomInteger result = multiplyKaratsuba(a, b);
+
+	// 5. APPLICATION DU SIGNE (Le correctif est ici)
+	result.isNegative = resultNegative;
+
+	reallocToFitInteger(&result);
+
+	return result;
+}
 EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 	EuclideanDivision result;
 
