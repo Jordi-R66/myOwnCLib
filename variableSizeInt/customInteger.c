@@ -1103,95 +1103,92 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
-	// Cas triviaux
-	if (isZero(exp)) return allocIntegerFromValue(1, false, true);
-	if (isZero(base)) return allocIntegerFromValue(0, false, true);
+	CustomInteger output;
 
-	// --- 1. OPTIMISATION PUISSANCE DE 2 (Améliorée) ---
+	// --- PRÉ-ANALYSE : Vérification Puissance de 2 ---
+	// On scanne 'base' pour voir si c'est une puissance de 2 (un seul bit à 1)
+	// Cela nous permet de décider quelle branche du if/else emprunter plus bas.
 	SizeT setBitCount = 0;
 	SizeT bitPosition = 0;
 
-	// On scanne pour voir si c'est une puissance de 2
 	for (SizeT i = 0; i < base.size; i++) {
 		uint8 b = base.value[i];
 		if (b != 0) {
-			// Compte les bits dans cet octet
 			for (int k = 0; k < 8; k++) {
 				if ((b >> k) & 1) {
 					setBitCount++;
 					if (setBitCount == 1) bitPosition = i * 8 + k;
 				}
 			}
-			// SI on a trouvé plus d'un bit au total, on arrête TOUT DE SUITE.
-			// Inutile de scanner le reste du grand nombre.
-			if (setBitCount > 1) break;
+			if (setBitCount > 1) break; // Pas une puissance de 2
 		}
 	}
 
-	if (setBitCount == 1) {
-		// Logique puissance de 2 (identique à avant, mais attention à l'overflow SizeT sur expVal)
-		// Note: Si exp est immense, expVal ne tiendra pas dans un SizeT. 
-		// Cette optimisation est valide pour des exposants "raisonnables" (< 64 bits).
-		if (exp.size > sizeof(SizeT)) {
-			// Fallback vers l'algo général si l'exposant est trop grand pour calculer le shift
-		} else {
-			SizeT expVal = 0;
-			for (SizeT i = 0; i < exp.size; i++) {
-				expVal |= ((SizeT)exp.value[i]) << (i * 8);
+	// --- LOGIQUE PRINCIPALE ---
+
+	if (isZero(exp)) {
+		// Cas trivial 1 : x^0 = 1
+		output = allocIntegerFromValue(1, false, true);
+	}
+	else if (isZero(base)) {
+		// Cas trivial 2 : 0^x = 0
+		output = allocIntegerFromValue(0, false, true);
+	}
+	else if (setBitCount == 1 && exp.size <= sizeof(SizeT)) {
+		// --- OPTIMISATION PUISSANCE DE 2 ---
+		// Condition : Base est 2^k ET Exposant tient dans un SizeT (pour calculer le shift)
+
+		SizeT expVal = 0;
+		for (SizeT i = 0; i < exp.size; i++) {
+			expVal |= ((SizeT)exp.value[i]) << (i * 8);
+		}
+
+		// Calcul du décalage : (2^k)^exp = 2^(k*exp)
+		SizeT totalShift = bitPosition * expVal;
+
+		output = allocIntegerFromValue(1, false, true);
+		BitshiftPtr(&output, totalShift, LEFT, true);
+	}
+	else {
+		// --- ALGORITHME GÉNÉRAL (Square and Multiply) ---
+
+		output = allocIntegerFromValue(1, false, true);
+		CustomInteger baseAccumulator = copyIntegerToNew(base);
+
+		// Optimisation : scan uniquement jusqu'au bit le plus significatif de l'exposant
+		SizeT maxBits = exp.size * 8;
+
+		for (SizeT i = 0; i < maxBits; i++) {
+			// 1. Si le bit est à 1, on multiplie le résultat courant par l'accumulateur
+			if (getBit(exp, i) == 1) {
+				CustomInteger newResult = multiplyInteger(output, baseAccumulator);
+				freeInteger(&output);
+				output = newResult;
 			}
 
-			// Attention: totalShift peut overflow, mais on assume que c'est géré ou que l'alloc échouera
-			SizeT totalShift = bitPosition * expVal;
-
-			CustomInteger result = allocIntegerFromValue(1, false, true);
-			BitshiftPtr(&result, totalShift, LEFT, true);
-
-			if (base.isNegative && (getBit(exp, 0) == 1)) {
-				result.isNegative = true;
+			// 2. On prépare la base pour le prochain tour (Carré)
+			// On ne le fait pas si c'était la dernière itération utile
+			if (i < maxBits - 1) {
+				CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
+				freeInteger(&baseAccumulator);
+				baseAccumulator = newBase;
 			}
-			return result;
 		}
+
+		freeInteger(&baseAccumulator);
 	}
 
-	// --- 2. ALGORITHME GÉNÉRAL (Square and Multiply - SCAN VERSION) ---
+	// --- POST-TRAITEMENT ---
 
-	CustomInteger result = allocIntegerFromValue(1, false, true);
-	CustomInteger baseAccumulator = copyIntegerToNew(base); // Représente base^(2^i)
-
-	// Détermination de la limite de bits à scanner
-	// On cherche le bit le plus significatif de l'exposant pour ne pas boucler sur des zéros
-	SizeT maxBits = exp.size * 8;
-	// Petite boucle pour réduire maxBits au strict nécessaire (optionnel mais propre)
-	// On pourrait utiliser une fonction getMostSignificantBitIndex()
-
-	for (SizeT i = 0; i < maxBits; i++) {
-		// Lecture directe du bit sans modifier l'exposant (O(1))
-		if (getBit(exp, i) == 1) {
-			CustomInteger newResult = multiplyInteger(result, baseAccumulator);
-			freeInteger(&result);
-			result = newResult;
-		}
-
-		// On prépare la base pour le prochain bit (base = base^2)
-		// On ne fait le carré que s'il reste des bits à traiter
-		// (Optimisation : éviter la dernière multiplication inutile au dernier tour)
-		if (i < maxBits - 1) {
-			// Petite vérification pour éviter de continuer si exp n'a plus de bits actifs
-			// (Implique de connaître le MSB de exp, sinon on continue jusqu'à exp.size*8)
-
-			CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
-			freeInteger(&baseAccumulator);
-			baseAccumulator = newBase;
-		}
+	// Gestion du signe commune à tous les cas non triviaux (et correcte pour les triviaux aussi)
+	// Résultat négatif si et seulement si : Base Négative ET Exposant Impair
+	if (!isZero(output)) {
+		output.isNegative = base.isNegative && (getBit(exp, 0) == 1);
 	}
 
-	// Nettoyage final
-	freeInteger(&baseAccumulator);
+	reallocToFitInteger(&output);
 
-	// Gestion du signe : si base négative et exposant impair
-	result.isNegative = base.isNegative && (getBit(exp, 0) == 1);
-
-	return result;
+	return output;
 }
 #pragma endregion
 
