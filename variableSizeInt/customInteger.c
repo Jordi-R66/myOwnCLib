@@ -331,6 +331,10 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 		output.value[i] = (uint8)((value >> (i * 8)) % 256);
 	}
 
+	if (fitToValue) {
+		reallocToFitInteger(&output);
+	}
+
 	return output;
 }
 
