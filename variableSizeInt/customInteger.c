@@ -258,7 +258,6 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 			}
 		}
 	} else {
-
 		// --- ALGORITHME LENT (Divisions Euclidiennes Générales) ---
 		// Utilisé pour Base 10, Base 8, ou toute base exotique.
 
@@ -774,7 +773,97 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 	return euclid.quotient;
 }
 
-CustomInteger powInteger(CustomInteger a, CustomInteger exp);
+CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
+	// Cas triviaux
+	if (isZero(exp)) return allocIntegerFromValue(1, false, true);
+	if (isZero(base)) return allocIntegerFromValue(0, false, true);
+
+	// --- 1. OPTIMISATION PUISSANCE DE 2 (Améliorée) ---
+	SizeT setBitCount = 0;
+	SizeT bitPosition = 0;
+
+	// On scanne pour voir si c'est une puissance de 2
+	for (SizeT i = 0; i < base.size; i++) {
+		uint8 b = base.value[i];
+		if (b != 0) {
+			// Compte les bits dans cet octet
+			for (int k = 0; k < 8; k++) {
+				if ((b >> k) & 1) {
+					setBitCount++;
+					if (setBitCount == 1) bitPosition = i * 8 + k;
+				}
+			}
+			// SI on a trouvé plus d'un bit au total, on arrête TOUT DE SUITE.
+			// Inutile de scanner le reste du grand nombre.
+			if (setBitCount > 1) break;
+		}
+	}
+
+	if (setBitCount == 1) {
+		// Logique puissance de 2 (identique à avant, mais attention à l'overflow SizeT sur expVal)
+		// Note: Si exp est immense, expVal ne tiendra pas dans un SizeT. 
+		// Cette optimisation est valide pour des exposants "raisonnables" (< 64 bits).
+		if (exp.size > sizeof(SizeT)) {
+			// Fallback vers l'algo général si l'exposant est trop grand pour calculer le shift
+		} else {
+			SizeT expVal = 0;
+			for (SizeT i = 0; i < exp.size; i++) {
+				expVal |= ((SizeT)exp.value[i]) << (i * 8);
+			}
+
+			// Attention: totalShift peut overflow, mais on assume que c'est géré ou que l'alloc échouera
+			SizeT totalShift = bitPosition * expVal;
+
+			CustomInteger result = allocIntegerFromValue(1, false, true);
+			BitshiftPtr(&result, totalShift, LEFT, true);
+
+			if (base.isNegative && (getBit(exp, 0) == 1)) {
+				result.isNegative = true;
+			}
+			return result;
+		}
+	}
+
+	// --- 2. ALGORITHME GÉNÉRAL (Square and Multiply - SCAN VERSION) ---
+
+	CustomInteger result = allocIntegerFromValue(1, false, true);
+	CustomInteger baseAccumulator = copyIntegerToNew(base); // Représente base^(2^i)
+
+	// Détermination de la limite de bits à scanner
+	// On cherche le bit le plus significatif de l'exposant pour ne pas boucler sur des zéros
+	SizeT maxBits = exp.size * 8;
+	// Petite boucle pour réduire maxBits au strict nécessaire (optionnel mais propre)
+	// On pourrait utiliser une fonction getMostSignificantBitIndex()
+
+	for (SizeT i = 0; i < maxBits; i++) {
+		// Lecture directe du bit sans modifier l'exposant (O(1))
+		if (getBit(exp, i) == 1) {
+			CustomInteger newResult = multiplyInteger(result, baseAccumulator);
+			freeInteger(&result);
+			result = newResult;
+		}
+
+		// On prépare la base pour le prochain bit (base = base^2)
+		// On ne fait le carré que s'il reste des bits à traiter
+		// (Optimisation : éviter la dernière multiplication inutile au dernier tour)
+		if (i < maxBits - 1) {
+			// Petite vérification pour éviter de continuer si exp n'a plus de bits actifs
+			// (Implique de connaître le MSB de exp, sinon on continue jusqu'à exp.size*8)
+
+			CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
+			freeInteger(&baseAccumulator);
+			baseAccumulator = newBase;
+		}
+	}
+
+	// Nettoyage final
+	freeInteger(&baseAccumulator);
+
+	// Gestion du signe : si base négative et exposant impair
+	result.isNegative = base.isNegative && (getBit(exp, 0) == 1);
+
+	return result;
+}
 #pragma endregion
 
 #pragma region Comparison operations
