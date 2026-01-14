@@ -68,6 +68,33 @@ typedef signed short int16;
 #define I64_MAX_VAL  9223372036854775807
 #define I64_MIN_VAL -9223372036854775808
 
+#pragma region Word Declaration
+
+#define SWORD_TYPE int32
+#define WORD_TYPE uint32
+
+#define WORD_MAX_VAL U32_MAX_VAL
+#define WORD_MIN_VAL U32_MIN_VAL
+
+#define SWORD_MAX_VAL I32_MAX_VAL
+#define SWORD_MIN_VAL I32_MIN_VAL
+
+#define SDOUBLE_WORD_TYPE int64
+#define DOUBLE_WORD_TYPE uint64
+
+#define DOUBLE_WORD_MAX_VAL U64_MAX_VAL
+#define DOUBLE_WORD_MIN_VAL U64_MIN_VAL
+
+#define SDOUBLE_WORD_MAX_VAL I64_MAX_VAL
+#define SDOUBLE_WORD_MIN_VAL I64_MIN_VAL
+
+typedef SWORD_TYPE sWord;
+typedef WORD_TYPE Word;
+typedef SDOUBLE_WORD_TYPE sDoubleWord;
+typedef DOUBLE_WORD_TYPE DoubleWord;
+
+#pragma endregion
+
 #pragma region SizeT Declaration
 	#if defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
 		typedef uint32 SizeT;
