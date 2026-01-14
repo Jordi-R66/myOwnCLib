@@ -42,12 +42,17 @@ typedef struct div {
 	CustomInteger quotient, remainder;
 } EuclideanDivision;
 
+typedef struct gcdStruct {
+	CustomInteger gcd, u, v;
+} Euclide;
+
 typedef CustomInteger (*ArithmeticFunc)(CustomInteger, CustomInteger);
 #pragma endregion
 
 #pragma pack()
 
 #define CUSTOM_INT_SIZE sizeof(CustomInteger)
+#define GCD_STRUCT_SIZE sizeof(Euclide)
 
 #pragma region Misc Operations
 
@@ -118,6 +123,13 @@ bool equalsInteger(CustomInteger a, CustomInteger b);
 bool differentFromInteger(CustomInteger a, CustomInteger b);
 bool lessThanInteger(CustomInteger a, CustomInteger b);
 bool greaterThanInteger(CustomInteger a, CustomInteger b);
+
+#pragma endregion
+
+#pragma region Modular Arithmetics
+
+Euclide ExtendedEuclide(CustomInteger a, CustomInteger b);
+CustomInteger modularInverse(CustomInteger a, CustomInteger m);
 
 #pragma endregion
 

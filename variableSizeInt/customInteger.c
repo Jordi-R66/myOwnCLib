@@ -1303,3 +1303,129 @@ bool greaterThanInteger(CustomInteger a, CustomInteger b) {
 }
 
 #pragma endregion
+
+#pragma region Modular Arithmetics
+
+Euclide ExtendedEuclide(CustomInteger a, CustomInteger b) {
+	// 1. Initialisation de output (correspond à r, u, v en Python)
+	// r = a, u = 1, v = 0
+	Euclide output;
+	output.gcd = copyIntegerToNew(a);
+	output.u = allocIntegerFromValue(1, false, true);
+	output.v = allocIntegerFromValue(0, false, true);
+
+	// 2. Initialisation de temp (correspond à r2, u2, v2 en Python)
+	// r2 = b, u2 = 0, v2 = 1
+	Euclide temp;
+	temp.gcd = copyIntegerToNew(b);
+	temp.u = allocIntegerFromValue(0, false, true);
+	temp.v = allocIntegerFromValue(1, false, true);
+
+	// 3. Boucle principale
+	while (!isZero(temp.gcd)) {
+		EuclideanDivision div = euclideanDivInteger(output.gcd, temp.gcd);
+		CustomInteger q = div.quotient;
+		CustomInteger r_new = div.remainder;
+
+		CustomInteger q_mult_u2 = multiplyInteger(q, temp.u);
+		CustomInteger u_new = subtractInteger(output.u, q_mult_u2);
+		freeInteger(&q_mult_u2);
+
+		CustomInteger q_mult_v2 = multiplyInteger(q, temp.v);
+		CustomInteger v_new = subtractInteger(output.v, q_mult_v2);
+		freeInteger(&q_mult_v2);
+
+		freeInteger(&q);
+
+		// D. Mise à jour des variables (Le "Swap")
+
+		// 1. On libère les anciennes valeurs de 'output' car elles vont être écrasées
+		freeInteger(&output.gcd);
+		freeInteger(&output.u);
+		freeInteger(&output.v);
+
+		// 2. 'output' prend les valeurs actuelles de 'temp'
+		// (r, u, v) = (r2, u2, v2)
+		output = temp;
+
+		// 3. 'temp' prend les nouvelles valeurs calculées
+		// (r2, u2, v2) = (r_new, u_new, v_new)
+		temp.gcd = r_new;
+		temp.u = u_new;
+		temp.v = v_new;
+	}
+
+	freeInteger(&temp.gcd);
+	freeInteger(&temp.u);
+	freeInteger(&temp.v);
+
+	return output;
+}
+
+CustomInteger gcdInteger(CustomInteger a, CustomInteger b) {
+	CustomInteger r_prev = copyIntegerToNew(a);
+	CustomInteger r_curr = copyIntegerToNew(b);
+
+	r_prev.isNegative = false;
+	r_curr.isNegative = false;
+
+	// 2. Boucle: while b != 0
+	while (!isZero(r_curr)) {
+		// Calcul du modulo : r_next = r_prev % r_curr
+		// On utilise euclideanDivInteger car elle gère déjà toute la complexité
+		EuclideanDivision div = euclideanDivInteger(r_prev, r_curr);
+
+		// On n'a pas besoin du quotient
+		freeInteger(&div.quotient);
+
+		// Nettoyage de l'ancienne valeur de 'a' (r_prev)
+		freeInteger(&r_prev);
+
+		// Rotation des variables :
+		// a = b  --> r_prev prend la valeur de r_curr
+		r_prev = r_curr;
+
+		// b = a % b --> r_curr prend la valeur du reste
+		r_curr = div.remainder;
+	}
+
+	// A la fin, r_curr est 0, et r_prev contient le PGCD
+	freeInteger(&r_curr);
+
+	return r_prev;
+}
+
+// Calcule X tel que (A * X) % M == 1
+CustomInteger modularInverse(CustomInteger a, CustomInteger m) {
+	Euclide res = ExtendedEuclide(a, m);
+
+	// L'inverse existe seulement si PGCD(a, m) == 1
+	CustomInteger One = allocIntegerFromValue(1, false, true);
+	if (!equalsInteger(res.gcd, One)) {
+		// Pas d'inverse (a et m ne sont pas premiers entre eux)
+		// Retourner 0 ou gérer l'erreur
+		freeInteger(&One);
+		// ... nettoyage ...
+		return allocIntegerFromValue(0, false, true);
+	}
+	freeInteger(&One);
+	freeInteger(&res.gcd);
+	freeInteger(&res.v); // On n'a pas besoin de v pour l'inverse modulaire
+
+	CustomInteger result = res.u; // C'est le coefficient 'u'
+
+	// Si le résultat est négatif, on ajoute le modulo M pour l'avoir positif
+	// ex: -2 mod 5 => 3
+	if (result.isNegative) {
+		CustomInteger temp = addInteger(result, m);
+		freeInteger(&result);
+		result = temp;
+	}
+
+	// Si result >= m (peut arriver selon l'implémentation), on fait un modulo
+	// Mais généralement avec Euclide étendu, |u| < m, donc le simple 'if negative' suffit.
+
+	return result;
+}
+
+#pragma endregion
