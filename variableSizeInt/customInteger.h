@@ -83,6 +83,7 @@ void reallocToFitInteger(CustomIntegerPtr integer);
 CustomInteger allocIntegerFromValue(uint64 value, bool isNegative, bool copy);
 CustomInteger copyIntegerToNew(CustomInteger original);
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest);
+void printInteger(CustomInteger integer, Base base, bool alwaysPutSign);
 
 // Bitwise Operations
 bool getBit(CustomInteger integer, SizeT index);
