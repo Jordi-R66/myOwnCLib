@@ -2,16 +2,10 @@
 
 #include "../bools/bool.h"
 #include "../targetSpecific/types.h"
+#include "memtypes.h"
 
 // Memory comparison
 #pragma region Memory Comparison
-
-typedef enum Comparison {
-	LESS = 0, EQUALS = 1, GREATER = 2, UNDEF = 3
-} Comparison;
-
-// Création des fonctions de comparaison
-typedef Comparison (*ComparisonFunc)(ptr, ptr, SizeT);
 
 /**
  * @brief Compares the n first bytes of A with the n first bytes of B

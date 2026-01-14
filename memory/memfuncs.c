@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 
 #include "memfuncs.h"
@@ -55,8 +54,8 @@ Comparison compareMemory(ptr A, ptr B, SizeT n) {
 
 #pragma region Memory Manipulation
 void copyMemory(ptr src, ptr dest, SizeT size) {
-	uint8* a = (uint8*)src;
-	uint8* b = (uint8*)dest;
+	Byte* a = (Byte*)src;
+	Byte* b = (Byte*)dest;
 
 	for (SizeT i = 0; i < size; i++) {
 		b[i] = a[i];

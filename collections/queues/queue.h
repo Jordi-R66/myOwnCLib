@@ -10,17 +10,19 @@
 #ifndef QUEUES
 #define QUEUES
 
-#include "../lists/list.h"
+#include "../collection.h"
 
-typedef List Queue;
+typedef struct Queue {
+	Collection collection;
+} Queue, *QueuePTR;
 
 #define QUEUE_SIZE sizeof(Queue)
 
-void initQueue(Queue* queue, SizeT initCapacity, SizeT elementSize);
-void freeQueue(Queue* queue);
+void initQueue(QueuePTR queue, SizeT initCapacity, SizeT elementSize);
+void freeQueue(QueuePTR queue);
 
-void enqueue(Queue* queue, ptr newElement);
-ptr peek(Queue* queue);
-ptr dequeue(Queue* queue);
+void enqueue(QueuePTR queue, ptr newElement);
+ptr peek(QueuePTR queue);
+ptr dequeue(QueuePTR queue);
 
 #endif

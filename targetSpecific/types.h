@@ -8,6 +8,8 @@
 typedef unsigned char uint8;
 typedef signed char int8;
 
+typedef uint8 Byte;
+
 typedef unsigned short uint16;
 typedef signed short int16;
 
@@ -39,6 +41,8 @@ typedef signed short int16;
 	#endif
 #pragma endregion
 
+#define BYTE_SIZE sizeof(Byte)
+
 #define I8_SIZE sizeof(uint8)
 #define I16_SIZE sizeof(uint16)
 #define I32_SIZE sizeof(uint32)
@@ -63,6 +67,36 @@ typedef signed short int16;
 #define U64_MIN_VAL 0x0
 #define I64_MAX_VAL  9223372036854775807
 #define I64_MIN_VAL -9223372036854775808
+
+#pragma region Word Declaration
+
+#define SWORD_TYPE int32
+#define WORD_TYPE uint32
+
+#define WORD_MAX_VAL U32_MAX_VAL
+#define WORD_MIN_VAL U32_MIN_VAL
+
+#define SWORD_MAX_VAL I32_MAX_VAL
+#define SWORD_MIN_VAL I32_MIN_VAL
+
+#define SDOUBLE_WORD_TYPE int64
+#define DOUBLE_WORD_TYPE uint64
+
+#define DOUBLE_WORD_MAX_VAL U64_MAX_VAL
+#define DOUBLE_WORD_MIN_VAL U64_MIN_VAL
+
+#define SDOUBLE_WORD_MAX_VAL I64_MAX_VAL
+#define SDOUBLE_WORD_MIN_VAL I64_MIN_VAL
+
+#define WORD_SIZE I32_SIZE
+#define DOUBLE_WORD_SIZE I64_SIZE
+
+typedef SWORD_TYPE sWord;
+typedef WORD_TYPE Word;
+typedef SDOUBLE_WORD_TYPE sDoubleWord;
+typedef DOUBLE_WORD_TYPE DoubleWord;
+
+#pragma endregion
 
 #pragma region SizeT Declaration
 	#if defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
@@ -106,6 +140,6 @@ typedef signed short int16;
 
 typedef char* string;
 typedef void* ptr;
-
+typedef SizeT IndexT;
 
 #endif

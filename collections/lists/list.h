@@ -3,39 +3,43 @@
 #ifndef LISTS
 #define LISTS
 
-#include "../../common.h"
-#include "../../memory/memfuncs.h"
+#include "../collection.h"
 
-#pragma pack(1)
-typedef struct List {
-	SizeT capacity; // List capacity in number of elements
-	SizeT n_elements; // Current number of elements
-	SizeT elementSize; // Size of elements in bytes
-	bool fragmented; // Is the list fragmented?
-	bool initialized; // Is the list initialized?
+typedef struct List List, *ListPtr;
 
-	ptr elements; // The actual array
-} List;
-#pragma pack()
+#pragma region public variables
 
-#define LIST_SIZE sizeof(List)
-#define asList(PTR) ((List*)PTR)
+extern SizeT foundAtPosition;
 
-void initializeList(List* list, SizeT initSize, SizeT elementSize);
-void freeList(List* list);
+#pragma endregion
 
-void resizeList(List* list, SizeT newCapacity);
+#pragma region LIST_FLAGS_GETTER
+bool isListFragmented(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLLECTION_FRAGMENTED) == COLLECTION_FRAGMENTED)
+bool isListInitialised(ListPtr list); //(((ListPtr)(ListPtr)->flags & COLLECTION_INITIALISED) == COLLECTION_INITIALISED)
+#pragma endregion
 
-void addElement(List* list, ptr newElement);
-void removeElement(List* list, SizeT index, bool shiftElements);
-ptr getElement(List* list, SizeT index);
-void replaceElement(List* list, SizeT index, ptr newElement);
-bool contains(List* list, ptr refElement);
+#pragma region LIST_FLAGS_SETTER
+CollectionFlag listFragmented(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLLECTION_FRAGMENTED) : ((ListPtr)(ListPtr)->flags & ~COLLECTION_FRAGMENTED)
+CollectionFlag listInitialised(ListPtr list, bool val); //(ListPtr)(ListPtr)->flags = boolean ? ((ListPtr)(ListPtr)->flags | COLLECTION_INITIALISED) : ((ListPtr)(ListPtr)->flags & ~COLLECTION_INITIALISED)
+#pragma endregion
 
-void swapListElements(List* list, SizeT i, SizeT j);
+#define asList(PTR) ((ListPtr)PTR)
 
-SizeT shrinkToFit(List* list);
-void copyList(List* listDest, List* listSrc);
+ListPtr initializeList(SizeT initSize, SizeT elementSize);
+void freeList(ListPtr list);
+
+void resizeList(ListPtr list, SizeT newCapacity);
+
+void addListElement(ListPtr list, ptr newElement);
+void removeListElement(ListPtr list, SizeT index);
+ptr getListElement(ListPtr list, SizeT index);
+void replaceListElement(ListPtr list, SizeT index, ptr newElement);
+bool listContains(ListPtr list, ptr refElement);
+
+void swapListElements(ListPtr list, SizeT i, SizeT j);
+
+SizeT shrinkListToFit(ListPtr list);
+void copyList(ListPtr listDest, ListPtr listSrc);
 
 /**
  * @brief Sorts the given list using the given comparison function
@@ -43,6 +47,16 @@ void copyList(List* listDest, List* listSrc);
  * @param list The pointer of the list to sort
  * @param compFunc the function to use to compare (set to NULL to use default)
  */
-void sortList(List* list, ComparisonFunc compFunc);
-void reverseList(List* list);
+void sortList(ListPtr list, ComparisonFunc compFunc);
+void reverseList(ListPtr list);
+
+/**
+ * @brief Returns a slice of the given list of (end - start + 1) elements
+ * 
+ * @param list 
+ * @param start 
+ * @param end 
+ * @return List 
+ */
+ListPtr sliceList(ListPtr list, SizeT start, SizeT end);
 #endif

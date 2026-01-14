@@ -1,26 +1,26 @@
 #include "stack.h"
 
-void initStack(Stack* stack, SizeT initCapacity, SizeT elementSize) {
-	initializeList(asList(stack), initCapacity, elementSize);
+void initStack(StackPTR stack, SizeT initCapacity, SizeT elementSize) {
+	initializeCollection(&stack->collection, initCapacity, elementSize);
 }
 
-void freeStack(Stack* stack) {
-	freeList(asList(stack));
+void freeStack(StackPTR stack) {
+	freeCollection(&stack->collection);
 }
 
-void push(Stack* stack, ptr newElement) {
-	addElement(asList(stack), newElement);
+void push(StackPTR stack, ptr newElement) {
+	addCollectionElement(&stack->collection, newElement);
 }
 
-ptr peek(Stack* stack) {
-	return getElement(asList(stack), stack->n_elements - 1);
+ptr peek(StackPTR stack) {
+	return getCollectionElement(&stack->collection, stack->collection.length - 1);
 }
 
-ptr pop(Stack* stack) {
-	ptr temp = calloc(1, stack->elementSize);
+ptr pop(StackPTR stack) {
+	ptr temp = calloc(1, stack->collection.elementSize);
 
-	copyMemory(peek(stack), temp, stack->elementSize);
-	removeElement(asList(stack), stack->n_elements - 1, false);
+	copyMemory(peek(stack), temp, stack->collection.elementSize);
+	removeCollectionElement(&stack->collection, stack->collection.length - 1);
 
 	return temp;
 }

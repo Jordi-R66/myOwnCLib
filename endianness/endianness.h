@@ -2,6 +2,9 @@
 
 #include "../targetSpecific/types.h"
 
+#ifndef ENDIANNESS
+#define ENDIANNESS
+
 enum Endianness {
 	Little = 0,
 	Big = 1
@@ -25,3 +28,4 @@ Endianness_t getEndian();
 void swapEndianness(ptr data, SizeT size);
 void toBigEndian(ptr data, SizeT size);
 void toLittleEndian(ptr data, SizeT size);
+#endif

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lists/list.h"
+#include "../collection.h"
 
 #pragma pack(1)
 typedef struct kvp {
@@ -9,7 +9,7 @@ typedef struct kvp {
 } KeyValuePair_t;
 
 typedef struct dict {
-	List pairs; // List of KeyValuePair_t
+	Collection collection; // Collection of KeyValuePair_t
 
 	SizeT keySize; // Size of the key in bytes
 	SizeT valSize; // Size of the value in bytes

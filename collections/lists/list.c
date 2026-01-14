@@ -1,249 +1,128 @@
 #include "list.h"
 
-void initializeList(List* list, SizeT initSize, SizeT elementSize) {
-	if (list->initialized) {
-		freeList(list);
+SizeT foundAtPosition = 0;
+
+#pragma pack(1)
+struct List {
+	Collection collection;
+};
+
+#pragma pack()
+
+const List NULL_LIST = {
+	.collection = {
+		.capacity = 0,
+		.length = 0,
+		.elementSize = 0,
+		.flags = NO_FLAGS,
+		.elements = NULL
 	}
+};
 
-	list->capacity = initSize;
-	list->n_elements = 0;
-	list->elementSize = elementSize;
+#define LIST_SIZE sizeof(List)
 
-	list->fragmented = false;
-	list->initialized = true;
+ListPtr generateNullList() {
+	ListPtr output = calloc(1, LIST_SIZE);
 
-	ptr tempPtr = (ptr)calloc(initSize, elementSize);
+	copyMemory(&NULL_LIST, output, LIST_SIZE);
 
-	if (tempPtr != NULL) {
-		list->elements = tempPtr;
-	} else {
-		fprintf(stderr, "Couldn't properly initialize the list, `calloc()` can't find enough space!\n");
-
-		list->initialized = false;
-		list->capacity = 0;
-		list->elementSize = 0;
-
-		free(tempPtr);
-		exit(EXIT_FAILURE);
-	}
+	return output;
 }
 
-void freeList(List* list) {
-	if (!list->initialized) {
-		fprintf(stderr, "Can't free a list that was never initialized!\n");
-		exit(EXIT_FAILURE);
-	}
-
-	memset(list->elements, 0, list->capacity * list->elementSize);
-
-	free(list->elements);
-
-	list->capacity = 0;
-	list->elementSize = 0;
-	list->n_elements = 0;
-	list->initialized = false;
+bool isListFragmented(ListPtr list) {
+	return isCollectionFragmented(&list->collection);
 }
 
-void resizeList(List* list, SizeT newCapacity) {
-	if (newCapacity < list->n_elements) {
-		newCapacity = list->n_elements;
-	}
-
-	if (newCapacity <= 0) {
-		freeList(list);
-		fprintf(stderr, "Can't resize a list to a null or negative length (%zu elements)\n", newCapacity);
-		exit(EXIT_FAILURE);
-	}
-
-	ptr tempPtr = (ptr)realloc(list->elements, newCapacity * list->elementSize);
-
-	if (tempPtr != NULL) {
-		//printf("new capacity : %zu elements\n", newCapacity);
-		list->elements = tempPtr;
-		list->capacity = newCapacity;
-	} else {
-		free(tempPtr);
-		fprintf(stderr, "Reallocation failure in `resizeList(%p, index)`\n", (ptr)list);
-		exit(EXIT_FAILURE);
-	}
+bool isListInitialised(ListPtr list) {
+	return isCollectionInitialised(&list->collection);
 }
 
-void addElement(List* list, ptr newElement) {
-	if ((list->n_elements + 1) > list->capacity) {
-		resizeList(list, list->n_elements + 50);
-	}
-
-	SizeT nBytes = list->n_elements * list->elementSize;
-	copyMemory((ptr)(list->elements + nBytes), newElement, list->elementSize);
-
-	list->n_elements++;
+CollectionFlag listFragmented(ListPtr list, bool val) {
+	return collectionFragmented(&list->collection, val);
 }
 
-void removeElement(List* list, SizeT index, bool shiftElements) {
-	if (index >= list->n_elements) {
-		fprintf(stderr, "Can't remove an element that is not in a list\n");
-		exit(EXIT_FAILURE);
-	}
+CollectionFlag listInitialised(ListPtr list, bool val) {
+	return collectionInitialised(&list->collection, val);
+}
 
-	SizeT nBytes = index * list->elementSize;
+ListPtr initializeList(SizeT initSize, SizeT elementSize) {
+	ListPtr output = NULL;
 
-	setMemory((ptr)(list->elements + nBytes), 0, list->elementSize);
+	output = (ListPtr)calloc(1, LIST_SIZE);
 
-	if (shiftElements) {
-		SizeT i = index;
-		SizeT j = index + 1;
+	if (output != NULL)
+		initializeCollection(&output->collection, initSize, elementSize);
 
-		SizeT nBytesI = i * list->elementSize;
-		SizeT nBytesJ = j * list->elementSize;
+	return output;
+}
 
-		SizeT bytesToCopy = (list->n_elements - j) * list->elementSize;
+void freeList(ListPtr list) {
+	freeCollection(&list->collection);
+}
 
-		memmove((int8*)list->elements + nBytesI, (int8*)list->elements + nBytesJ, bytesToCopy);
+void resizeList(ListPtr list, SizeT newCapacity) {
+	resizeCollection(&list->collection, newCapacity);
+}
 
-		list->n_elements--;
-	} else {
-		list->fragmented |= true;
-	}
+void addListElement(ListPtr list, ptr newElement) {
+	addCollectionElement(&list->collection, newElement);
+}
+
+void removeListElement(ListPtr list, SizeT index) {
+	removeCollectionElement(&list->collection, index);
 }
 
 /*
 	Returns pointer to element in list as `ptr`
 */
-ptr getElement(List* list, SizeT index) {
-	if ((index >= list->capacity) || (index >= list->n_elements)) {
-		return NULL;
-	}
-
-	return list->elements + index * list->elementSize;
+ptr getListElement(ListPtr list, SizeT index) {
+	return getCollectionElement(&list->collection, index);
 }
 
-void replaceElement(List* list, SizeT index, ptr newElement) {
-	if (index >= list->capacity) {
-		fprintf(stderr, "Can't replace an element outside of a list\n");
-		exit(EXIT_FAILURE);
-	}
-
-	SizeT nBytes = index * list->elementSize;
-
-	removeElement(list, index, false);
-	copyMemory((ptr)(list->elements + nBytes), newElement, list->elementSize);
-
-	list->fragmented = false;
+void replaceListElement(ListPtr list, SizeT index, ptr newElement) {
+	replaceCollectionElement(&list->collection, index, newElement);
 }
 
-bool contains(List* list, ptr refElement) {
-	for (SizeT i = 0; i < list->n_elements; i++) {
-		if (equalMemory(refElement, getElement(list, i), list->elementSize)) {
-			return true;
-		}
-	}
-
-	return false;
+bool listContains(ListPtr list, ptr refElement) {
+	return collectionContains(&list->collection, refElement);
 }
 
-void swapListElements(List* list, SizeT i, SizeT j) {
-	uint8 temp;
-
-	if (i == j) {
-		return;
-	}
-
-	uint8* a = (uint8*)getElement(list, i);
-	uint8* b = (uint8*)getElement(list, j);
-
-	for (SizeT k = 0; k < list->elementSize; k++) {
-		temp = a[k];
-		a[k] = b[k];
-		b[k] = temp;
-	}
+void swapListElements(ListPtr list, SizeT i, SizeT j) {
+	swapCollectionElements(&list->collection, i, j);
 }
 
-SizeT shrinkToFit(List* list) {
-	if (list->fragmented) {
-		fprintf(stderr, "Can't shrink a list if it is fragmented\n");
-		exit(EXIT_FAILURE);
-	}
-
-	resizeList(list, 0);
-
-	return list->capacity;
+SizeT shrinkListToFit(ListPtr list) {
+	return shrinkCollectionToFit(&list->collection);
 }
 
-void copyList(List* listDest, List* listSrc) {
-	memcpy(listDest, listSrc, sizeof(*listSrc));
+void copyList(ListPtr listDest, ListPtr listSrc) {
+	copyCollection(&listDest->collection, &listSrc->collection);
+}
 
-	ptr ptr = calloc(listDest->capacity, listDest->elementSize);
+void sortList(ListPtr list, ComparisonFunc compFunc) {
+	sortCollection(&list->collection, compFunc);
+}
 
-	if (ptr != NULL) {
-		listDest->elements = ptr;
+void reverseList(ListPtr list) {
+	reverseCollection(&list->collection);
+}
+
+ListPtr sliceList(ListPtr list, SizeT start, SizeT end) {
+	ListPtr output = &NULL_LIST;
+
+	if ((start >= end) || (start >= list->collection.length)) {
+		output = &NULL_LIST;
+	} else if (end >= list->collection.length) {
+		output = sliceList(list, start, list->collection.length-1);
 	} else {
+		SizeT capacity = end - start + 1;
 
-		free(ptr);
-		exit(EXIT_FAILURE);
-	}
+		output = initializeList(capacity, list->collection.elementSize);
 
-	memcpy(listDest->elements, listSrc->elements, listSrc->capacity * listSrc->elementSize);
-}
-
-SizeT partition(List* list, SizeT lo, SizeT hi, ComparisonFunc compFunc) {
-	if (compFunc == NULL) {
-		compFunc = compareMemory;
-	}
-
-	SizeT n = list->elementSize;
-
-	ptr pivot = getElement(list, hi);
-
-	SizeT i = lo;
-
-	for (SizeT j = lo; j < hi; j++) {
-		ptr jPtr = getElement(list, j);
-		if (compFunc(jPtr, pivot, n) == LESS || compFunc(jPtr, pivot, n) == EQUALS) {
-			swapListElements(list, i, j);
-			i++;
+		for (SizeT i = 0; i < capacity; i++) {
+			replaceListElement(&output, i, getElement(list, start + i));
 		}
 	}
 
-	swapListElements(list, i, hi);
-
-	return i;
-}
-
-void QuickSort(List* list, SizeT lo, SizeT hi, ComparisonFunc compFunc) {
-	if ((lo >= hi) || (hi >= list->n_elements)) {
-		return;
-	}
-
-	if (compFunc == NULL) {
-		compFunc = compareMemory;
-	}
-
-	SizeT p = partition(list, lo, hi, compFunc);
-
-	QuickSort(list, lo, p - 1, compFunc);
-	QuickSort(list, p + 1, hi, compFunc);
-}
-
-void sortList(List* list, ComparisonFunc compFunc) {
-	if (list->n_elements < 2 || list->capacity < 2) {
-		return;
-	}
-
-	if (compFunc == NULL) {
-		compFunc = compareMemory;
-	}
-
-	QuickSort(list, 0, list->n_elements - 1, compFunc);
-}
-
-void reverseList(List* list) {
-	if (list->n_elements < 2 || list->capacity < 2) {
-		return;
-	}
-
-	for (SizeT i = 0; i < list->n_elements/2; i++) {
-		SizeT j = list->n_elements - i - 1;
-
-		swapListElements(list, i, j);
-	}
+	return output;
 }
