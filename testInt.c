@@ -21,9 +21,9 @@
  */
 int64_t customToInt64(CustomInteger ci) {
 	int64_t res = 0;
-	SizeT limit = ci.size > 8 ? 8 : ci.size;
+	SizeT limit = ci.size > 2 ? 2 : ci.size;
 	for (SizeT i = 0; i < limit; i++) {
-		res |= ((uint64_t)ci.value[i]) << (i * 8);
+		res |= ((uint64_t)ci.value[i]) << (i * 32);
 	}
 
 	if (ci.isNegative) {
