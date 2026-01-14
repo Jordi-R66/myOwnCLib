@@ -1428,4 +1428,62 @@ CustomInteger modularInverse(CustomInteger a, CustomInteger m) {
 	return result;
 }
 
+CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger mod) {
+	CustomInteger output;
+
+	// Variable utilitaire pour les comparaisons (allouée au début pour le flux)
+	CustomInteger One = allocIntegerFromValue(1, false, true);
+
+	// 1. Cas d'erreur : Modulo 0
+	if (isZero(mod)) {
+		freeInteger(&One);
+		fprintf(stderr, "Math error: modulo by 0\n");
+		exit(EXIT_FAILURE);
+	} else if (equalsInteger(mod, One)) {
+		output = allocIntegerFromValue(0, false, true);
+	} else if (isZero(exp)) {
+		output = allocIntegerFromValue(1, false, true);
+	} else {
+		output = allocIntegerFromValue(1, false, true);
+
+		// On travaille sur une base réduite modulo m dès le départ
+		CustomInteger baseAcc = modInteger(base, mod);
+
+		// On parcourt tous les bits de l'exposant
+		SizeT maxBits = exp.size * 8;
+
+		for (SizeT i = 0; i < maxBits; i++) {
+			// A. Si le bit courant est 1, on multiplie le résultat
+			if (getBit(exp, i) == 1) {
+				CustomInteger prod = multiplyInteger(output, baseAcc);
+				CustomInteger newOutput = modInteger(prod, mod);
+
+				freeInteger(&prod);
+				freeInteger(&output);
+				output = newOutput;
+			}
+
+			// B. On élève la base au carré pour le prochain bit
+			// (inutile de le faire à la toute dernière itération)
+			if (i < maxBits - 1) {
+				CustomInteger sq = multiplyInteger(baseAcc, baseAcc);
+				CustomInteger newBaseAcc = modInteger(sq, mod);
+
+				freeInteger(&sq);
+				freeInteger(&baseAcc);
+				baseAcc = newBaseAcc;
+			}
+		}
+
+		freeInteger(&baseAcc);
+	}
+
+	freeInteger(&One);
+
+	// Nettoyage final de la taille (suppression des zéros de tête potentiels)
+	reallocToFitInteger(&output);
+
+	return output;
+}
+
 #pragma endregion
