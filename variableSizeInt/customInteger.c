@@ -883,75 +883,113 @@ CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
-	CustomInteger output;
+    CustomInteger output;
 
-	SizeT setBitCount = 0;
-	SizeT bitPosition = 0;
+    // --- PRÉ-ANALYSE : Vérification Puissance de 2 ---
+    // On scanne 'base' pour voir si c'est une puissance de 2 (un seul bit à 1)
+    SizeT setBitCount = 0;
+    SizeT bitPosition = 0;
 
-	for (SizeT i = 0; i < base.size; i++) {
-		Word b = base.value[i];
-		if (b != 0) {
-			for (int k = 0; k < 32; k++) {
-				if ((b >> k) & 1) {
-					setBitCount++;
-					if (setBitCount == 1) bitPosition = i * 32 + k;
-				}
-			}
-			if (setBitCount > 1) break;
-		}
-	}
+    for (SizeT i = 0; i < base.size; i++) {
+        Word b = base.value[i];
+        if (b != 0) {
+            for (int k = 0; k < 32; k++) { // Scan des 32 bits du mot
+                if ((b >> k) & 1) {
+                    setBitCount++;
+                    if (setBitCount == 1) bitPosition = i * 32 + k;
+                }
+            }
+            if (setBitCount > 1) break; // Pas une puissance de 2
+        }
+    }
 
-	if (isZero(exp)) {
-		output = allocIntegerFromValue(1, false, true);
-	}
-	else if (isZero(base)) {
-		output = allocIntegerFromValue(0, false, true);
-	}
-	else if (setBitCount == 1 && exp.size <= sizeof(SizeT)) {
-		SizeT expVal = 0;
-		// Limitation à SizeT pour l'exposant lors de l'opti puissance de 2
-		// Attention, si l'exposant est grand, expVal sera tronqué ou faux, 
-		// mais la condition exp.size <= sizeof(SizeT) protège un peu.
-		for (SizeT i = 0; i < exp.size; i++) {
-			if (i * 32 < sizeof(SizeT) * 8)
-				expVal |= ((SizeT)exp.value[i]) << (i * 32);
-		}
+    // --- LOGIQUE PRINCIPALE ---
 
-		SizeT totalShift = bitPosition * expVal;
+    if (isZero(exp)) {
+        // Cas trivial 1 : x^0 = 1
+        output = allocIntegerFromValue(1, false, true);
+    }
+    else if (isZero(base)) {
+        // Cas trivial 2 : 0^x = 0
+        output = allocIntegerFromValue(0, false, true);
+    }
+    // Condition : Base est 2^k ET Exposant tient dans un SizeT pour le shift
+    // Note : exp.size est en Mots (4 octets). On vérifie que la taille totale en octets tient dans SizeT.
+    else if (setBitCount == 1 && (exp.size * sizeof(Word)) <= sizeof(SizeT)) {
+        // --- OPTIMISATION PUISSANCE DE 2 ---
 
-		output = allocIntegerFromValue(1, false, true);
-		BitshiftPtr(&output, totalShift, LEFT, true);
-	}
-	else {
-		output = allocIntegerFromValue(1, false, true);
-		CustomInteger baseAccumulator = copyIntegerToNew(base);
+        SizeT expVal = 0;
+        for (SizeT i = 0; i < exp.size; i++) {
+            // Reconstitution de la valeur (Word vers SizeT)
+            // On cast en SizeT avant le shift pour éviter l'overflow si SizeT > 32 bits
+            expVal |= ((SizeT)exp.value[i]) << (i * 32);
+        }
 
-		SizeT maxBits = exp.size * 32;
+        // Calcul du décalage : (2^k)^exp = 2^(k*exp)
+        SizeT totalShift = bitPosition * expVal;
 
-		for (SizeT i = 0; i < maxBits; i++) {
-			if (getBit(exp, i) == 1) {
-				CustomInteger newResult = multiplyInteger(output, baseAccumulator);
-				freeInteger(&output);
-				output = newResult;
-			}
+        output = allocIntegerFromValue(1, false, true);
+        BitshiftPtr(&output, totalShift, LEFT, true);
+    }
+    else {
+        // --- ALGORITHME GÉNÉRAL (Square and Multiply) ---
 
-			if (i < maxBits - 1) {
-				CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
-				freeInteger(&baseAccumulator);
-				baseAccumulator = newBase;
-			}
-		}
+        output = allocIntegerFromValue(1, false, true);
+        CustomInteger baseAccumulator = copyIntegerToNew(base);
 
-		freeInteger(&baseAccumulator);
-	}
+        // Optimisation : scan uniquement jusqu'au bit le plus significatif de l'exposant
+        // Calcul précis de maxBits pour éviter de boucler inutilement (ex: 32 itérations pour 5^3)
+        SizeT maxBits = 0;
+        if (exp.size > 0) {
+            // 1. Trouver le mot le plus significatif non nul
+            SizeT msWordIdx = exp.size;
+            while (msWordIdx > 0 && exp.value[msWordIdx - 1] == 0) {
+                msWordIdx--;
+            }
 
-	if (!isZero(output)) {
-		output.isNegative = base.isNegative && (getBit(exp, 0) == 1);
-	}
+            if (msWordIdx > 0) {
+                // 2. Trouver le bit le plus significatif dans ce mot
+                Word topWord = exp.value[msWordIdx - 1];
+                int msBit = 31;
+                while (msBit >= 0 && !((topWord >> msBit) & 1)) {
+                    msBit--;
+                }
+                
+                // Index absolu du dernier bit à 1
+                maxBits = (msWordIdx - 1) * 32 + msBit + 1;
+            }
+        }
 
-	reallocToFitInteger(&output);
+        for (SizeT i = 0; i < maxBits; i++) {
+            // 1. Si le bit est à 1, on multiplie le résultat courant par l'accumulateur
+            if (getBit(exp, i) == 1) {
+                CustomInteger newResult = multiplyInteger(output, baseAccumulator);
+                freeInteger(&output);
+                output = newResult;
+            }
 
-	return output;
+            // 2. On prépare la base pour le prochain tour (Carré)
+            // On ne le fait pas si c'était la dernière itération utile
+            if (i < maxBits - 1) {
+                CustomInteger newBase = multiplyInteger(baseAccumulator, baseAccumulator);
+                freeInteger(&baseAccumulator);
+                baseAccumulator = newBase;
+            }
+        }
+
+        freeInteger(&baseAccumulator);
+    }
+
+    // --- POST-TRAITEMENT ---
+
+    // Gestion du signe commune à tous les cas non triviaux
+    if (!isZero(output)) {
+        output.isNegative = base.isNegative && (getBit(exp, 0) == 1);
+    }
+
+    reallocToFitInteger(&output);
+
+    return output;
 }
 #pragma endregion
 
