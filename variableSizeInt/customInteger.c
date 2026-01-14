@@ -85,6 +85,8 @@ void reallocToFitInteger(CustomIntegerPtr integer) {
 }
 
 void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity) {
+	SizeT sizeToCopy = newCapacity < integer->size ? newCapacity : integer->size;
+
 	if (newCapacity == integer->capacity) {
 		return;
 	}
@@ -97,7 +99,7 @@ void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity) {
 		exit(EXIT_FAILURE);
 	}
 
-	copyMemory(oldPtr, newPtr, integer->size);
+	copyMemory(oldPtr, newPtr, sizeToCopy);
 	setMemory(oldPtr, 0, integer->capacity);
 
 	integer->capacity = newCapacity;
