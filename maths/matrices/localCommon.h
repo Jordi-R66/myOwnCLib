@@ -23,3 +23,5 @@ typedef enum ValTypes {
 	U_DISCRETE = 1,
 	REAL = 2
 } ValType;
+
+typedef value_t* Values;
