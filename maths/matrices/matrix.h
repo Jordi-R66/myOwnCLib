@@ -6,7 +6,7 @@
 struct Matrix {
 	SizeT rows, cols, size;
 
-	value_t* data;
+	Values data;
 	bool memFreed;
 };
 #pragma pack()
@@ -18,16 +18,16 @@ typedef struct Matrix Matrix;
 void allocMatrix(Matrix* matrix);
 void deallocMatrix(Matrix* matrix);
 
-void getMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer);
-void getMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer);
+void getMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer);
+void getMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer);
 
-void setMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer);
-void setMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer);
+void setMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer);
+void setMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer);
 
 void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col);
 value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col);
 
-void setMatrix(Matrix* matrix, value_t* values);
+void setMatrix(Matrix* matrix, Values values);
 
 void scalarMul(Matrix* matrix, value_t scalar);
 void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest);

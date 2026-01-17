@@ -7,7 +7,7 @@ Function to return the index of the row's pivot in the context
 of Gauss' Pivot Algorithm
 */
 SizeT identifyGaussPivot(Matrix* mat, SizeT rowId) {
-	value_t* row = (value_t*)calloc(mat->cols, sizeof(value_t));
+	Values row = (Values)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowId, row);
 
@@ -152,7 +152,7 @@ void prepareGauss(Matrix* mat, Tracker* tracker) {
 }
 
 void Gauss(Matrix* mat, Tracker* tracker) {
-	value_t* col = (value_t*)calloc(mat->rows, sizeof(value_t));
+	Values col = (Values)calloc(mat->rows, sizeof(value_t));
 
 	prepareGauss(mat, tracker);
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));

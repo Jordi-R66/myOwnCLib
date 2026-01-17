@@ -5,7 +5,7 @@
 #ifdef MATRIX_INCLUDED
 void allocMatrix(Matrix* matrix) {
 	matrix->size = matrix->rows * matrix->cols;
-	matrix->data = (value_t*)calloc(matrix->size, sizeof(value_t));
+	matrix->data = (Values)calloc(matrix->size, sizeof(value_t));
 	setMemory((ptr)matrix->data, 0, matrix->size);
 	matrix->memFreed = false;
 }
@@ -15,7 +15,7 @@ void deallocMatrix(Matrix* matrix) {
 	matrix->memFreed = true;
 }
 
-void getMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer) {
+void getMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer) {
 	SizeT iStart, iEnd;
 
 	iStart = row * matrix->cols;
@@ -26,21 +26,21 @@ void getMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer) {
 	}
 }
 
-void getMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer) {
+void getMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer) {
 	for (SizeT row = 0; row < matrix->rows; row++) {
 		SizeT i = row * matrix->cols + column;
 		colBuffer[row] = matrix->data[i];
 	}
 }
 
-void setMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer) {
+void setMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer) {
 	for (SizeT i = 0; i < matrix->cols; i++) {
 		value_t val = rowBuffer[i];
 		setMatrixCase(matrix, val, row, i);
 	}
 }
 
-void setMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer) {
+void setMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer) {
 	for (SizeT i = 0; i < matrix->rows; i++) {
 		value_t val = colBuffer[i];
 		setMatrixCase(matrix, val, i, column);
@@ -79,7 +79,7 @@ value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col) {
 	return matrix->data[i];
 }
 
-void setMatrix(Matrix* matrix, value_t* values) {
+void setMatrix(Matrix* matrix, Values values) {
 	for (SizeT i = 0; i < matrix->size; i++) {
 		matrix->data[i] = values[i];
 	}
@@ -119,8 +119,8 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 
 	allocMatrix(matDest);
 
-	value_t* col = (value_t*)calloc(matB->rows, sizeof(value_t));
-	value_t* row = (value_t*)calloc(matA->cols, sizeof(value_t));
+	Values col = (Values)calloc(matB->rows, sizeof(value_t));
+	Values row = (Values)calloc(matA->cols, sizeof(value_t));
 
 	for (SizeT i = 0; i < matDest->rows; i++) {
 		getMatrixRow(matA, i, row);
@@ -186,7 +186,7 @@ void genIdentityMatrix(Matrix* matrix, SizeT n) {
 }
 
 void printMatrix(Matrix* matrix, ValType valFormat) {
-	value_t* row_buffer = (value_t*)calloc(matrix->cols, sizeof(value_t));
+	Values row_buffer = (Values)calloc(matrix->cols, sizeof(value_t));
 
 	for (SizeT row = 0; row < matrix->rows; row++) {
 		getMatrixRow(matrix, row, row_buffer);
@@ -225,8 +225,8 @@ void swapRows(Matrix* mat, SizeT rowAId, SizeT rowBId) {
 		exit(EXIT_FAILURE);
 	}
 
-	value_t* rowA = (value_t*)calloc(mat->cols, sizeof(value_t));
-	value_t* rowB = (value_t*)calloc(mat->cols, sizeof(value_t));
+	Values rowA = (Values)calloc(mat->cols, sizeof(value_t));
+	Values rowB = (Values)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowAId, rowA);
 	getMatrixRow(mat, rowBId, rowB);
@@ -250,8 +250,8 @@ void swapCols(Matrix* mat, SizeT colAId, SizeT colBId) {
 		exit(EXIT_FAILURE);
 	}
 
-	value_t* colA = (value_t*)calloc(mat->rows, sizeof(value_t));
-	value_t* colB = (value_t*)calloc(mat->rows, sizeof(value_t));
+	Values colA = (Values)calloc(mat->rows, sizeof(value_t));
+	Values colB = (Values)calloc(mat->rows, sizeof(value_t));
 
 	getMatrixColumn(mat, colBId, colB);
 	getMatrixColumn(mat, colAId, colA);
@@ -266,8 +266,8 @@ void swapCols(Matrix* mat, SizeT colAId, SizeT colBId) {
 }
 
 void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB) {
-	value_t* rowA = (value_t*)calloc(mat->cols, sizeof(value_t));
-	value_t* rowB = (value_t*)calloc(mat->cols, sizeof(value_t));
+	Values rowA = (Values)calloc(mat->cols, sizeof(value_t));
+	Values rowB = (Values)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowAId, rowA);
 	getMatrixRow(mat, rowBId, rowB);
@@ -285,7 +285,7 @@ void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB) {
 }
 
 void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow) {
-	value_t* row = (value_t*)calloc(mat->cols, sizeof(value_t));
+	Values row = (Values)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowId, row);
 
