@@ -213,7 +213,7 @@ void matrixAddition(MatrixPtr matA, MatrixPtr matB) {
 
 Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB) {
 	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
-		exit(EXIT_FAILURE); // TODO: Remove later
+		exit(EXIT_FAILURE);
 		//return;
 	}
 
