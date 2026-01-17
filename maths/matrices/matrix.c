@@ -3,16 +3,41 @@
 #include "../memory/memfuncs.h"
 
 #ifdef MATRIX_INCLUDED
-void allocMatrix(MatrixPtr matrix) {
-	matrix->size = matrix->rows * matrix->cols;
-	matrix->data = (Values)calloc(matrix->size, sizeof(Value));
-	setMemory((ptr)matrix->data, 0, matrix->size);
-	matrix->memFreed = false;
+bool allocMatrix(MatrixPtr matrix) {
+	bool success = true;
+	// Safety : Do not allocate if the matrix seems to already contain unfreed data
+
+	if (matrix->data != NULL && !matrix->memFreed) {
+		fprintf(stderr, "Error: Attempt to allocate over an existing matrix without freeing it first.\n");
+		success = false;
+	} else {
+		matrix->size = matrix->rows * matrix->cols;
+		matrix->data = (Values)calloc(matrix->size, VALUE_T_SIZE);
+	}
+
+	if (success && matrix->data == NULL) {
+		fprintf(stderr, "Error: Couldn't allocate memory for your %zux%zu matrix.\n", matrix->rows, matrix->cols);
+		success = false;
+	} else if (success) {
+		matrix->memFreed = false;
+	}
+
+	return success;
 }
 
-void deallocMatrix(MatrixPtr matrix) {
-	free(matrix->data);
-	matrix->memFreed = true;
+void deallocMatrix(MatrixPtr matrix, bool destroyValues) {
+	if (matrix->data != NULL) {
+		if (destroyValues) {
+			setMemory(matrix->data, 0, matrix->size * VALUE_T_SIZE);
+		}
+
+		free(matrix->data);
+
+		matrix->size = 0;
+		matrix->data = NULL;
+	}
+
+	matrix->memFreed = false;
 }
 
 void getMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer) {
@@ -50,12 +75,12 @@ void setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer) {
 void setMatrixCase(MatrixPtr matrix, Value value, SizeT row, SizeT col) {
 	if (row >= matrix->rows) {
 		fprintf(stderr, "Can't get to row %zu : limit exceeded\n", row);
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
 	if (col >= matrix->cols) {
 		fprintf(stderr, "Can't get to col %zu : limit exceeded\n", col);
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
 	SizeT i = row * matrix->cols + col;
@@ -66,12 +91,12 @@ void setMatrixCase(MatrixPtr matrix, Value value, SizeT row, SizeT col) {
 Value getMatrixCase(MatrixPtr matrix, SizeT row, SizeT col) {
 	if (row >= matrix->rows) {
 		fprintf(stderr, "Can't get to row %zu : limit exceeded\n", row);
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
 	if (col >= matrix->cols) {
 		fprintf(stderr, "Can't get to col %zu : limit exceeded\n", col);
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
 	SizeT i = row * matrix->cols + col;
@@ -104,42 +129,70 @@ Matrix scalarMulNewMatrix(MatrixPtr matrix, double scalar) {
 	return newMatrix;
 }
 
-/*
-	Performs an inefficient matrix multiplication algorithm and stores the resulting matrix at a given address
-	Stores the result `matDest` of `matA * matB`
+/**
+ * Performs an inefficient matrix multiplication algorithm and stores the resulting matrix at a given address
+ * Stores the result `matDest` of `matA * matB`
+ * @returns `success` : true if success, false if failure
 */
-void matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
+bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
+	bool success = true;
+
 	if (matA->cols != matB->rows) {
-		fprintf(stderr, "Can't multiply the given matrices, matA.cols != matB.rows\n");
-		exit(EXIT_FAILURE);
+		fprintf(stderr, "Error: Can't multiply the given matrices, matA.cols != matB.rows\n");
+		success = false;
 	}
 
-	matDest->rows = matA->rows;
-	matDest->cols = matB->cols;
+	if (success && (matDest->data != NULL && !matDest->memFreed)) {
+		fprintf(stderr, "Error: Destination matrix isn't empty. Please free it before use.\n");
+		success = false;
+	} else if (success) {
+		matDest->rows = matA->rows;
+		matDest->cols = matB->cols;
 
-	allocMatrix(matDest);
+		if (!allocMatrix(matDest)) {
+			success = false;
+		}
+	}
 
-	Values col = (Values)calloc(matB->rows, sizeof(Value));
-	Values row = (Values)calloc(matA->cols, sizeof(Value));
+	Values col = NULL, row = NULL;
 
-	for (SizeT i = 0; i < matDest->rows; i++) {
-		getMatrixRow(matA, i, row);
+	if (success) {
+		col = (Values)calloc(matB->rows, VALUE_T_SIZE);
+		row = (Values)calloc(matA->cols, VALUE_T_SIZE);
+
+		if (col == NULL || row == NULL) {
+			fprintf(stderr, "Error: Temp buffer alloc failed.\n");
+			deallocMatrix(matDest, true);
+
+			if (col) free(col);
+			if (row) free(row);
+
+			success = false;
+		}
+	}
+
+	if (success) {
+		for (SizeT i = 0; i < matDest->rows; i++) {
+			getMatrixRow(matA, i, row);
 
 		for (SizeT j = 0; j < matDest->cols; j++) {
 			Value newValue = 0.0;
 
-			getMatrixColumn(matB, j, col);
+				getMatrixColumn(matB, j, col);
 
-			for (SizeT k = 0; k <= matB->cols; k++) {
-				newValue += col[k] * row[k];
+				for (SizeT k = 0; k < matA->cols; k++) {
+					newValue += col[k] * row[k];
+				}
+
+				setMatrixCase(matDest, newValue, i, j);
 			}
-
-			setMatrixCase(matDest, newValue, i, j);
 		}
+
+		free(col);
+		free(row);
 	}
 
-	free(col);
-	free(row);
+	return success;
 }
 
 /*
@@ -147,17 +200,20 @@ void matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 */
 void matrixAddition(MatrixPtr matA, MatrixPtr matB) {
 	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
-		return;
+		fprintf(stderr, "Error: Dimension mismatch for addition.\n");
+		return false;
 	}
 
 	for (SizeT i = 0; i < matA->size; i++) {
 		matA->data[i] += matB->data[i];
 	}
+
+	return true;
 }
 
 Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB) {
 	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 		//return;
 	}
 
@@ -178,7 +234,7 @@ void genIdentityMatrix(MatrixPtr matrix, SizeT n) {
 	matrix->rows = n;
 	allocMatrix(matrix);
 
-	memset(matrix->data, 0, matrix->size * sizeof(Value));
+	memset(matrix->data, 0, matrix->size * VALUE_T_SIZE);
 
 	for (SizeT i = 0; i < matrix->cols; i++) {
 		setMatrixCase(matrix, 1.0, i, i);
@@ -186,7 +242,7 @@ void genIdentityMatrix(MatrixPtr matrix, SizeT n) {
 }
 
 void printMatrix(MatrixPtr matrix, ValType valFormat) {
-	Values row_buffer = (Values)calloc(matrix->cols, sizeof(Value));
+	Values row_buffer = (Values)calloc(matrix->cols, VALUE_T_SIZE);
 
 	for (SizeT row = 0; row < matrix->rows; row++) {
 		getMatrixRow(matrix, row, row_buffer);
@@ -204,7 +260,7 @@ void printMatrix(MatrixPtr matrix, ValType valFormat) {
 					break;
 				default:
 					fprintf(stderr, "Unknown format\n");
-					exit(EXIT_FAILURE);
+					exit(EXIT_FAILURE); // TODO: Remove later
 			}
 		}
 		printf("\n");
@@ -222,11 +278,11 @@ void swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId) {
 
 	if ((rowAId >= mat->rows) || (rowBId >= mat->rows)) {
 		fprintf(stderr, "Error: row index out of bounds\n\tidA = %lu\n\tidB = %lu\n", rowAId, rowBId);
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
-	Values rowA = (Values)calloc(mat->cols, sizeof(Value));
-	Values rowB = (Values)calloc(mat->cols, sizeof(Value));
+	Values rowA = (Values)calloc(mat->cols, VALUE_T_SIZE);
+	Values rowB = (Values)calloc(mat->cols, VALUE_T_SIZE);
 
 	getMatrixRow(mat, rowAId, rowA);
 	getMatrixRow(mat, rowBId, rowB);
@@ -247,11 +303,11 @@ void swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId) {
 
 	if ((colAId >= mat->cols) || (colBId >= mat->cols)) {
 		fprintf(stderr, "Error: row index out of bounds\n\tidA = %lu\n\t idB = %lu\n", colAId, colBId);
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
-	Values colA = (Values)calloc(mat->rows, sizeof(Value));
-	Values colB = (Values)calloc(mat->rows, sizeof(Value));
+	Values colA = (Values)calloc(mat->rows, VALUE_T_SIZE);
+	Values colB = (Values)calloc(mat->rows, VALUE_T_SIZE);
 
 	getMatrixColumn(mat, colBId, colB);
 	getMatrixColumn(mat, colAId, colA);
@@ -266,8 +322,8 @@ void swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId) {
 }
 
 void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, Value coeffRowB) {
-	Values rowA = (Values)calloc(mat->cols, sizeof(Value));
-	Values rowB = (Values)calloc(mat->cols, sizeof(Value));
+	Values rowA = (Values)calloc(mat->cols, VALUE_T_SIZE);
+	Values rowB = (Values)calloc(mat->cols, VALUE_T_SIZE);
 
 	getMatrixRow(mat, rowAId, rowA);
 	getMatrixRow(mat, rowBId, rowB);
@@ -285,7 +341,7 @@ void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, Value coeffRowB) {
 }
 
 void multiplyRow(MatrixPtr mat, SizeT rowId, Value coeffRow) {
-	Values row = (Values)calloc(mat->cols, sizeof(Value));
+	Values row = (Values)calloc(mat->cols, VALUE_T_SIZE);
 
 	getMatrixRow(mat, rowId, row);
 

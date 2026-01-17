@@ -15,36 +15,37 @@ struct Matrix {
 
 typedef struct Matrix Matrix, *MatrixPtr;
 
-void allocMatrix(MatrixPtr matrix);
+#pragma region Matrix Init
+bool allocMatrix(MatrixPtr matrix);
 void deallocMatrix(MatrixPtr matrix);
+#pragma endregion
 
+#pragma region Accessors
 void getMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer);
 void getMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
-
 void setMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer);
 void setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
-
 void setMatrixCase(MatrixPtr matrix, Value value, SizeT row, SizeT col);
 Value getMatrixCase(MatrixPtr matrix, SizeT row, SizeT col);
-
 void setMatrix(MatrixPtr matrix, Values values);
+#pragma endregion
 
+#pragma region Arithmetics
 void scalarMul(MatrixPtr matrix, Value scalar);
-void matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
-void matrixAddition(MatrixPtr matA, MatrixPtr matB);
+bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
+bool matrixAddition(MatrixPtr matA, MatrixPtr matB);
 
 Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar);
 Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
+#pragma endregion
 
 void genIdentityMatrix(MatrixPtr matrix, SizeT n);
-
 void printMatrix(MatrixPtr matrix, ValType valFormat);
 
 // Originally in gauss.h
 
 void swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId);
 void swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId);
-
 void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, Value coeffRowB);
 void multiplyRow(MatrixPtr mat, SizeT rowId, Value coeffRow);
 
