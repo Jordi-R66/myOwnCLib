@@ -49,6 +49,8 @@ bool getMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer) {
 	for (SizeT i = iStart; i < iEnd; i++) {
 		rowBuffer[i - iStart] = matrix->data[i];
 	}
+
+	return true;
 }
 
 bool getMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer) {
@@ -56,6 +58,8 @@ bool getMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer) {
 		SizeT i = row * matrix->cols + column;
 		colBuffer[row] = matrix->data[i];
 	}
+
+	return true;
 }
 
 bool setMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer) {
@@ -63,6 +67,8 @@ bool setMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer) {
 		Value val = rowBuffer[i];
 		setMatrixCase(matrix, val, row, i);
 	}
+
+	return true;
 }
 
 bool setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer) {
@@ -70,6 +76,8 @@ bool setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer) {
 		Value val = colBuffer[i];
 		setMatrixCase(matrix, val, i, column);
 	}
+
+	return true;
 }
 
 bool setMatrixCase(MatrixPtr matrix, Value value, SizeT row, SizeT col) {
