@@ -31,7 +31,7 @@ void mirrorMatrix(MatrixPtr mat, SwapType type, Tracker* tracker) {
 
 		default:
 			fprintf(stderr, "Can't mirror your matrix with the given option :\n\ttype = %d", type);
-			exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE); // TODO: Remove later
 	}
 }
 
