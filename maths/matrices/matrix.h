@@ -24,16 +24,16 @@ void getMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
 void setMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer);
 void setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
 
-void setMatrixCase(MatrixPtr matrix, value_t value, SizeT row, SizeT col);
-value_t getMatrixCase(MatrixPtr matrix, SizeT row, SizeT col);
+void setMatrixCase(MatrixPtr matrix, Value value, SizeT row, SizeT col);
+Value getMatrixCase(MatrixPtr matrix, SizeT row, SizeT col);
 
 void setMatrix(MatrixPtr matrix, Values values);
 
-void scalarMul(MatrixPtr matrix, value_t scalar);
+void scalarMul(MatrixPtr matrix, Value scalar);
 void matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
 void matrixAddition(MatrixPtr matA, MatrixPtr matB);
 
-Matrix scalarMulNewMatrix(MatrixPtr matrix, value_t scalar);
+Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar);
 Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
 
 void genIdentityMatrix(MatrixPtr matrix, SizeT n);
@@ -45,7 +45,7 @@ void printMatrix(MatrixPtr matrix, ValType valFormat);
 void swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId);
 void swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId);
 
-void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB);
-void multiplyRow(MatrixPtr mat, SizeT rowId, value_t coeffRow);
+void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, Value coeffRowB);
+void multiplyRow(MatrixPtr mat, SizeT rowId, Value coeffRow);
 
 #define MATRIX_INCLUDED

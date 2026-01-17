@@ -59,7 +59,7 @@ void recordSwap(Tracker* tracker, SizeT idA, SizeT idB, SwapType type) {
 	RecordTransformation(tracker, transformation);
 }
 
-void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff) {
+void recordSub(Tracker* tracker, SizeT idA, SizeT idB, Value coeff) {
 	if ((idA == idB) || (coeff == -1.0)) {
 		return;
 	}
@@ -77,7 +77,7 @@ void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff) {
 	RecordTransformation(tracker, transformation);
 }
 
-void recordMul(Tracker* tracker, SizeT idA, value_t coeff) {
+void recordMul(Tracker* tracker, SizeT idA, Value coeff) {
 	if (coeff == 1.0) {
 		return;
 	}

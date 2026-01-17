@@ -2,21 +2,21 @@
 
 #include "../common.h"
 
-#ifndef OVERRIDE_MATRIX_VALUE_TYPE
-	#ifdef VALUE_TYPE
-	#undef VALUE_TYPE
+#ifndef OVERRIDE_MATRIX_ValueYPE
+	#ifdef ValueYPE
+	#undef ValueYPE
 	#endif
 
 	#ifdef _64BITS
-		#define VALUE_TYPE double
+		#define ValueYPE double
 	#elif defined(_32BITS)
-		#define VALUE_TYPE float
+		#define ValueYPE float
 	#else
 		#error "Unsupported"
 	#endif
 #endif
 
-typedef VALUE_TYPE value_t;
+typedef ValueYPE Value;
 
 typedef enum ValTypes {
 	S_DISCRETE = 0,
@@ -24,4 +24,4 @@ typedef enum ValTypes {
 	REAL = 2
 } ValType;
 
-typedef value_t* Values;
+typedef Value* Values;

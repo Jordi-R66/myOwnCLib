@@ -7,7 +7,7 @@ Function to return the index of the row's pivot in the context
 of Gauss' Pivot Algorithm
 */
 SizeT identifyGaussPivot(MatrixPtr mat, SizeT rowId) {
-	Values row = (Values)calloc(mat->cols, sizeof(value_t));
+	Values row = (Values)calloc(mat->cols, sizeof(Value));
 
 	getMatrixRow(mat, rowId, row);
 
@@ -16,7 +16,7 @@ SizeT identifyGaussPivot(MatrixPtr mat, SizeT rowId) {
 
 	// Iterating until we find a non-null value
 	for (i = 0; (i < mat->cols) && run; i++) {
-		value_t val = row[i];
+		Value val = row[i];
 		run = val == 0.0;
 	}
 
@@ -152,7 +152,7 @@ void prepareGauss(MatrixPtr mat, Tracker* tracker) {
 }
 
 void Gauss(MatrixPtr mat, Tracker* tracker) {
-	Values col = (Values)calloc(mat->rows, sizeof(value_t));
+	Values col = (Values)calloc(mat->rows, sizeof(Value));
 
 	prepareGauss(mat, tracker);
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
@@ -161,13 +161,13 @@ void Gauss(MatrixPtr mat, Tracker* tracker) {
 		generatePivotsArray(mat, rowsGaussPivots);
 
 		SizeT p = rowsGaussPivots[l];
-		value_t pivot_val = getMatrixCase(mat, l, p);
+		Value pivot_val = getMatrixCase(mat, l, p);
 
 		for (SizeT i = l + 1; i < mat->rows; i++) {
-			value_t val = getMatrixCase(mat, i, p);
+			Value val = getMatrixCase(mat, i, p);
 
 			if (val != 0.0) {
-				value_t coeff = pivot_val / val;
+				Value coeff = pivot_val / val;
 				printf("%lu, %lu, %lf, (%lf, %lf)\n", i, l, coeff, pivot_val, val);
 				subtractRows(mat, i, l, coeff);
 			}
@@ -182,7 +182,7 @@ void Gauss(MatrixPtr mat, Tracker* tracker) {
 
 		if (col[i] != 0) {
 			for (SizeT j = i + 1; j < mat->rows; j++) {
-				value_t coeff = col[j] / col[i];
+				Value coeff = col[j] / col[i];
 				printf("i, j = %lu, %lu\n", i, j);
 				subtractRows(mat, j, i, coeff);
 			}
@@ -196,7 +196,7 @@ void Gauss(MatrixPtr mat, Tracker* tracker) {
 			getMatrixColumn(mat, refColId, col);
 
 			for (SizeT j = i + 1; j < mat->rows; j++) {
-				value_t coeff = col[j] / col[i];
+				Value coeff = col[j] / col[i];
 				//printf("i, j = %lu, %lu\n", i, j);
 				subtractRows(mat, j, i, coeff);
 			}
