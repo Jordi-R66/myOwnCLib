@@ -158,14 +158,16 @@ bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 	bool success = true;
 
 	if (matA->cols != matB->rows) {
-		fprintf(stderr, "Error: Can't multiply the given matrices, matA.cols != matB.rows\n");
+		fprintf(stderr, "Error: Can't multiply the given matrices, matA.cols (%zu) != matB.rows (%zu)\n", (size_t)matA->cols, (size_t)matB->rows);
 		success = false;
 	}
 
 	if (success && (matDest->data != NULL && !matDest->memFreed)) {
 		fprintf(stderr, "Error: Destination matrix isn't empty. Please free it before use.\n");
 		success = false;
-	} else if (success) {
+	}
+
+	if (success) {
 		matDest->rows = matA->rows;
 		matDest->cols = matB->cols;
 
@@ -174,42 +176,33 @@ bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 		}
 	}
 
-	Values col = NULL, row = NULL;
-
 	if (success) {
-		col = (Values)calloc(matB->rows, VALUE_T_SIZE);
-		row = (Values)calloc(matA->cols, VALUE_T_SIZE);
+		SizeT M = matA->rows;
+		SizeT N = matDest->cols; // matB->cols
+		SizeT K = matA->cols;    // Dimension commune
 
-		if (col == NULL || row == NULL) {
-			fprintf(stderr, "Error: Temp buffer alloc failed.\n");
-			deallocMatrix(matDest, true);
+		// Pointeurs bruts pour éviter l'indirection répétée
+		Values A = matA->data;
+		Values B = matB->data;
+		Values C = matDest->data;
 
-			if (col) free(col);
-			if (row) free(row);
+		for (SizeT i = 0; i < M; i++) {
+			// Optimisation : pré-calcul de l'offset de la ligne i de A et C
+			SizeT offsetA = i * K;
+			SizeT offsetC = i * N;
 
-			success = false;
-		}
-	}
+			for (SizeT j = 0; j < N; j++) {
+				Value sum = 0;
 
-	if (success) {
-		for (SizeT i = 0; i < matDest->rows; i++) {
-			getMatrixRow(matA, i, row);
-
-		for (SizeT j = 0; j < matDest->cols; j++) {
-			Value newValue = 0.0;
-
-				getMatrixColumn(matB, j, col);
-
-				for (SizeT k = 0; k < matA->cols; k++) {
-					newValue += col[k] * row[k];
+				for (SizeT k = 0; k < K; k++) {
+					// C[i][j] += A[i][k] * B[k][j]
+					// B est accédé avec un stride de N (moins cache-friendly que A, mais standard)
+					sum += A[offsetA + k] * B[k * N + j];
 				}
 
-				setMatrixCase(matDest, newValue, i, j);
+				C[offsetC + j] = sum;
 			}
 		}
-
-		free(col);
-		free(row);
 	}
 
 	return success;
@@ -219,16 +212,23 @@ bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 	Adds matB to matA and stores the result in matA
 */
 bool matrixAddition(MatrixPtr matA, MatrixPtr matB) {
+	bool success = true;
+
 	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
-		fprintf(stderr, "Error: Dimension mismatch for addition.\n");
-		return false;
+		fprintf(stderr, "Error: Dimension mismatch for addition (%zux%zu vs %zux%zu).\n", 
+			(size_t)matA->rows, (size_t)matA->cols, (size_t)matB->rows, (size_t)matB->cols);
+		success = false;
 	}
 
-	for (SizeT i = 0; i < matA->size; i++) {
-		matA->data[i] += matB->data[i];
+	if (success) {
+		// Optimisation : On parcourt linear-wise car les données sont contiguës
+		// Cela évite les doubles boucles et favorise la vectorisation CPU
+		for (SizeT i = 0; i < matA->size; i++) {
+			matA->data[i] += matB->data[i];
+		}
 	}
 
-	return true;
+	return success;
 }
 
 Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB) {
