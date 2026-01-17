@@ -1,6 +1,6 @@
 #include "matrix.h"
 
-#include "../../memory/memfuncs.h"
+//#include "../../memory/memfuncs.h"
 
 #ifdef MATRIX_INCLUDED
 bool allocMatrix(MatrixPtr matrix) {
@@ -28,7 +28,7 @@ bool allocMatrix(MatrixPtr matrix) {
 void deallocMatrix(MatrixPtr matrix, bool destroyValues) {
 	if (matrix->data != NULL) {
 		if (destroyValues) {
-			setMemory(matrix->data, 0, matrix->size * VALUE_T_SIZE);
+			memset(matrix->data, 0, matrix->size * VALUE_T_SIZE);
 		}
 
 		free(matrix->data);

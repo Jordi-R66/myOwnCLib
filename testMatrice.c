@@ -25,6 +25,8 @@ int32 main(void) {
 	matrixMultiplication(&M, &M, &C);
 
 	printMatrix(&C, S_DISCRETE);
+	deallocMatrix(&M, true);
+	deallocMatrix(&C, true);
 
 	return 0;
 }
