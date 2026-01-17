@@ -16,7 +16,7 @@
 	#endif
 #endif
 
-typedef ValueTYPE Value;
+typedef ValueTYPE Value, *Values;
 
 #define VALUE_T_SIZE sizeof(Value)
 
@@ -25,5 +25,3 @@ typedef enum ValTypes {
 	U_DISCRETE = 1,
 	REAL = 2
 } ValType;
-
-typedef Value* Values;
