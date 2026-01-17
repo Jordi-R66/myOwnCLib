@@ -1,5 +1,6 @@
 #pragma once
 
+#ifndef MATRIX_INLCUDED
 #include "localCommon.h"
 
 #pragma pack(1)
@@ -49,4 +50,5 @@ bool swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId);
 void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, Value coeffRowB);
 void multiplyRow(MatrixPtr mat, SizeT rowId, Value coeffRow);
 
-#define MATRIX_INCLUDED
+#define MATRIX_INCLUDED 1
+#endif
