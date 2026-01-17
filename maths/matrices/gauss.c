@@ -6,7 +6,7 @@
 Function to return the index of the row's pivot in the context
 of Gauss' Pivot Algorithm
 */
-SizeT identifyGaussPivot(Matrix* mat, SizeT rowId) {
+SizeT identifyGaussPivot(MatrixPtr mat, SizeT rowId) {
 	Values row = (Values)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowId, row);
@@ -27,7 +27,7 @@ SizeT identifyGaussPivot(Matrix* mat, SizeT rowId) {
 	return i;
 }
 
-void generatePivotsArray(Matrix* mat, SizeT* rowsGaussPivots) {
+void generatePivotsArray(MatrixPtr mat, SizeT* rowsGaussPivots) {
 	for (SizeT i = 0; i < mat->rows; i++) {
 		rowsGaussPivots[i] = identifyGaussPivot(mat, i);
 	}
@@ -47,7 +47,7 @@ SizeT chooseSortingPivot(SizeT min, SizeT max) {
 	//return randomIndex(min, max);
 }
 
-void sortingSwap(Matrix* mat, SizeT* pivots, SizeT idA, SizeT idB, Tracker* tracker) {
+void sortingSwap(MatrixPtr mat, SizeT* pivots, SizeT idA, SizeT idB, Tracker* tracker) {
 	if (idA == idB) {
 		return;
 	}
@@ -59,7 +59,7 @@ void sortingSwap(Matrix* mat, SizeT* pivots, SizeT idA, SizeT idB, Tracker* trac
 }
 
 /* -- QuickSort implementation, needs to be fixed so implemented BubbleSort instead
-SizeT Partitioning(Matrix* mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, Swap** swaps, SizeT* swapsMade) {
+SizeT Partitioning(MatrixPtr mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, Swap** swaps, SizeT* swapsMade) {
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
 
 	for (SizeT i = 0; i < mat->rows; i++) {
@@ -95,7 +95,7 @@ SizeT Partitioning(Matrix* mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, S
 	return j;
 }
 
-void QuickSort(Matrix* mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* swapsMade) {
+void QuickSort(MatrixPtr mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* swapsMade) {
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
 
 	for (SizeT i = 0; i < mat->rows; i++) {
@@ -121,7 +121,7 @@ void QuickSort(Matrix* mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* sw
 }
 */
 
-void BubbleSort(Matrix* mat, Tracker* tracker) {
+void BubbleSort(MatrixPtr mat, Tracker* tracker) {
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
 
 	generatePivotsArray(mat, rowsGaussPivots);
@@ -142,7 +142,7 @@ void BubbleSort(Matrix* mat, Tracker* tracker) {
 	free(rowsGaussPivots);
 }
 
-void prepareGauss(Matrix* mat, Tracker* tracker) {
+void prepareGauss(MatrixPtr mat, Tracker* tracker) {
 	if (tracker->initialised == false) {
 		InitTracker(tracker);
 	}
@@ -151,7 +151,7 @@ void prepareGauss(Matrix* mat, Tracker* tracker) {
 	BubbleSort(mat, tracker);
 }
 
-void Gauss(Matrix* mat, Tracker* tracker) {
+void Gauss(MatrixPtr mat, Tracker* tracker) {
 	Values col = (Values)calloc(mat->rows, sizeof(value_t));
 
 	prepareGauss(mat, tracker);

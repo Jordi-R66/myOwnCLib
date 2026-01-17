@@ -1,7 +1,7 @@
 #include "advMatrix.h"
 
 #ifdef ADVANCED_MATRIX_INCLUDED
-void mirrorMatrix(Matrix* mat, SwapType type, Tracker* tracker) {
+void mirrorMatrix(MatrixPtr mat, SwapType type, Tracker* tracker) {
 	SizeT j = 0;
 
 	switch (type) {
@@ -35,7 +35,7 @@ void mirrorMatrix(Matrix* mat, SwapType type, Tracker* tracker) {
 	}
 }
 
-bool inversibiltyCheck(Matrix* mat, Tracker* tracker) {
+bool inversibiltyCheck(MatrixPtr mat, Tracker* tracker) {
 	bool result = true;
 
 	result &= mat->cols == mat->rows;

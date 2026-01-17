@@ -3,19 +3,19 @@
 #include "../memory/memfuncs.h"
 
 #ifdef MATRIX_INCLUDED
-void allocMatrix(Matrix* matrix) {
+void allocMatrix(MatrixPtr matrix) {
 	matrix->size = matrix->rows * matrix->cols;
 	matrix->data = (Values)calloc(matrix->size, sizeof(value_t));
 	setMemory((ptr)matrix->data, 0, matrix->size);
 	matrix->memFreed = false;
 }
 
-void deallocMatrix(Matrix* matrix) {
+void deallocMatrix(MatrixPtr matrix) {
 	free(matrix->data);
 	matrix->memFreed = true;
 }
 
-void getMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer) {
+void getMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer) {
 	SizeT iStart, iEnd;
 
 	iStart = row * matrix->cols;
@@ -26,28 +26,28 @@ void getMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer) {
 	}
 }
 
-void getMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer) {
+void getMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer) {
 	for (SizeT row = 0; row < matrix->rows; row++) {
 		SizeT i = row * matrix->cols + column;
 		colBuffer[row] = matrix->data[i];
 	}
 }
 
-void setMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer) {
+void setMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer) {
 	for (SizeT i = 0; i < matrix->cols; i++) {
 		value_t val = rowBuffer[i];
 		setMatrixCase(matrix, val, row, i);
 	}
 }
 
-void setMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer) {
+void setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer) {
 	for (SizeT i = 0; i < matrix->rows; i++) {
 		value_t val = colBuffer[i];
 		setMatrixCase(matrix, val, i, column);
 	}
 }
 
-void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col) {
+void setMatrixCase(MatrixPtr matrix, value_t value, SizeT row, SizeT col) {
 	if (row >= matrix->rows) {
 		fprintf(stderr, "Can't get to row %zu : limit exceeded\n", row);
 		exit(EXIT_FAILURE);
@@ -63,7 +63,7 @@ void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col) {
 	matrix->data[i] = value;
 }
 
-value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col) {
+value_t getMatrixCase(MatrixPtr matrix, SizeT row, SizeT col) {
 	if (row >= matrix->rows) {
 		fprintf(stderr, "Can't get to row %zu : limit exceeded\n", row);
 		exit(EXIT_FAILURE);
@@ -79,19 +79,19 @@ value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col) {
 	return matrix->data[i];
 }
 
-void setMatrix(Matrix* matrix, Values values) {
+void setMatrix(MatrixPtr matrix, Values values) {
 	for (SizeT i = 0; i < matrix->size; i++) {
 		matrix->data[i] = values[i];
 	}
 }
 
-void scalarMul(Matrix* matrix, value_t scalar) {
+void scalarMul(MatrixPtr matrix, value_t scalar) {
 	for (SizeT i = 0; i < matrix->size; i++) {
 		matrix->data[i] *= scalar;
 	}
 }
 
-Matrix scalarMulNewMatrix(Matrix* matrix, double scalar) {
+Matrix scalarMulNewMatrix(MatrixPtr matrix, double scalar) {
 	Matrix newMatrix;
 	newMatrix.rows = matrix->rows;
 	newMatrix.cols = matrix->cols;
@@ -108,7 +108,7 @@ Matrix scalarMulNewMatrix(Matrix* matrix, double scalar) {
 	Performs an inefficient matrix multiplication algorithm and stores the resulting matrix at a given address
 	Stores the result `matDest` of `matA * matB`
 */
-void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
+void matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 	if (matA->cols != matB->rows) {
 		fprintf(stderr, "Can't multiply the given matrices, matA.cols != matB.rows\n");
 		exit(EXIT_FAILURE);
@@ -145,7 +145,7 @@ void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest) {
 /*
 	Adds matB to matA and stores the result in matA
 */
-void matrixAddition(Matrix* matA, Matrix* matB) {
+void matrixAddition(MatrixPtr matA, MatrixPtr matB) {
 	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
 		return;
 	}
@@ -155,7 +155,7 @@ void matrixAddition(Matrix* matA, Matrix* matB) {
 	}
 }
 
-Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB) {
+Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB) {
 	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
 		exit(EXIT_FAILURE);
 		//return;
@@ -173,7 +173,7 @@ Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB) {
 	return newMatrix;
 }
 
-void genIdentityMatrix(Matrix* matrix, SizeT n) {
+void genIdentityMatrix(MatrixPtr matrix, SizeT n) {
 	matrix->cols = n;
 	matrix->rows = n;
 	allocMatrix(matrix);
@@ -185,7 +185,7 @@ void genIdentityMatrix(Matrix* matrix, SizeT n) {
 	}
 }
 
-void printMatrix(Matrix* matrix, ValType valFormat) {
+void printMatrix(MatrixPtr matrix, ValType valFormat) {
 	Values row_buffer = (Values)calloc(matrix->cols, sizeof(value_t));
 
 	for (SizeT row = 0; row < matrix->rows; row++) {
@@ -215,7 +215,7 @@ void printMatrix(Matrix* matrix, ValType valFormat) {
 
 // Originally in gauss.c
 
-void swapRows(Matrix* mat, SizeT rowAId, SizeT rowBId) {
+void swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId) {
 	if (rowAId == rowBId) {
 		return;
 	}
@@ -240,7 +240,7 @@ void swapRows(Matrix* mat, SizeT rowAId, SizeT rowBId) {
 	return;
 }
 
-void swapCols(Matrix* mat, SizeT colAId, SizeT colBId) {
+void swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId) {
 	if (colAId == colBId) {
 		return;
 	}
@@ -265,7 +265,7 @@ void swapCols(Matrix* mat, SizeT colAId, SizeT colBId) {
 	return;
 }
 
-void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB) {
+void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB) {
 	Values rowA = (Values)calloc(mat->cols, sizeof(value_t));
 	Values rowB = (Values)calloc(mat->cols, sizeof(value_t));
 
@@ -284,7 +284,7 @@ void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB) {
 	return;
 }
 
-void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow) {
+void multiplyRow(MatrixPtr mat, SizeT rowId, value_t coeffRow) {
 	Values row = (Values)calloc(mat->cols, sizeof(value_t));
 
 	getMatrixRow(mat, rowId, row);

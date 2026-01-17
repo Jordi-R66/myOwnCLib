@@ -13,39 +13,39 @@ struct Matrix {
 
 #define MATRIX_SIZE sizeof(Matrix)
 
-typedef struct Matrix Matrix;
+typedef struct Matrix Matrix, *MatrixPtr;
 
-void allocMatrix(Matrix* matrix);
-void deallocMatrix(Matrix* matrix);
+void allocMatrix(MatrixPtr matrix);
+void deallocMatrix(MatrixPtr matrix);
 
-void getMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer);
-void getMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer);
+void getMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer);
+void getMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
 
-void setMatrixRow(Matrix* matrix, SizeT row, Values rowBuffer);
-void setMatrixColumn(Matrix* matrix, SizeT column, Values colBuffer);
+void setMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer);
+void setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
 
-void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col);
-value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col);
+void setMatrixCase(MatrixPtr matrix, value_t value, SizeT row, SizeT col);
+value_t getMatrixCase(MatrixPtr matrix, SizeT row, SizeT col);
 
-void setMatrix(Matrix* matrix, Values values);
+void setMatrix(MatrixPtr matrix, Values values);
 
-void scalarMul(Matrix* matrix, value_t scalar);
-void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest);
-void matrixAddition(Matrix* matA, Matrix* matB);
+void scalarMul(MatrixPtr matrix, value_t scalar);
+void matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
+void matrixAddition(MatrixPtr matA, MatrixPtr matB);
 
-Matrix scalarMulNewMatrix(Matrix* matrix, value_t scalar);
-Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB);
+Matrix scalarMulNewMatrix(MatrixPtr matrix, value_t scalar);
+Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
 
-void genIdentityMatrix(Matrix* matrix, SizeT n);
+void genIdentityMatrix(MatrixPtr matrix, SizeT n);
 
-void printMatrix(Matrix* matrix, ValType valFormat);
+void printMatrix(MatrixPtr matrix, ValType valFormat);
 
 // Originally in gauss.h
 
-void swapRows(Matrix* mat, SizeT rowAId, SizeT rowBId);
-void swapCols(Matrix* mat, SizeT colAId, SizeT colBId);
+void swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId);
+void swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId);
 
-void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB);
-void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow);
+void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB);
+void multiplyRow(MatrixPtr mat, SizeT rowId, value_t coeffRow);
 
 #define MATRIX_INCLUDED
