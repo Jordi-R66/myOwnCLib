@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common.h"
+#include "../../common.h"
 
 #ifndef OVERRIDE_MATRIX_ValueYPE
 	#ifdef ValueTYPE

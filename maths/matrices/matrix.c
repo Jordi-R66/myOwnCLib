@@ -1,6 +1,6 @@
 #include "matrix.h"
 
-#include "../memory/memfuncs.h"
+#include "../../memory/memfuncs.h"
 
 #ifdef MATRIX_INCLUDED
 bool allocMatrix(MatrixPtr matrix) {
