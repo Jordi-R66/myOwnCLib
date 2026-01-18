@@ -318,6 +318,35 @@ void printMatrix(MatrixPtr matrix, ValType valFormat) {
 	free(row_buffer);
 }
 
+bool matrixTranspose(MatrixPtr src, MatrixPtr dest) {
+	bool success = true;
+
+	if (success && (dest->data != NULL && !dest->memFreed)) {
+		fprintf(stderr, "Error: Destination matrix isn't empty.\n");
+		success = false;
+	}
+
+	if (success) {
+		dest->rows = src->cols;
+		dest->cols = src->rows;
+
+		if (!allocMatrix(dest)) {
+			success = false;
+		}
+	}
+
+	if (success) {
+		// TODO: Optimiser plus tard, ici c'est une version naïve. Il va falloir prendre avantage du cache du CPU.
+		for (SizeT i=0; i < src->rows; i++) {
+			for (SizeT j = 0; j < src->cols; j++) {
+				dest->data[j * dest->cols + i] = src->data[i * src->cols + j];
+			}
+		}
+	}
+
+	return success;
+}
+
 // Originally in gauss.c
 
 bool swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId) {

@@ -45,6 +45,7 @@ Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
 #pragma region Other
 void genIdentityMatrix(MatrixPtr matrix, SizeT n);
 void printMatrix(MatrixPtr matrix, ValType valFormat);
+bool matrixTranspose(MatrixPtr src, MatrixPtr dest);
 #pragma endregion
 
 // Originally in gauss.h
