@@ -42,15 +42,19 @@ Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar);
 Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
 #pragma endregion
 
+#pragma region Other
 void genIdentityMatrix(MatrixPtr matrix, SizeT n);
 void printMatrix(MatrixPtr matrix, ValType valFormat);
+#pragma endregion
 
 // Originally in gauss.h
 
+#pragma region Gauss Functions
 bool swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId);
 bool swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId);
 void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, Value coeffRowB);
 void multiplyRow(MatrixPtr mat, SizeT rowId, Value coeffRow);
+#pragma endregion
 
 #define MATRIX_INCLUDED 1
 #endif
