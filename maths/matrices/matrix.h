@@ -18,6 +18,8 @@ typedef struct Matrix Matrix, *MatrixPtr;
 
 #pragma region Matrix Init
 bool allocMatrix(MatrixPtr matrix);
+Matrix createMatrix(SizeT rows, SizeT cols);
+Matrix createMatrixWithValues(SizeT rows, SizeT cols, Values vals);
 void deallocMatrix(MatrixPtr matrix, bool destroyValues);
 #pragma endregion
 

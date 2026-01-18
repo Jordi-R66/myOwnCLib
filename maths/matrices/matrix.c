@@ -3,6 +3,7 @@
 //#include "../../memory/memfuncs.h"
 
 #ifdef MATRIX_INCLUDED
+
 bool allocMatrix(MatrixPtr matrix) {
 	bool success = true;
 	// Safety : Do not allocate if the matrix seems to already contain unfreed data
@@ -23,6 +24,34 @@ bool allocMatrix(MatrixPtr matrix) {
 	}
 
 	return success;
+}
+
+Matrix createMatrix(SizeT rows, SizeT cols) {
+	Matrix output = {.cols = cols, .rows = rows, .data = NULL, .memFreed = false, .size = 0};
+
+	bool success = allocMatrix(&output);
+
+	if (!success) {
+		fprintf(stderr, "Error: on createMatrix(SizeT, SizeT)\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return output;
+}
+
+Matrix createMatrixWithValues(SizeT rows, SizeT cols, Values vals) {
+	Matrix output = createMatrix(rows, vals);
+
+	bool success = output.data != NULL;
+
+	if (!success) {
+		fprintf(stderr, "Error: on createMatrixWithValues(SizeT, SizeT, Values)\n");
+		exit(EXIT_FAILURE);
+	} else {
+		setMatrix(&output, vals);
+	}
+
+	return output;
 }
 
 void deallocMatrix(MatrixPtr matrix, bool destroyValues) {
