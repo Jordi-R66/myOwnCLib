@@ -37,6 +37,7 @@ void setMatrix(MatrixPtr matrix, Values values);
 #pragma region Arithmetics
 void scalarMul(MatrixPtr matrix, Value scalar);
 bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
+bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
 bool matrixAddition(MatrixPtr matA, MatrixPtr matB);
 
 Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar);

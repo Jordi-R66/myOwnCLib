@@ -237,6 +237,54 @@ bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 	return success;
 }
 
+bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
+	bool success = true;
+
+	// Note : Pour A * B^T, le nombre de colonnes de A doit égaler le nombre de colonnes de B (car B est transposée)
+	if (matA->cols != matB->cols) {
+		fprintf(stderr, "Error: Dimension mismatch for A * B^T (%zux%zu) * (%zux%zu)^T\n", matA->rows, matA->cols, matB->rows, matB->cols);
+		success = false;
+	}
+
+	if (success && (matDest->data != NULL && !matDest->memFreed)) {
+		fprintf(stderr, "Error: Dest isn't empty.\n");
+		success = false;
+	}
+
+	if (success) {
+		matDest->rows = matA->rows;
+		matDest->cols = matB->rows; // Car B est transposée : (RxC) * (RxC)^T -> (RxC) * (CxR) -> RxR
+		if (!allocMatrix(matDest)) {
+			success = false;
+		}
+	}
+
+	if (success) {
+		SizeT M = matA->rows;
+		SizeT N = matDest->cols; // matB->rows
+		SizeT K = matA->cols;    // matB->cols (dimension de sommation)
+
+		Values A = matA->data;
+		Values B = matB->data;
+		Values C = matDest->data;
+
+		for (SizeT i = 0; i < M; i++) {
+			for (SizeT j = 0; j < N; j++) {
+				Value sum = 0;
+				// Cette boucle est EXCELLENTE pour le cache : A et B sont lus linéairement !
+				// C'est souvent plus rapide que la multiplication standard.
+
+				for (SizeT k = 0; k < K; k++) {
+					sum += A[i * K + k] * B[j * K + k]; 
+				}
+				C[i * N + j] = sum;
+			}
+		}
+	}
+
+	return success;
+}
+
 /*
 	Adds matB to matA and stores the result in matA
 */
