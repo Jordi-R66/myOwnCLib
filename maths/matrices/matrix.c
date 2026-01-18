@@ -40,7 +40,7 @@ Matrix createMatrix(SizeT rows, SizeT cols) {
 }
 
 Matrix createMatrixWithValues(SizeT rows, SizeT cols, Values vals) {
-	Matrix output = createMatrix(rows, vals);
+	Matrix output = createMatrix(rows, cols);
 
 	bool success = output.data != NULL;
 
