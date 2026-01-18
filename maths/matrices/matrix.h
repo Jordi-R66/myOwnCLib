@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef MATRIX_INLCUDED
+#ifndef MATRIX_INCLUDED
 #include "localCommon.h"
 
 #pragma pack(1)
