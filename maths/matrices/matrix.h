@@ -15,6 +15,7 @@ struct Matrix {
 #define MATRIX_SIZE sizeof(Matrix)
 
 typedef struct Matrix Matrix, *MatrixPtr;
+typedef Value (*ValueFunc)(Value);
 
 #pragma region Matrix Init
 bool allocMatrix(MatrixPtr matrix);
@@ -46,6 +47,14 @@ Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
 void genIdentityMatrix(MatrixPtr matrix, SizeT n);
 void printMatrix(MatrixPtr matrix, ValType valFormat);
 bool matrixTranspose(MatrixPtr src, MatrixPtr dest);
+
+/**
+ * @brief Applies a function to every values of a given Matrix
+ * 
+ * @param mat The pointer to the Matrix struct
+ * @param func the function to apply, must return a Value, and give a Value as a parameter
+ */
+void matrixMap(MatrixPtr mat, ValueFunc func);
 #pragma endregion
 
 // Originally in gauss.h

@@ -347,6 +347,12 @@ bool matrixTranspose(MatrixPtr src, MatrixPtr dest) {
 	return success;
 }
 
+void matrixMap(MatrixPtr mat, ValueFunc func) {
+	for (SizeT i = 0; i < mat->size; i++) {
+		mat->data[i] = func(mat->data[i]);
+	}
+}
+
 // Originally in gauss.c
 
 bool swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId) {
