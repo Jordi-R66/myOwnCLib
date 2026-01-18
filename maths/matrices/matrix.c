@@ -187,7 +187,7 @@ bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 	bool success = true;
 
 	if (matA->cols != matB->rows) {
-		fprintf(stderr, "Error: Can't multiply the given matrices, matA.cols (%zu) != matB.rows (%zu)\n", (size_t)matA->cols, (size_t)matB->rows);
+		fprintf(stderr, "Error: Can't multiply the given matrices, matA.cols (%zu) != matB.rows (%zu)\n", matA->cols, matB->rows);
 		success = false;
 	}
 
@@ -245,7 +245,7 @@ bool matrixAddition(MatrixPtr matA, MatrixPtr matB) {
 
 	if ((matA->cols != matB->cols) || (matA->rows != matB->rows)) {
 		fprintf(stderr, "Error: Dimension mismatch for addition (%zux%zu vs %zux%zu).\n", 
-			(size_t)matA->rows, (size_t)matA->cols, (size_t)matB->rows, (size_t)matB->cols);
+			matA->rows, matA->cols, matB->rows, matB->cols);
 		success = false;
 	}
 
