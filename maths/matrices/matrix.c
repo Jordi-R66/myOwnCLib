@@ -4,6 +4,8 @@
 
 #ifdef MATRIX_INCLUDED
 
+const Matrix NULL_MATRIX = {0, 0, 0, NULL, false};
+
 bool allocMatrix(MatrixPtr matrix) {
 	bool success = true;
 	// Safety : Do not allocate if the matrix seems to already contain unfreed data

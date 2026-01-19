@@ -14,6 +14,10 @@ struct Matrix {
 
 #define MATRIX_SIZE sizeof(Matrix)
 
+#define IS_NULL_MATRIX(m) (m.rows == (SizeT)0 && m.cols == (SizeT)0 && m.size == (SizeT)0 && m.data == NULL && m.memFreed = false)
+
+extern const Matrix NULL_MATRIX;
+
 typedef struct Matrix Matrix, *MatrixPtr;
 typedef Value (*ValueFunc)(Value);
 
