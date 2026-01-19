@@ -167,7 +167,7 @@ void scalarMul(MatrixPtr matrix, Value scalar) {
 	}
 }
 
-Matrix scalarMulNewMatrix(MatrixPtr matrix, double scalar) {
+Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar) {
 	Matrix newMatrix;
 	newMatrix.rows = matrix->rows;
 	newMatrix.cols = matrix->cols;
