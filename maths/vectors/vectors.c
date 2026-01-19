@@ -27,6 +27,8 @@ bool allocVector(VectorPtr vector, SizeT coords) {
 		fprintf(stderr, "Error: Couldn't allocate the vector with %zu coordinates.\n", coords);
 		*vector = NULL_VECTOR;
 	}
+
+	return output;
 }
 
 bool isNullVector(VectorPtr vPtr) {
