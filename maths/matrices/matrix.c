@@ -6,6 +6,128 @@
 
 const Matrix NULL_MATRIX = {0, 0, 0, NULL, false};
 
+#pragma region Helpers
+// Seuil pour arrêter la récursion et passer au calcul direct.
+// Un bloc 64x64 de doubles fait 32KB, ce qui tient généralement dans le cache L1.
+#define CO_BLOCK_SIZE 64
+
+// --- HELPERS PRIVÉS (Cache Oblivious) ---
+
+// Transposition récursive : Diviser pour régner
+// A : Source, B : Destination
+// strideA/B : Largeur réelle de la matrice d'origine (pour sauter les lignes correctement)
+static void _transposeRecursive(Values A, Values B, SizeT rows, SizeT cols, SizeT strideA, SizeT strideB) {
+	// Cas de base : Le bloc est assez petit pour tenir dans le cache L1/L2
+	if (rows <= CO_BLOCK_SIZE && cols <= CO_BLOCK_SIZE) {
+		for (SizeT i = 0; i < rows; i++) {
+			for (SizeT j = 0; j < cols; j++) {
+				// Copie directe (cache-friendly car le bloc est petit)
+				B[j * strideB + i] = A[i * strideA + j];
+			}
+		}
+	} else {
+		// Récursivité : On coupe la plus grande dimension en deux
+		if (rows >= cols) {
+			SizeT half = rows / 2;
+			// Haut
+			_transposeRecursive(A, B, half, cols, strideA, strideB);
+			// Bas (A avance de 'half' lignes, B avance de 'half' colonnes)
+			_transposeRecursive(A + half * strideA, B + half, rows - half, cols, strideA, strideB);
+		} else {
+			SizeT half = cols / 2;
+			// Gauche
+			_transposeRecursive(A, B, rows, half, strideA, strideB);
+			// Droite (A avance de 'half' colonnes, B avance de 'half' lignes)
+			_transposeRecursive(A + half, B + half * strideB, rows, cols - half, strideA, strideB);
+		}
+	}
+}
+
+// Multiplication récursive : C += A * B
+static void _multRecursive(SizeT M, SizeT N, SizeT K, 
+							Values A, SizeT strideA, 
+							Values B, SizeT strideB, 
+							Values C, SizeT strideC) {
+
+	// Cas de base : Petit bloc -> Appel au "Kernel" itératif optimisé
+	if ((M <= CO_BLOCK_SIZE) && (N <= CO_BLOCK_SIZE) && (K <= CO_BLOCK_SIZE)) {
+		for (SizeT i = 0; i < M; i++) {
+			for (SizeT k = 0; k < K; k++) {
+				// On charge A[i][k] dans un registre pour l'utiliser N fois
+				Value aVal = A[i * strideA + k];
+				for (SizeT j = 0; j < N; j++) {
+					C[i * strideC + j] += aVal * B[k * strideB + j];
+				}
+			}
+		}
+	} else {
+		// Stratégie de découpe : On coupe la plus grande dimension
+		if (M >= N && M >= K) {
+			// Split M (Couper horizontalement A et C)
+			SizeT half = M / 2;
+			_multRecursive(half, N, K, A, strideA, B, strideB, C, strideC);
+			_multRecursive(M - half, N, K, A + half * strideA, strideA, B, strideB, C + half * strideC, strideC);
+		} else if (N >= M && N >= K) {
+			// Split N (Couper verticalement B et C)
+			SizeT half = N / 2;
+			_multRecursive(M, half, K, A, strideA, B, strideB, C, strideC);
+			_multRecursive(M, N - half, K, A, strideA, B + half, strideB, C + half, strideC);
+		} else {
+			// Split K (Couper verticalement A et horizontalement B) -> C += A_left*B_top + A_right*B_bot
+			SizeT half = K / 2;
+			_multRecursive(M, N, half, A, strideA, B, strideB, C, strideC);
+			_multRecursive(M, N, K - half, A + half, strideA, B + half * strideB, strideB, C, strideC);
+		}
+	}
+}
+// Helper : Multiplication Transposée Récursive (Cache Oblivious)
+// Effectue C += A * B^T
+// A : MxK, B : NxK (stockée ligne par ligne), C : MxN
+static void _multNTRecursive(SizeT M, SizeT N, SizeT K, 
+								Values A, SizeT strideA, 
+								Values B, SizeT strideB, 
+								Values C, SizeT strideC) {
+
+	// Cas de base : Petit bloc -> Kernel Itératif
+	// On utilise les boucles simples qui seront vectorisées par le compilateur
+	if ((M <= CO_BLOCK_SIZE) && (N <= CO_BLOCK_SIZE) && (K <= CO_BLOCK_SIZE)) {
+		for (SizeT i = 0; i < M; i++) {
+			for (SizeT j = 0; j < N; j++) {
+				Value sum = 0;
+				// Dot Product optimisé (accès linéaires sur A et B)
+				for (SizeT k = 0; k < K; k++) {
+					sum += A[i * strideA + k] * B[j * strideB + k];
+				}
+				// Accumulation (+=) car on somme les résultats des découpes de K
+				C[i * strideC + j] += sum;
+			}
+		}
+	} else {
+		// Récursivité : On coupe la plus grande dimension
+		if (M >= N && M >= K) {
+			// Split M (Lignes de A et C)
+			SizeT half = M / 2;
+			_multNTRecursive(half, N, K, A, strideA, B, strideB, C, strideC);
+			_multNTRecursive(M - half, N, K, A + half * strideA, strideA, B, strideB, C + half * strideC, strideC);
+		} else if (N >= M && N >= K) {
+			// Split N (Lignes de B et Colonnes de C)
+			SizeT half = N / 2;
+			_multNTRecursive(M, half, K, A, strideA, B, strideB, C, strideC);
+			// Note : B avance de 'half' lignes (car B est NxK)
+			// C avance de 'half' colonnes (pointeur + half)
+			_multNTRecursive(M, N - half, K, A, strideA, B + half * strideB, strideB, C + half, strideC);
+		} else {
+			// Split K (Colonnes de A et B) -> Somme des résultats
+			// C += A_left * B_left^T + A_right * B_right^T
+			SizeT half = K / 2;
+			_multNTRecursive(M, N, half, A, strideA, B, strideB, C, strideC);
+			// A et B avancent de 'half' colonnes
+			_multNTRecursive(M, N, K - half, A + half, strideA, B + half, strideB, C, strideC);
+		}
+	}
+}
+#pragma endregion
+
 bool allocMatrix(MatrixPtr matrix) {
 	bool success = true;
 	// Safety : Do not allocate if the matrix seems to already contain unfreed data
@@ -186,66 +308,47 @@ Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar) {
  * @returns `success` : true if success, false if failure
 */
 bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
-	bool success = true;
+	bool success = matA->cols == matB->rows;
 
-	if (matA->cols != matB->rows) {
-		fprintf(stderr, "Error: Can't multiply the given matrices, matA.cols (%zu) != matB.rows (%zu)\n", matA->cols, matB->rows);
-		success = false;
+	if (!success) {
+		fprintf(stderr, "Error: Dimension mismatch (%zu x %zu) * (%zu x %zu)\n", 
+			(size_t)matA->rows, (size_t)matA->cols, (size_t)matB->rows, (size_t)matB->cols);
 	}
 
 	if (success && (matDest->data != NULL && !matDest->memFreed)) {
-		fprintf(stderr, "Error: Destination matrix isn't empty. Please free it before use.\n");
+		fprintf(stderr, "Error: Destination matrix isn't empty.\n");
 		success = false;
 	}
 
 	if (success) {
 		matDest->rows = matA->rows;
 		matDest->cols = matB->cols;
-
+		// allocMatrix utilise calloc, donc la matrice est initialisée à 0 (requis pour +=)
 		if (!allocMatrix(matDest)) {
 			success = false;
 		}
 	}
 
 	if (success) {
-		SizeT M = matA->rows;
-		SizeT N = matDest->cols; // matB->cols
-		SizeT K = matA->cols;    // Dimension commune
-
-		// Pointeurs bruts pour éviter l'indirection répétée
-		Values A = matA->data;
-		Values B = matB->data;
-		Values C = matDest->data;
-
-		for (SizeT i = 0; i < M; i++) {
-			// Optimisation : pré-calcul de l'offset de la ligne i de A et C
-			SizeT offsetA = i * K;
-			SizeT offsetC = i * N;
-
-			for (SizeT j = 0; j < N; j++) {
-				Value sum = 0;
-
-				for (SizeT k = 0; k < K; k++) {
-					// C[i][j] += A[i][k] * B[k][j]
-					// B est accédé avec un stride de N (moins cache-friendly que A, mais standard)
-					sum += A[offsetA + k] * B[k * N + j];
-				}
-
-				C[offsetC + j] = sum;
-			}
-		}
+		// Lancement de l'algo Cache Oblivious
+		// On passe les pointeurs bruts et les dimensions
+		_multRecursive(matA->rows, matDest->cols, matA->cols,
+					   matA->data, matA->cols,      // A, strideA
+					   matB->data, matB->cols,      // B, strideB
+					   matDest->data, matDest->cols // C, strideC
+		);
 	}
 
 	return success;
 }
 
 bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
-	bool success = true;
+	bool success = matA->cols == matB->cols;
 
-	// Note : Pour A * B^T, le nombre de colonnes de A doit égaler le nombre de colonnes de B (car B est transposée)
-	if (matA->cols != matB->cols) {
-		fprintf(stderr, "Error: Dimension mismatch for A * B^T (%zux%zu) * (%zux%zu)^T\n", matA->rows, matA->cols, matB->rows, matB->cols);
-		success = false;
+	// A * B^T implique que A et B doivent avoir le même nombre de colonnes (dimension de réduction K)
+	if (!success) {
+		fprintf(stderr, "Error: Dimension mismatch for A * B^T (%zux%zu) * (%zux%zu)^T\n", 
+			(size_t)matA->rows, (size_t)matA->cols, (size_t)matB->rows, (size_t)matB->cols);
 	}
 
 	if (success && (matDest->data != NULL && !matDest->memFreed)) {
@@ -255,33 +358,22 @@ bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 
 	if (success) {
 		matDest->rows = matA->rows;
-		matDest->cols = matB->rows; // Car B est transposée : (RxC) * (RxC)^T -> (RxC) * (CxR) -> RxR
-		if (!allocMatrix(matDest)) {
-			success = false;
-		}
+		matDest->cols = matB->rows; // Résultat (MxN)
+
+		// allocMatrix utilise calloc -> C est initialisé à 0, ce qui est requis pour l'accumulation +=
+		success = allocMatrix(matDest);
 	}
 
 	if (success) {
-		SizeT M = matA->rows;
-		SizeT N = matDest->cols; // matB->rows
-		SizeT K = matA->cols;    // matB->cols (dimension de sommation)
-
-		Values A = matA->data;
-		Values B = matB->data;
-		Values C = matDest->data;
-
-		for (SizeT i = 0; i < M; i++) {
-			for (SizeT j = 0; j < N; j++) {
-				Value sum = 0;
-				// Cette boucle est EXCELLENTE pour le cache : A et B sont lus linéairement !
-				// C'est souvent plus rapide que la multiplication standard.
-
-				for (SizeT k = 0; k < K; k++) {
-					sum += A[i * K + k] * B[j * K + k]; 
-				}
-				C[i * N + j] = sum;
-			}
-		}
+		// Appel Cache Oblivious
+		// M = matA->rows
+		// N = matB->rows (car transposée)
+		// K = matA->cols (ou matB->cols)
+		_multNTRecursive(matA->rows, matB->rows, matA->cols,
+						 matA->data, matA->cols,      // A, strideA
+						 matB->data, matB->cols,      // B, strideB
+						 matDest->data, matDest->cols // C, strideC
+		);
 	}
 
 	return success;
@@ -368,29 +460,24 @@ void printMatrix(MatrixPtr matrix, ValType valFormat) {
 }
 
 bool matrixTranspose(MatrixPtr src, MatrixPtr dest) {
-	bool success = true;
+	bool success = !(dest->data != NULL && !dest->memFreed);
 
-	if (success && (dest->data != NULL && !dest->memFreed)) {
+	if (!success) {
 		fprintf(stderr, "Error: Destination matrix isn't empty.\n");
-		success = false;
 	}
 
 	if (success) {
 		dest->rows = src->cols;
 		dest->cols = src->rows;
-
 		if (!allocMatrix(dest)) {
 			success = false;
 		}
 	}
 
 	if (success) {
-		// TODO: Optimiser plus tard, ici c'est une version naïve. Il va falloir prendre avantage du cache du CPU.
-		for (SizeT i=0; i < src->rows; i++) {
-			for (SizeT j = 0; j < src->cols; j++) {
-				dest->data[j * dest->cols + i] = src->data[i * src->cols + j];
-			}
-		}
+		// Lancement de l'algo Cache Oblivious
+		// Les "strides" initiaux sont égaux aux nombres de colonnes
+		_transposeRecursive(src->data, dest->data, src->rows, src->cols, src->cols, dest->cols);
 	}
 
 	return success;
