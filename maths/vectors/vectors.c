@@ -1,4 +1,5 @@
 #include "vectors.h"
+#include "math.h"
 
 const Vector NULL_VECTOR = {0, 0, 0, NULL, false};
 
@@ -149,3 +150,86 @@ bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result) {
 
 	return success;
 }
+
+#pragma region Primitives ML
+
+// Nécessaire pour l'entraînement (Gradient Descent) : Y = alpha * X + Y
+bool vectorAxpy(Value alpha, VectorPtr x, VectorPtr y) {
+	bool success = x->size == y->size;
+
+	if (!success) {
+		fprintf(stderr, "Error: Dimension mismatch for AXPY (%zu vs %zu)\n", (size_t)x->size, (size_t)y->size);
+	}
+
+	if (success) {
+		SizeT n = x->size;
+		Values X = x->data;
+		Values Y = y->data;
+
+		// Boucle FMA (Fused Multiply-Add) candidate
+		for (SizeT i = 0; i < n; i++) {
+			Y[i] = alpha * X[i] + Y[i];
+		}
+	}
+
+	return success;
+}
+
+// Nécessaire pour la classification (Probabilités en sortie)
+bool vectorSoftmax(VectorPtr v) {
+	bool success = v->size != 0;
+
+	if (success) {
+		// 1. Max Trick (Stabilité numérique)
+		Value maxVal = v->data[0];
+		for (SizeT i = 1; i < v->size; i++) {
+			if (v->data[i] > maxVal) maxVal = v->data[i];
+		}
+
+		// 2. Exponentielle
+		Value sumExp = 0.0;
+		Values D = v->data;
+
+		for (SizeT i = 0; i < v->size; i++) {
+			D[i] = exp(D[i] - maxVal); // In-place
+			sumExp += D[i];
+		}
+
+		// 3. Normalisation
+		success = sumExp != 0; // Ne devrait pas arriver avec exp()
+
+		if (success) {
+			Value invSum = 1.0 / sumExp;
+
+			for (SizeT i = 0; i < v->size; i++) {
+				D[i] *= invSum;
+			}
+		}
+	}
+
+	return success;
+}
+
+// Nécessaire pour obtenir le résultat final (Quel chiffre est prédit ?)
+bool vectorArgmax(VectorPtr v, SizeT* resultIndex) {
+	bool success = v->size > 0;
+
+	if (success) {
+		SizeT maxIdx = 0;
+		Value maxVal = v->data[0];
+		Values D = v->data;
+
+		for (SizeT i = 1; i < v->size; i++) {
+			if (D[i] > maxVal) {
+				maxVal = D[i];
+				maxIdx = i;
+			}
+		}
+
+		*resultIndex = maxIdx;
+	}
+
+	return success;
+}
+
+#pragma endregion

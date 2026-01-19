@@ -22,5 +22,11 @@ void setVector(VectorPtr vector, Values colBuffer);
 bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest);
 bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result);
 
+#pragma region ML Primitives
+bool vectorAxpy(Value alpha, VectorPtr x, VectorPtr y);
+bool vectorSoftmax(VectorPtr v);
+bool vectorArgmax(VectorPtr v, SizeT* resultIndex);
+#pragma endregion
+
 #define VECTORS_INCLUDED 1
 #endif
