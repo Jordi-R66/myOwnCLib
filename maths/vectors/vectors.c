@@ -47,7 +47,7 @@ bool getCoord(VectorPtr vector, SizeT coordNumber, Value* destVar) {
 
 	if (coordNumber >= vector->rows) {
 		success = false;
-		fprintf(stderr, "Error: Couldn't access the %zuth element of the vector. %zu is out of bounds.\n");
+		fprintf(stderr, "Error: Couldn't access the %zuth element of the vector. %zu is out of bounds.\n", coordNumber);
 	}
 
 	if (success)
@@ -61,7 +61,7 @@ bool setCoord(VectorPtr vector, SizeT coordNumber, Value value) {
 
 	if (coordNumber >= vector->rows) {
 		success = false;
-		fprintf(stderr, "Error: Couldn't set the %zuth element of the vector. %zu is out of bounds.\n");
+		fprintf(stderr, "Error: Couldn't set the %zuth element of the vector. %zu is out of bounds.\n", coordNumber);
 	}
 
 	if (success)
