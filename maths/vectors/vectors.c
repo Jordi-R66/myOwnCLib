@@ -134,7 +134,7 @@ bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result) {
 	if (success) {
 		Value sum = 0;
 		SizeT n = vectorA->size;
-		
+
 		// 2. Optimisation : Accès direct (Hot Path)
 		// On évite getCoord/setCoord pour permettre au CPU de vectoriser la boucle
 		Values A = vectorA->data;
