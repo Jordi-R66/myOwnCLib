@@ -379,6 +379,22 @@ bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 	return success;
 }
 
+bool matrixHadamard(MatrixPtr A, MatrixPtr B, MatrixPtr dest) {
+	bool success = (A->rows == B->rows && A->cols == B->cols && 
+					dest->rows == A->rows && dest->cols == A->cols);
+
+	if (!success) {
+		fprintf(stderr, "Error: Dimension mismatch for Hadamard product.\n");
+	} else {
+		SizeT n = A->size;
+		// Optimisation possible : SIMD
+		for (SizeT i = 0; i < n; i++) {
+			dest->data[i] = A->data[i] * B->data[i];
+		}
+	}
+	return success;
+}
+
 /*
 	Adds matB to matA and stores the result in matA
 */

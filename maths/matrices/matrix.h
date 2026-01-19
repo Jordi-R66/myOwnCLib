@@ -42,7 +42,7 @@ void scalarMul(MatrixPtr matrix, Value scalar);
 bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
 bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
 bool matrixAddition(MatrixPtr matA, MatrixPtr matB);
-
+bool matrixHadamard(MatrixPtr A, MatrixPtr B, MatrixPtr dest);
 Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar);
 Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
 #pragma endregion
