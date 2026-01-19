@@ -153,6 +153,32 @@ bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result) {
 	return success;
 }
 
+bool vectorNormalize(VectorPtr v) {
+    Value norm = 0;
+    // 1. Calcul de la norme (utilise la fonction précédente)
+    bool success = vectorNorm(v, &norm);
+
+    if (success) {
+        // 2. Vérification mathématique
+        if (norm == 0) {
+            fprintf(stderr, "Error: Cannot normalize a zero vector (division by zero).\n");
+            success = false;
+        } else {
+            // 3. Optimisation : Multiplication par l'inverse
+            Value invNorm = 1.0 / norm;
+            SizeT n = v->size;
+            Values D = v->data;
+
+            // Boucle vectorisable SIMD
+            for (SizeT i = 0; i < n; i++) {
+                D[i] *= invNorm;
+            }
+        }
+    }
+
+    return success;
+}
+
 #pragma region Primitives ML
 bool vectorNorm(VectorPtr v, Value* result) {
 	// On considère qu'un vecteur vide n'a pas de norme calculable dans ce contexte

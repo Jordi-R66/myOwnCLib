@@ -21,6 +21,7 @@ void setVector(VectorPtr vector, Values colBuffer);
 
 bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest);
 bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result);
+bool vectorNormalize(VectorPtr v);
 
 #pragma region ML Primitives
 bool vectorNorm(VectorPtr v, Value* result);
