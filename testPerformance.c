@@ -23,9 +23,8 @@ void randomizeMatrix(MatrixPtr m) {
 	}
 }
 
-void testBigMatrixMult() {
-	printf("\n--- 🏗️  Test Multiplication Matrice (1024x1024) ---\n");
-	SizeT N = 1024; // 1024*1024*1024 = 1 Milliard d'ops
+void testBigMatrixMult(SizeT N) {
+	printf("\n--- 🏗️  Test Multiplication Matrice (%zux%zu) ---\n", N, N);
 
 	Matrix A = createMatrix(N, N);
 	Matrix B = createMatrix(N, N);
@@ -47,11 +46,10 @@ void testBigMatrixMult() {
 	deallocMatrix(&C, true);
 }
 
-void testBigMatrixMultNT() {
-	printf("\n--- 🚀 Test Multiplication Matrice Transposée (1024x1024) ---\n");
+void testBigMatrixMultNT(SizeT N) {
+	printf("\n--- 🚀 Test Multiplication Matrice Transposée (%zux%zu) ---\n", N, N);
 	printf("(Ceci simule A * B^T, très fréquent en Backpropagation)\n");
 
-	SizeT N = 1024;
 	Matrix A = createMatrix(N, N);
 	Matrix B = createMatrix(N, N); // Sera traitée comme transposée
 
@@ -106,8 +104,10 @@ int main() {
 	// Initialisation du random
 	srand(time(NULL));
 
-	testBigMatrixMult();
-	testBigMatrixMultNT();
+	SizeT N = 2048;
+
+	testBigMatrixMult(N);
+	testBigMatrixMultNT(N);
 	testBigVector();
 
 	return 0;
