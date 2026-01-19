@@ -23,6 +23,7 @@ bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest);
 bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result);
 
 #pragma region ML Primitives
+bool vectorNorm(VectorPtr v, Value* result);
 bool vectorAxpy(Value alpha, VectorPtr x, VectorPtr y);
 bool vectorSoftmax(VectorPtr v);
 bool vectorArgmax(VectorPtr v, SizeT* resultIndex);

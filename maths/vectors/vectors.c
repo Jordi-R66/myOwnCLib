@@ -154,6 +154,29 @@ bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result) {
 }
 
 #pragma region Primitives ML
+bool vectorNorm(VectorPtr v, Value* result) {
+	// On considère qu'un vecteur vide n'a pas de norme calculable dans ce contexte
+	bool success = v->size > 0;
+
+	if (!success) {
+		fprintf(stderr, "Error: Cannot calculate norm of empty vector.\n");
+	}
+
+	if (success) {
+		Value sum = 0;
+		Values D = v->data;
+		SizeT n = v->size;
+
+		// Boucle vectorisable par GCC (-O3)
+		for (SizeT i = 0; i < n; i++) {
+			sum += D[i] * D[i];
+		}
+		
+		*result = sqrt(sum);
+	}
+
+	return success;
+}
 
 // Nécessaire pour l'entraînement (Gradient Descent) : Y = alpha * X + Y
 bool vectorAxpy(Value alpha, VectorPtr x, VectorPtr y) {
