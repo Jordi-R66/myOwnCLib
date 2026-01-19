@@ -9,15 +9,17 @@ typedef Vector* VectorPtr;
 
 extern const Vector NULL_VECTOR;
 
-void allocVector(VectorPtr vector, SizeT coords);
+Vector createVector(SizeT coords);
+bool allocVector(VectorPtr vector, SizeT coords);
 void deallocVector(VectorPtr vector);
+bool isNullVector(VectorPtr vPtr);
 
 bool getCoord(VectorPtr vector, SizeT coordNumber, Value* destVar);
 bool setCoord(VectorPtr vector, SizeT coordNumber, Value value);
 
-void setVector(VectorPtr vector, Value* colBuffer);
+void setVector(VectorPtr vector, Values colBuffer);
 
-Vector crossProduct(VectorPtr vectorA, VectorPtr vectorB);
+bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest);
 Value dotProduct(VectorPtr vectorA, VectorPtr vectorB);
 
 #define VECTORS_INCLUDED 1

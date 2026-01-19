@@ -35,6 +35,7 @@ bool isNullVector(VectorPtr vPtr) {
 void deallocVector(VectorPtr vector) {
 	if (!isNullVector(vector)) {
 		deallocMatrix((MatrixPtr)vector, false);
+		*vector = NULL_VECTOR;
 	}
 }
 
@@ -43,7 +44,7 @@ bool getCoord(VectorPtr vector, SizeT coordNumber, Value* destVar) {
 
 	if (coordNumber >= vector->rows) {
 		success = false;
-		fprintf(stderr, "Error: Couldn't retrieve the %zuth element of the vector. %zu is out of bounds.\n");
+		fprintf(stderr, "Error: Couldn't access the %zuth element of the vector. %zu is out of bounds.\n");
 	}
 
 	if (success)
@@ -57,7 +58,7 @@ bool setCoord(VectorPtr vector, SizeT coordNumber, Value value) {
 
 	if (coordNumber >= vector->rows) {
 		success = false;
-		fprintf(stderr, "Error: Couldn't retrieve the %zuth element of the vector. %zu is out of bounds.\n");
+		fprintf(stderr, "Error: Couldn't set the %zuth element of the vector. %zu is out of bounds.\n");
 	}
 
 	if (success)
@@ -72,39 +73,60 @@ void setVector(VectorPtr vector, Values colBuffer) {
 	}
 }
 
-Vector crossProduct(VectorPtr vectorA, VectorPtr vectorB) {
-	bool success = vectorA->rows == vectorB->rows;
+bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest) {
+	bool success = vA->size == vB->size;
 
-	Vector output;
-
-	if (!success) {
-		fprintf(stderr, "vectorA doesn't have the same amount of dimensions as vectorB\n");
-		output = NULL_VECTOR;
+	// 1. Vérifications
+	if (success) {
+		fprintf(stderr, "Error: Dimension mismatch for Cross Product (%zu vs %zu)\n", 
+			(size_t)vA->size, (size_t)vB->size);
 	}
 
-	Vector vectorC;
-	allocVector(&vectorC, vectorA->rows);
+	if (success && (vDest->data != NULL && !vDest->memFreed)) {
+		fprintf(stderr, "Error: Destination vector isn't empty.\n");
+		success = false;
+	}
 
-	Value a, b, c, d;
-	SizeT rows = vectorA->rows;
+	// 2. Allocation de la destination
+	if (success) {
+		vDest->rows = vA->rows;
+		vDest->cols = 1; // Convention vecteur colonne
+		if (!allocMatrix(vDest)) {
+			success = false;
+		}
+	}
 
-	SizeT current, next = 1, i = 0;
+	// 3. Calcul optimisé (Sans modulo dans la boucle)
+	if (success) {
+		SizeT n = vA->size;
+		Values A = vA->data;
+		Values B = vB->data;
+		Values C = vDest->data;
 
-	do {
-		current = next;
-		next = (current + 1) % rows;
+		// --- BOUCLE PRINCIPALE (Vectorisable SIMD) ---
+		// On traite les indices de 0 à N-3.
+		// Les accès A[i+1], A[i+2] sont contigus et prédictibles pour le cache.
+		if (n > 2) {
+			for (SizeT i = 0; i < n - 2; i++) {
+				C[i] = A[i + 1] * B[i + 2] - A[i + 2] * B[i + 1];
+			}
+		}
 
-		getCoord(vectorA, current, &a);
-		getCoord(vectorB, next, &b);
+		// --- GESTION DES BORDS (Wrapping) ---
+		// Traitement manuel des deux derniers éléments pour éviter le modulo dans la boucle
 
-		getCoord(vectorA, next, &c);
-		getCoord(vectorB, current, &d);
+		// Avant-dernier élément (i = n-2) : indices [n-1] et [0]
+		if (n >= 2) {
+			C[n - 2] = A[n - 1] * B[0] - A[0] * B[n - 1];
+		}
 
-		setCoord(&vectorC, i, a * b - c * d);
-		i++;
-	} while (i < rows);
+		// Dernier élément (i = n-1) : indices [0] et [1]
+		if (n >= 1) {
+			C[n - 1] = A[0] * B[1] - A[1] * B[0];
+		}
+	}
 
-	return vectorC;
+	return success;
 }
 
 Value dotProduct(VectorPtr vectorA, VectorPtr vectorB) {
