@@ -2,15 +2,23 @@
 
 #include "../matrices/matrix.h"
 
+#ifndef VECTORS_INCLUDED
+
 typedef Matrix Vector;
+typedef Vector* VectorPtr;
 
-void allocVector(Vector* vector, SizeT coords);
-void deallocVector(Vector* vector);
+extern const Vector NULL_VECTOR;
 
-double getCoord(Vector* vector, SizeT coordNumber);
-void setCoord(Vector* vector, SizeT coordNumber, value_t value);
+void allocVector(VectorPtr vector, SizeT coords);
+void deallocVector(VectorPtr vector);
 
-void setVector(Vector* vector, value_t* colBuffer);
+bool getCoord(VectorPtr vector, SizeT coordNumber, Value* destVar);
+bool setCoord(VectorPtr vector, SizeT coordNumber, Value value);
 
-Vector crossProduct(Vector* vectorA, Vector* vectorB);
-value_t dotProduct(Vector* vectorA, Vector* vectorB);
+void setVector(VectorPtr vector, Value* colBuffer);
+
+Vector crossProduct(VectorPtr vectorA, VectorPtr vectorB);
+Value dotProduct(VectorPtr vectorA, VectorPtr vectorB);
+
+#define VECTORS_INCLUDED 1
+#endif

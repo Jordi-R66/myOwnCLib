@@ -1,46 +1,91 @@
 #include "vectors.h"
 
-void allocVector(Vector* vector, SizeT coords) {
+const Vector NULL_VECTOR = {0, 0, 0, NULL, false};
+
+Vector createVector(SizeT coords) {
+	Vector output = NULL_VECTOR;
+
+	if (coords > 0) {
+		allocVector(&output, coords);
+	} else {
+		fprintf(stderr, "Error: Can't create a Vector with 0 dimension.\n\tReturning NULL_VECTOR\n");
+	}
+
+	return output;
+}
+
+bool allocVector(VectorPtr vector, SizeT coords) {
+	bool output = true;
+
 	vector->rows = coords;
 	vector->cols = 1;
 
-	allocMatrix((Matrix*)vector);
+	output = allocMatrix((MatrixPtr)vector);
+
+	if (!output) {
+		fprintf(stderr, "Error: Couldn't allocate the vector with %zu coordinates.\n", coords);
+		*vector = NULL_VECTOR;
+	}
 }
 
-void deallocVector(Vector* vector) {
-	deallocMatrix((Matrix*)vector);
+bool isNullVector(VectorPtr vPtr) {
+	return (vPtr->rows == (SizeT)0 && vPtr->cols == (SizeT)0 && vPtr->size == (SizeT)0 && vPtr->data == NULL && vPtr->memFreed == false);
 }
 
-value_t getCoord(Vector* vector, SizeT coordNumber) {
+void deallocVector(VectorPtr vector) {
+	if (!isNullVector(vector)) {
+		deallocMatrix((MatrixPtr)vector, false);
+	}
+}
+
+bool getCoord(VectorPtr vector, SizeT coordNumber, Value* destVar) {
+	bool success = true;
+
 	if (coordNumber >= vector->rows) {
-		exit(EXIT_FAILURE);
+		success = false;
+		fprintf(stderr, "Error: Couldn't retrieve the %zuth element of the vector. %zu is out of bounds.\n");
 	}
 
-	return getMatrixCase((Matrix*)vector, coordNumber, 0);
+	if (success)
+		*destVar = vector->data[coordNumber];
+
+	return success;
 }
 
-void setCoord(Vector* vector, SizeT coordNumber, value_t value) {
+bool setCoord(VectorPtr vector, SizeT coordNumber, Value value) {
+	bool success = true;
+
 	if (coordNumber >= vector->rows) {
-		exit(EXIT_FAILURE);
+		success = false;
+		fprintf(stderr, "Error: Couldn't retrieve the %zuth element of the vector. %zu is out of bounds.\n");
 	}
 
-	setMatrixCase((Matrix*)vector, value, coordNumber, 0);
+	if (success)
+		vector->data[coordNumber] = value;
+
+	return success;
 }
 
-void setVector(Vector* vector, value_t* colBuffer) {
-	setMatrixColumn((Matrix*)vector, 0, colBuffer);
+void setVector(VectorPtr vector, Values colBuffer) {
+	for (SizeT i = 0; i < vector->size; i++) {
+		vector->data[i] = colBuffer[i];
+	}
 }
 
-Vector crossProduct(Vector* vectorA, Vector* vectorB) {
-	if (vectorA->rows != vectorB->rows) {
+Vector crossProduct(VectorPtr vectorA, VectorPtr vectorB) {
+	bool success = vectorA->rows == vectorB->rows;
+
+	Vector output;
+
+	if (!success) {
 		fprintf(stderr, "vectorA doesn't have the same amount of dimensions as vectorB\n");
-		exit(EXIT_FAILURE);
+		output = NULL_VECTOR;
 	}
 
 	Vector vectorC;
 	allocVector(&vectorC, vectorA->rows);
 
-	value_t a, b, c, d;
+	Value a, b, c, d;
 	SizeT rows = vectorA->rows;
 
 	SizeT current, next = 1, i = 0;
@@ -49,11 +94,11 @@ Vector crossProduct(Vector* vectorA, Vector* vectorB) {
 		current = next;
 		next = (current + 1) % rows;
 
-		a = getCoord(vectorA, current);
-		b = getCoord(vectorB, next);
+		getCoord(vectorA, current, &a);
+		getCoord(vectorB, next, &b);
 
-		c = getCoord(vectorA, next);
-		d = getCoord(vectorB, current);
+		getCoord(vectorA, next, &c);
+		getCoord(vectorB, current, &d);
 
 		setCoord(&vectorC, i, a * b - c * d);
 		i++;
@@ -62,17 +107,19 @@ Vector crossProduct(Vector* vectorA, Vector* vectorB) {
 	return vectorC;
 }
 
-value_t dotProduct(Vector* vectorA, Vector* vectorB) {
-	value_t product = 0;
+Value dotProduct(VectorPtr vectorA, VectorPtr vectorB) {
+	Value product = 0;
 
 	if (vectorA->rows != vectorB->rows) {
 		exit(EXIT_FAILURE);
 	}
 
 	SizeT rows = vectorA->rows;
+	Value a, b;
 
 	for (SizeT i = 0; i < rows; i++) {
-		product += getCoord(vectorA, i) * getCoord(vectorB, i);
+		if (getCoord(vectorA, i, &a) && getCoord(vectorB, i, &b))
+			product += a * a;
 	}
 
 	return product;
