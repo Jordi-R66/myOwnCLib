@@ -77,50 +77,42 @@ bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest) {
 	bool success = vA->size == vB->size;
 
 	// 1. Vérifications
-	if (success) {
+	if (!success) {
 		fprintf(stderr, "Error: Dimension mismatch for Cross Product (%zu vs %zu)\n", 
 			(size_t)vA->size, (size_t)vB->size);
 	}
 
+	// Vérification de destination non vide
 	if (success && (vDest->data != NULL && !vDest->memFreed)) {
 		fprintf(stderr, "Error: Destination vector isn't empty.\n");
 		success = false;
 	}
 
-	// 2. Allocation de la destination
+	// 2. Allocation
 	if (success) {
-		vDest->rows = vA->rows;
-		vDest->cols = 1; // Convention vecteur colonne
-		if (!allocMatrix(vDest)) {
-			success = false;
-		}
+		success = allocVector(vDest, vA->rows);
 	}
 
-	// 3. Calcul optimisé (Sans modulo dans la boucle)
+	// 3. Calcul Optimisé (Linear Access Pattern)
 	if (success) {
 		SizeT n = vA->size;
 		Values A = vA->data;
 		Values B = vB->data;
 		Values C = vDest->data;
 
-		// --- BOUCLE PRINCIPALE (Vectorisable SIMD) ---
-		// On traite les indices de 0 à N-3.
-		// Les accès A[i+1], A[i+2] sont contigus et prédictibles pour le cache.
+		// Cœur de boucle vectorisable (i de 0 à N-3)
+		// Accès mémoire contigus : A[i+1], B[i+2] etc. -> Très rapide
 		if (n > 2) {
 			for (SizeT i = 0; i < n - 2; i++) {
 				C[i] = A[i + 1] * B[i + 2] - A[i + 2] * B[i + 1];
 			}
 		}
 
-		// --- GESTION DES BORDS (Wrapping) ---
-		// Traitement manuel des deux derniers éléments pour éviter le modulo dans la boucle
-
-		// Avant-dernier élément (i = n-2) : indices [n-1] et [0]
+		// Gestion manuelle des bords (Wrapping) pour éviter le modulo % lent dans la boucle
 		if (n >= 2) {
 			C[n - 2] = A[n - 1] * B[0] - A[0] * B[n - 1];
 		}
 
-		// Dernier élément (i = n-1) : indices [0] et [1]
 		if (n >= 1) {
 			C[n - 1] = A[0] * B[1] - A[1] * B[0];
 		}
