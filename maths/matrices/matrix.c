@@ -359,7 +359,6 @@ void printMatrix(MatrixPtr matrix, ValType valFormat) {
 					break;
 				default:
 					fprintf(stderr, "Unknown format\n");
-					exit(EXIT_FAILURE); // TODO: Remove later
 			}
 		}
 		printf("\n");
