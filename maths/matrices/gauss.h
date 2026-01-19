@@ -2,12 +2,12 @@
 
 #include "tracking.h"
 
-SizeT identifyGaussPivot(Matrix* mat, SizeT rowId);
+SizeT identifyGaussPivot(MatrixPtr mat, SizeT rowId);
 
-//SizeT Partitioning(Matrix* mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, Swap** swaps, SizeT* swapsMade);
-//void QuickSort(Matrix* mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* swapsMade);
+//SizeT Partitioning(MatrixPtr mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, Swap** swaps, SizeT* swapsMade);
+//void QuickSort(MatrixPtr mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* swapsMade);
 
-void prepareGauss(Matrix* mat, Tracker* tracker);
-void Gauss(Matrix* mat, Tracker* tracker);
+void prepareGauss(MatrixPtr mat, Tracker* tracker);
+void Gauss(MatrixPtr mat, Tracker* tracker);
 
 #define GAUSS_INCLUDED

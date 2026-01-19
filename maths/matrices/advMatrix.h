@@ -2,9 +2,9 @@
 
 #include "gauss.h"
 
-void mirrorMatrix(Matrix* mat, SwapType toSwap, Tracker* tracker);
+void mirrorMatrix(MatrixPtr mat, SwapType toSwap, Tracker* tracker);
 
-bool inversibilityCheck(Matrix* mat);
-void inverseMatrix(Matrix* mat, Matrix* invMat);
+bool inversibilityCheck(MatrixPtr mat);
+void inverseMatrix(MatrixPtr mat, MatrixPtr invMat);
 
 #define ADVANCED_MATRIX_INCLUDED

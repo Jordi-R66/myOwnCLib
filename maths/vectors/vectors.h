@@ -2,15 +2,31 @@
 
 #include "../matrices/matrix.h"
 
+#ifndef VECTORS_INCLUDED
+
 typedef Matrix Vector;
+typedef Vector* VectorPtr;
 
-void allocVector(Vector* vector, SizeT coords);
-void deallocVector(Vector* vector);
+extern const Vector NULL_VECTOR;
 
-double getCoord(Vector* vector, SizeT coordNumber);
-void setCoord(Vector* vector, SizeT coordNumber, value_t value);
+Vector createVector(SizeT coords);
+bool allocVector(VectorPtr vector, SizeT coords);
+void deallocVector(VectorPtr vector);
+bool isNullVector(VectorPtr vPtr);
 
-void setVector(Vector* vector, value_t* colBuffer);
+bool getCoord(VectorPtr vector, SizeT coordNumber, Value* destVar);
+bool setCoord(VectorPtr vector, SizeT coordNumber, Value value);
 
-Vector crossProduct(Vector* vectorA, Vector* vectorB);
-value_t dotProduct(Vector* vectorA, Vector* vectorB);
+void setVector(VectorPtr vector, Values colBuffer);
+
+bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest);
+bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result);
+
+#pragma region ML Primitives
+bool vectorAxpy(Value alpha, VectorPtr x, VectorPtr y);
+bool vectorSoftmax(VectorPtr v);
+bool vectorArgmax(VectorPtr v, SizeT* resultIndex);
+#pragma endregion
+
+#define VECTORS_INCLUDED 1
+#endif

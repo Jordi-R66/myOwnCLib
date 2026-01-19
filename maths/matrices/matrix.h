@@ -1,51 +1,74 @@
 #pragma once
 
+#ifndef MATRIX_INCLUDED
 #include "localCommon.h"
 
 #pragma pack(1)
-struct Matrix {
+typedef struct Matrix {
 	SizeT rows, cols, size;
 
-	value_t* data;
+	Values data;
 	bool memFreed;
-};
+} Matrix, *MatrixPtr;
 #pragma pack()
 
 #define MATRIX_SIZE sizeof(Matrix)
 
-typedef struct Matrix Matrix;
+#define IS_NULL_MATRIX(m) (m.rows == (SizeT)0 && m.cols == (SizeT)0 && m.size == (SizeT)0 && m.data == NULL && m.memFreed == false)
 
-void allocMatrix(Matrix* matrix);
-void deallocMatrix(Matrix* matrix);
+extern const Matrix NULL_MATRIX;
 
-void getMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer);
-void getMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer);
+typedef Value (*ValueFunc)(Value);
 
-void setMatrixRow(Matrix* matrix, SizeT row, value_t* rowBuffer);
-void setMatrixColumn(Matrix* matrix, SizeT column, value_t* colBuffer);
+#pragma region Matrix Init
+bool allocMatrix(MatrixPtr matrix);
+Matrix createMatrix(SizeT rows, SizeT cols);
+Matrix createMatrixWithValues(SizeT rows, SizeT cols, Values vals);
+void deallocMatrix(MatrixPtr matrix, bool destroyValues);
+#pragma endregion
 
-void setMatrixCase(Matrix* matrix, value_t value, SizeT row, SizeT col);
-value_t getMatrixCase(Matrix* matrix, SizeT row, SizeT col);
+#pragma region Accessors
+bool getMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer);
+bool getMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
+bool setMatrixRow(MatrixPtr matrix, SizeT row, Values rowBuffer);
+bool setMatrixColumn(MatrixPtr matrix, SizeT column, Values colBuffer);
+bool setMatrixCase(MatrixPtr matrix, Value value, SizeT row, SizeT col);
+bool getMatrixCase(MatrixPtr matrix, SizeT row, SizeT col, Value* destVar);
+void setMatrix(MatrixPtr matrix, Values values);
+#pragma endregion
 
-void setMatrix(Matrix* matrix, value_t* values);
+#pragma region Arithmetics
+void scalarMul(MatrixPtr matrix, Value scalar);
+bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
+bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest);
+bool matrixAddition(MatrixPtr matA, MatrixPtr matB);
 
-void scalarMul(Matrix* matrix, value_t scalar);
-void matrixMultiplication(Matrix* matA, Matrix* matB, Matrix* matDest);
-void matrixAddition(Matrix* matA, Matrix* matB);
+Matrix scalarMulNewMatrix(MatrixPtr matrix, Value scalar);
+Matrix matrixAdditionNewMatrix(MatrixPtr matA, MatrixPtr matB);
+#pragma endregion
 
-Matrix scalarMulNewMatrix(Matrix* matrix, value_t scalar);
-Matrix matrixAdditionNewMatrix(Matrix* matA, Matrix* matB);
+#pragma region Other
+void genIdentityMatrix(MatrixPtr matrix, SizeT n);
+void printMatrix(MatrixPtr matrix, ValType valFormat);
+bool matrixTranspose(MatrixPtr src, MatrixPtr dest);
 
-void genIdentityMatrix(Matrix* matrix, SizeT n);
-
-void printMatrix(Matrix* matrix, ValType valFormat);
+/**
+ * @brief Applies a function to every values of a given Matrix
+ * 
+ * @param mat The pointer to the Matrix struct
+ * @param func the function to apply, must return a Value, and give a Value as a parameter
+ */
+void matrixMap(MatrixPtr mat, ValueFunc func);
+#pragma endregion
 
 // Originally in gauss.h
 
-void swapRows(Matrix* mat, SizeT rowAId, SizeT rowBId);
-void swapCols(Matrix* mat, SizeT colAId, SizeT colBId);
+#pragma region Gauss Functions
+bool swapRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId);
+bool swapCols(MatrixPtr mat, SizeT colAId, SizeT colBId);
+void subtractRows(MatrixPtr mat, SizeT rowAId, SizeT rowBId, Value coeffRowB);
+void multiplyRow(MatrixPtr mat, SizeT rowId, Value coeffRow);
+#pragma endregion
 
-void subtractRows(Matrix* mat, SizeT rowAId, SizeT rowBId, value_t coeffRowB);
-void multiplyRow(Matrix* mat, SizeT rowId, value_t coeffRow);
-
-#define MATRIX_INCLUDED
+#define MATRIX_INCLUDED 1
+#endif

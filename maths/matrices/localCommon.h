@@ -1,22 +1,24 @@
 #pragma once
 
-#include "../common.h"
+#include "../../common.h"
 
-#ifndef OVERRIDE_MATRIX_VALUE_TYPE
-	#ifdef VALUE_TYPE
-	#undef VALUE_TYPE
+#ifndef OVERRIDE_MATRIX_ValueYPE
+	#ifdef ValueTYPE
+	#undef ValueTYPE
 	#endif
 
 	#ifdef _64BITS
-		#define VALUE_TYPE double
+		#define ValueTYPE double
 	#elif defined(_32BITS)
-		#define VALUE_TYPE float
+		#define ValueTYPE float
 	#else
 		#error "Unsupported"
 	#endif
 #endif
 
-typedef VALUE_TYPE value_t;
+typedef ValueTYPE Value, *Values;
+
+#define VALUE_T_SIZE sizeof(Value)
 
 typedef enum ValTypes {
 	S_DISCRETE = 0,

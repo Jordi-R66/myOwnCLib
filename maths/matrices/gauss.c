@@ -6,8 +6,8 @@
 Function to return the index of the row's pivot in the context
 of Gauss' Pivot Algorithm
 */
-SizeT identifyGaussPivot(Matrix* mat, SizeT rowId) {
-	value_t* row = (value_t*)calloc(mat->cols, sizeof(value_t));
+SizeT identifyGaussPivot(MatrixPtr mat, SizeT rowId) {
+	Values row = (Values)calloc(mat->cols, sizeof(Value));
 
 	getMatrixRow(mat, rowId, row);
 
@@ -16,7 +16,7 @@ SizeT identifyGaussPivot(Matrix* mat, SizeT rowId) {
 
 	// Iterating until we find a non-null value
 	for (i = 0; (i < mat->cols) && run; i++) {
-		value_t val = row[i];
+		Value val = row[i];
 		run = val == 0.0;
 	}
 
@@ -27,7 +27,7 @@ SizeT identifyGaussPivot(Matrix* mat, SizeT rowId) {
 	return i;
 }
 
-void generatePivotsArray(Matrix* mat, SizeT* rowsGaussPivots) {
+void generatePivotsArray(MatrixPtr mat, SizeT* rowsGaussPivots) {
 	for (SizeT i = 0; i < mat->rows; i++) {
 		rowsGaussPivots[i] = identifyGaussPivot(mat, i);
 	}
@@ -47,7 +47,7 @@ SizeT chooseSortingPivot(SizeT min, SizeT max) {
 	//return randomIndex(min, max);
 }
 
-void sortingSwap(Matrix* mat, SizeT* pivots, SizeT idA, SizeT idB, Tracker* tracker) {
+void sortingSwap(MatrixPtr mat, SizeT* pivots, SizeT idA, SizeT idB, Tracker* tracker) {
 	if (idA == idB) {
 		return;
 	}
@@ -59,7 +59,7 @@ void sortingSwap(Matrix* mat, SizeT* pivots, SizeT idA, SizeT idB, Tracker* trac
 }
 
 /* -- QuickSort implementation, needs to be fixed so implemented BubbleSort instead
-SizeT Partitioning(Matrix* mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, Swap** swaps, SizeT* swapsMade) {
+SizeT Partitioning(MatrixPtr mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, Swap** swaps, SizeT* swapsMade) {
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
 
 	for (SizeT i = 0; i < mat->rows; i++) {
@@ -95,7 +95,7 @@ SizeT Partitioning(Matrix* mat, SizeT firstId, SizeT lastId, SizeT pivotRowId, S
 	return j;
 }
 
-void QuickSort(Matrix* mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* swapsMade) {
+void QuickSort(MatrixPtr mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* swapsMade) {
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
 
 	for (SizeT i = 0; i < mat->rows; i++) {
@@ -121,7 +121,7 @@ void QuickSort(Matrix* mat, SizeT firstId, SizeT lastId, Swap** swaps, SizeT* sw
 }
 */
 
-void BubbleSort(Matrix* mat, Tracker* tracker) {
+void BubbleSort(MatrixPtr mat, Tracker* tracker) {
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
 
 	generatePivotsArray(mat, rowsGaussPivots);
@@ -142,7 +142,7 @@ void BubbleSort(Matrix* mat, Tracker* tracker) {
 	free(rowsGaussPivots);
 }
 
-void prepareGauss(Matrix* mat, Tracker* tracker) {
+void prepareGauss(MatrixPtr mat, Tracker* tracker) {
 	if (tracker->initialised == false) {
 		InitTracker(tracker);
 	}
@@ -151,8 +151,8 @@ void prepareGauss(Matrix* mat, Tracker* tracker) {
 	BubbleSort(mat, tracker);
 }
 
-void Gauss(Matrix* mat, Tracker* tracker) {
-	value_t* col = (value_t*)calloc(mat->rows, sizeof(value_t));
+void Gauss(MatrixPtr mat, Tracker* tracker) {
+	Values col = (Values)calloc(mat->rows, sizeof(Value));
 
 	prepareGauss(mat, tracker);
 	SizeT* rowsGaussPivots = (SizeT*)calloc(mat->rows, sizeof(SizeT));
@@ -161,13 +161,13 @@ void Gauss(Matrix* mat, Tracker* tracker) {
 		generatePivotsArray(mat, rowsGaussPivots);
 
 		SizeT p = rowsGaussPivots[l];
-		value_t pivot_val = getMatrixCase(mat, l, p);
+		Value pivot_val = getMatrixCase(mat, l, p);
 
 		for (SizeT i = l + 1; i < mat->rows; i++) {
-			value_t val = getMatrixCase(mat, i, p);
+			Value val = getMatrixCase(mat, i, p);
 
 			if (val != 0.0) {
-				value_t coeff = pivot_val / val;
+				Value coeff = pivot_val / val;
 				printf("%lu, %lu, %lf, (%lf, %lf)\n", i, l, coeff, pivot_val, val);
 				subtractRows(mat, i, l, coeff);
 			}
@@ -182,7 +182,7 @@ void Gauss(Matrix* mat, Tracker* tracker) {
 
 		if (col[i] != 0) {
 			for (SizeT j = i + 1; j < mat->rows; j++) {
-				value_t coeff = col[j] / col[i];
+				Value coeff = col[j] / col[i];
 				printf("i, j = %lu, %lu\n", i, j);
 				subtractRows(mat, j, i, coeff);
 			}
@@ -196,7 +196,7 @@ void Gauss(Matrix* mat, Tracker* tracker) {
 			getMatrixColumn(mat, refColId, col);
 
 			for (SizeT j = i + 1; j < mat->rows; j++) {
-				value_t coeff = col[j] / col[i];
+				Value coeff = col[j] / col[i];
 				//printf("i, j = %lu, %lu\n", i, j);
 				subtractRows(mat, j, i, coeff);
 			}

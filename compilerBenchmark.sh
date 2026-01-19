@@ -1,0 +1,1 @@
+gcc -masm=intel -s -O3 -o benchmark.out testPerformance.c maths/matrices/matrix.c maths/matrices/mlMatrix.c maths/vectors/vectors.c -lm

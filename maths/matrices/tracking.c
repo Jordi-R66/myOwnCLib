@@ -7,7 +7,7 @@ void InitTracker(Tracker* tracker) {
 
 	if (tracker->transformations == NULL) {
 		fprintf(stderr, "Error or not enough space available in memory to continue\n");
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
 	tracker->initialised = true;
@@ -23,7 +23,7 @@ void RecordTransformation(Tracker* tracker, MatrixTransformation transformation)
 	}
 	else {
 		fprintf(stderr, "Error or not enough space available in memory to continue\n");
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE); // TODO: Remove later
 	}
 
 	tracker->transformations[tracker->transformationMade - 1] = transformation;
@@ -59,7 +59,7 @@ void recordSwap(Tracker* tracker, SizeT idA, SizeT idB, SwapType type) {
 	RecordTransformation(tracker, transformation);
 }
 
-void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff) {
+void recordSub(Tracker* tracker, SizeT idA, SizeT idB, Value coeff) {
 	if ((idA == idB) || (coeff == -1.0)) {
 		return;
 	}
@@ -77,7 +77,7 @@ void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff) {
 	RecordTransformation(tracker, transformation);
 }
 
-void recordMul(Tracker* tracker, SizeT idA, value_t coeff) {
+void recordMul(Tracker* tracker, SizeT idA, Value coeff) {
 	if (coeff == 1.0) {
 		return;
 	}
@@ -118,7 +118,7 @@ void printLog(MatrixTransformation transformation) {
 			strcpy(typeTrans, "MUL");
 			break;
 		default:
-			exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE); // TODO: Remove later
 			break;
 	}
 
@@ -133,7 +133,7 @@ void printLog(MatrixTransformation transformation) {
 				break;
 
 			default:
-				exit(EXIT_FAILURE);
+				exit(EXIT_FAILURE); // TODO: Remove later
 				break;
 		}
 	}

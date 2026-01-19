@@ -30,7 +30,7 @@ struct MatrixTransformation {
 	TransformationType transType;
 
 	SizeT A, B;
-	value_t coeff;
+	Value coeff;
 
 	SwapType swapType;
 };
@@ -54,8 +54,8 @@ void deallocTracker(Tracker* tracker);
 void RecordTransformation(Tracker* tracker, MatrixTransformation transformation);
 
 void recordSwap(Tracker* tracker, SizeT idA, SizeT idB, SwapType type);
-void recordSub(Tracker* tracker, SizeT idA, SizeT idB, value_t coeff);
-void recordMul(Tracker* tracker, SizeT idA, value_t coeff);
+void recordSub(Tracker* tracker, SizeT idA, SizeT idB, Value coeff);
+void recordMul(Tracker* tracker, SizeT idA, Value coeff);
 
 void printTrackingLogs(Tracker* tracker);
 
