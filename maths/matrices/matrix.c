@@ -343,6 +343,45 @@ bool matrixMultiplication(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 }
 
 bool matrixMultiplicationNT(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
+	bool success = matA->cols == matB->cols; // Dimension K commune
+
+	if (!success) {
+		fprintf(stderr, "Error: Dimension mismatch for A * B^T (%zux%zu) * (%zux%zu)^T\n", 
+			(size_t)matA->rows, (size_t)matA->cols, (size_t)matB->rows, (size_t)matB->cols);
+	}
+
+	// 1. Stratégie "Naïve" : Transposition explicite temporaire
+	// On profite de la vitesse extrême de matrixMultiplication (Standard)
+	Matrix tempB = {0}; // Matrice temporaire pour B transposée
+
+	if (success) {
+		// Allouer tempB aux dimensions inversées de B
+		tempB.rows = matB->cols;
+		tempB.cols = matB->rows;
+		success = allocMatrix(&tempB);
+	}
+
+	if (success) {
+		// Transposition : B -> tempB
+		// C'est très rapide (O(N^2)) comparé à la multiplication
+		success = matrixTranspose(matB, &tempB);
+	}
+
+	if (success) {
+		// Multiplication Standard : Dest = A * tempB
+		// C'est ici qu'on gagne du temps grâce au kernel optimisé Cache Oblivious
+		success = matrixMultiplication(matA, &tempB, matDest);
+	}
+
+	// Nettoyage : On libère la matrice temporaire
+	// 'false' car on ne veut pas free la structure tempB (variable locale), juste son buffer data
+	deallocMatrix(&tempB, false);
+
+	return success;
+}
+
+// Cette fonction est moins rapide que la méthode naïve, on remplace donc temporairement par la manière naïve tout en gardant celle-là de côté
+bool matrixMultiplicationNT_old(MatrixPtr matA, MatrixPtr matB, MatrixPtr matDest) {
 	bool success = matA->cols == matB->cols;
 
 	// A * B^T implique que A et B doivent avoir le même nombre de colonnes (dimension de réduction K)
