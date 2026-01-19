@@ -4,12 +4,12 @@
 #include "localCommon.h"
 
 #pragma pack(1)
-struct Matrix {
+typedef struct Matrix {
 	SizeT rows, cols, size;
 
 	Values data;
 	bool memFreed;
-};
+} Matrix, *MatrixPtr;
 #pragma pack()
 
 #define MATRIX_SIZE sizeof(Matrix)
@@ -18,7 +18,6 @@ struct Matrix {
 
 extern const Matrix NULL_MATRIX;
 
-typedef struct Matrix Matrix, *MatrixPtr;
 typedef Value (*ValueFunc)(Value);
 
 #pragma region Matrix Init

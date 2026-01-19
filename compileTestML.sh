@@ -1,0 +1,2 @@
+gcc -masm=intel -s -O3 -o testML testML.c maths/matrices/matrix.c maths/matrices/mlMatrix.c maths/vectors/vectors.c -lm
+gcc -masm=intel -s -O3 testML.c maths/matrices/matrix.c maths/matrices/mlMatrix.c maths/vectors/vectors.c -lm -S
