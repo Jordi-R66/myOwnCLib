@@ -129,20 +129,31 @@ bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest) {
 	return success;
 }
 
-Value dotProduct(VectorPtr vectorA, VectorPtr vectorB) {
-	Value product = 0;
+bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result) {
+	bool success = vectorA->size == vectorB->size;
 
-	if (vectorA->rows != vectorB->rows) {
-		exit(EXIT_FAILURE);
+	// 1. Vérification des dimensions (SizeT comparés directement)
+	if (!success) {
+		fprintf(stderr, "Error: Dimension mismatch for Dot Product (%zu vs %zu)\n", 
+			(size_t)vectorA->size, (size_t)vectorB->size);
+		success = false;
 	}
 
-	SizeT rows = vectorA->rows;
-	Value a, b;
+	if (success) {
+		Value sum = 0;
+		SizeT n = vectorA->size;
+		
+		// 2. Optimisation : Accès direct (Hot Path)
+		// On évite getCoord/setCoord pour permettre au CPU de vectoriser la boucle
+		Values A = vectorA->data;
+		Values B = vectorB->data;
 
-	for (SizeT i = 0; i < rows; i++) {
-		if (getCoord(vectorA, i, &a) && getCoord(vectorB, i, &b))
-			product += a * a;
+		for (SizeT i = 0; i < n; i++) {
+			sum += A[i] * B[i];
+		}
+		
+		*result = sum;
 	}
 
-	return product;
+	return success;
 }

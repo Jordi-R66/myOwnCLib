@@ -20,7 +20,7 @@ bool setCoord(VectorPtr vector, SizeT coordNumber, Value value);
 void setVector(VectorPtr vector, Values colBuffer);
 
 bool crossProduct(VectorPtr vA, VectorPtr vB, VectorPtr vDest);
-Value dotProduct(VectorPtr vectorA, VectorPtr vectorB);
+bool dotProduct(VectorPtr vectorA, VectorPtr vectorB, Value* result);
 
 #define VECTORS_INCLUDED 1
 #endif
