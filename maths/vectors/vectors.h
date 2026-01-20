@@ -7,6 +7,8 @@
 typedef Matrix Vector;
 typedef Vector* VectorPtr;
 
+#define VECTOR_SIZE sizeof(Vector)
+
 extern const Vector NULL_VECTOR;
 
 Vector createVector(SizeT coords);
