@@ -100,6 +100,7 @@ void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity) {
 	ptr newPtr = calloc(newCapacity, WORD_SIZE);
 
 	if (newPtr == NULL) {
+		freeInteger(integer);
 		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", newCapacity * 32);
 		exit(EXIT_FAILURE);
 	}
@@ -277,7 +278,8 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 	SizeT capacity = sizeof(uint64) / WORD_SIZE; // Typiquement 2 pour 64 bits / 32 bits
 	if (capacity < 1) capacity = 1;
 
-	SizeT size = 1;
+	SizeT size = (value > 0xFFFFFFFF) ? 2 : 1;
+	if (value == 0) size = 1;
 
 	// Calcul de la taille nécessaire en Mots
 	while (value >> (size * 32)) {
@@ -317,46 +319,55 @@ Word getWordFromInteger(CustomInteger integer, SizeT wordIndex) {
 #pragma region Bitwise Operations
 
 CustomInteger BitwiseAND(CustomInteger a, CustomInteger b) {
-	CustomInteger result;
+	CustomInteger result = {0};
 
-	SizeT smallest = a.size < b.size ? a.size : b.size;
+	CustomIntegerPtr smallest = a.size < b.size ? &a : &b;
+	CustomIntegerPtr biggest = smallest->size == a.size ? &b : &a;
 
-	result = allocInteger(smallest);
+	result = allocInteger(smallest->size);
 
-	for (SizeT i = 0; i < smallest; i++) {
-		result.value[i] = a.value[i] & b.value[i];
+	for (SizeT i = 0; i < smallest->size; i++) {
+		result.value[i] = smallest->value[i] & biggest->value[i];
 		result.size++;
 	}
+
+	reallocToFitInteger(&result);
 
 	return result;
 }
 
 CustomInteger BitwiseOR(CustomInteger a, CustomInteger b) {
-	CustomInteger result;
+	CustomInteger result = {0};
 
-	SizeT smallest = a.size < b.size ? a.size : b.size;
+	CustomIntegerPtr smallest = a.size < b.size ? &a : &b;
+	CustomIntegerPtr biggest = smallest->size == a.size ? &b : &a;
 
-	result = allocInteger(smallest);
+	result = allocInteger(biggest->size);
 
-	for (SizeT i = 0; i < smallest; i++) {
-		result.value[i] = a.value[i] | b.value[i];
+	for (SizeT i = 0; i < biggest->size; i++) {
+		result.value[i] = i < smallest->size ? a.value[i] | b.value[i] : biggest->value[i];
 		result.size++;
 	}
+
+	reallocToFitInteger(&result);
 
 	return result;
 }
 
 CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b) {
-	CustomInteger result;
+	CustomInteger result = {0};
 
-	SizeT smallest = a.size < b.size ? a.size : b.size;
+	CustomIntegerPtr smallest = a.size < b.size ? &a : &b;
+	CustomIntegerPtr biggest = smallest->size == a.size ? &b : &a;
 
-	result = allocInteger(smallest);
+	result = allocInteger(biggest->size);
 
-	for (SizeT i = 0; i < smallest; i++) {
-		result.value[i] = a.value[i] ^ b.value[i];
+	for (SizeT i = 0; i < biggest->size; i++) {
+		result.value[i] = i < smallest->size ? a.value[i] ^ b.value[i] : biggest->value[i];
 		result.size++;
 	}
+
+	reallocToFitInteger(&result);
 
 	return result;
 }
@@ -364,12 +375,14 @@ CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b) {
 CustomInteger BitwiseNOT(CustomInteger a) {
 	CustomInteger result;
 
-	result = allocInteger(a.capacity);
+	result = allocInteger(a.size);
 
-	for (SizeT i = 0; i < a.capacity; i++) {
+	for (SizeT i = 0; i < a.size; i++) {
 		result.value[i] = ~a.value[i];
 		result.size++;
 	}
+
+	reallocToFitInteger(&result);
 
 	return result;
 }
