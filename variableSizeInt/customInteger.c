@@ -1178,7 +1178,23 @@ CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger
 		output = allocIntegerFromValue(1, false, true);
 		CustomInteger baseAcc = modInteger(base, mod);
 
-		SizeT maxBits = exp.size * 32;
+		SizeT maxBits = 0;
+		if (exp.size > 0) {
+			SizeT msWordIdx = exp.size;
+			while (msWordIdx > 0 && exp.value[msWordIdx - 1] == 0) {
+				msWordIdx--;
+			}
+
+			if (msWordIdx > 0) {
+				Word topWord = exp.value[msWordIdx - 1];
+				int msBit = 31;
+				while (msBit >= 0 && !((topWord >> msBit) & 1)) {
+					msBit--;
+				}
+				// Calcul précis du nombre de bits réellement utiles
+				maxBits = (msWordIdx - 1) * 32 + msBit + 1;
+			}
+		}
 
 		for (SizeT i = 0; i < maxBits; i++) {
 			if (getBit(exp, i) == 1) {
