@@ -1138,7 +1138,226 @@ static SizeT countTrailingZeros(CustomInteger n) {
 	return count;
 }
 
-CustomInteger fastGcdInteger(CustomInteger a, CustomInteger b) {
+// Fonction utilitaire locale pour vérifier si un nombre est pair
+static inline bool isEven(CustomInteger n) {
+	if (n.size == 0) return true;
+	return (n.value[0] & 1) == 0;
+}
+
+CustomInteger binaryModularInverse(CustomInteger a, CustomInteger m) {
+	if (isEven(m) || isZero(m)) {
+		return allocIntegerFromValue(0, false, true);
+	}
+
+	CustomInteger u = copyIntegerToNew(a);
+	CustomInteger v = copyIntegerToNew(m);
+
+	CustomInteger x1 = allocIntegerFromValue(1, false, true);
+	CustomInteger x2 = allocIntegerFromValue(0, false, true);
+
+	while (!isZero(u) && !isZero(v)) {
+		while (isEven(u) && !isZero(u)) {
+			BitshiftPtr(&u, 1, RIGHT, false);
+
+			if (isEven(x1)) {
+				BitshiftPtr(&x1, 1, RIGHT, false);
+			} else {
+				CustomInteger temp = addInteger(x1, m);
+				freeInteger(&x1);
+				x1 = temp;
+				BitshiftPtr(&x1, 1, RIGHT, false);
+			}
+		}
+
+		while (isEven(v) && !isZero(v)) {
+			BitshiftPtr(&v, 1, RIGHT, false);
+
+			if (isEven(x2)) {
+				BitshiftPtr(&x2, 1, RIGHT, false);
+			} else {
+				CustomInteger temp = addInteger(x2, m);
+				freeInteger(&x2);
+				x2 = temp;
+				BitshiftPtr(&x2, 1, RIGHT, false);
+			}
+		}
+
+		if (compareAbs(u, v) == GREATER || compareAbs(u, v) == EQUALS) {
+			CustomInteger tempU = subtractInteger(u, v);
+			freeInteger(&u);
+			u = tempU;
+
+			if (lessThanInteger(x1, x2)) {
+				CustomInteger tempX1 = addInteger(x1, m);
+				freeInteger(&x1);
+				x1 = tempX1;
+			}
+			CustomInteger newX1 = subtractInteger(x1, x2);
+			freeInteger(&x1);
+			x1 = newX1;
+		} else {
+			CustomInteger tempV = subtractInteger(v, u);
+			freeInteger(&v);
+			v = tempV;
+
+			if (lessThanInteger(x2, x1)) {
+				CustomInteger tempX2 = addInteger(x2, m);
+				freeInteger(&x2);
+				x2 = tempX2;
+			}
+			CustomInteger newX2 = subtractInteger(x2, x1);
+			freeInteger(&x2);
+			x2 = newX2;
+		}
+	}
+
+	CustomInteger One = allocIntegerFromValue(1, false, true);
+	CustomInteger result;
+
+	if (isZero(u)) {
+		if (equalsInteger(v, One)) {
+			result = copyIntegerToNew(x2);
+		} else {
+			result = allocIntegerFromValue(0, false, true);
+		}
+	} else {
+		if (equalsInteger(u, One)) {
+			result = copyIntegerToNew(x1);
+		} else {
+			result = allocIntegerFromValue(0, false, true);
+		}
+	}
+
+	// Nettoyage de la mémoire
+	freeInteger(&u);
+	freeInteger(&v);
+	freeInteger(&x1);
+	freeInteger(&x2);
+	freeInteger(&One);
+
+	return result;
+}
+
+Euclide ExtendedStein(CustomInteger a, CustomInteger b) {
+	Euclide output;
+
+	if (isZero(a)) {
+		output.gcd = copyIntegerToNew(b);
+		output.gcd.isNegative = false;
+		output.u = allocIntegerFromValue(0, false, true);
+		output.v = allocIntegerFromValue(1, false, true);
+		if (b.isNegative) output.v.isNegative = true;
+		return output;
+	}
+
+	if (isZero(b)) {
+		output.gcd = copyIntegerToNew(a);
+		output.gcd.isNegative = false;
+		output.u = allocIntegerFromValue(1, false, true);
+		if (a.isNegative) output.u.isNegative = true;
+		output.v = allocIntegerFromValue(0, false, true);
+		return output;
+	}
+
+	CustomInteger x = copyIntegerToNew(a);
+	CustomInteger y = copyIntegerToNew(b);
+	x.isNegative = false;
+	y.isNegative = false;
+
+	SizeT tzX = countTrailingZeros(x);
+	SizeT tzY = countTrailingZeros(y);
+	SizeT k = (tzX < tzY) ? tzX : tzY;
+
+	if (tzX > 0) BitshiftPtr(&x, tzX, RIGHT, false);
+	if (tzY > 0) BitshiftPtr(&y, tzY, RIGHT, false);
+
+	CustomInteger u = copyIntegerToNew(x);
+	CustomInteger v = copyIntegerToNew(y);
+
+	CustomInteger A = allocIntegerFromValue(1, false, true);
+	CustomInteger B = allocIntegerFromValue(0, false, true);
+	CustomInteger C = allocIntegerFromValue(0, false, true);
+	CustomInteger D = allocIntegerFromValue(1, false, true);
+
+	while (!isZero(u)) {
+
+		while (isEven(u) && !isZero(u)) {
+			BitshiftPtr(&u, 1, RIGHT, false);
+
+			if (isEven(A) && isEven(B)) {
+				BitshiftPtr(&A, 1, RIGHT, false);
+				BitshiftPtr(&B, 1, RIGHT, false);
+			} else {
+				CustomInteger tempA = addInteger(A, y);
+				CustomInteger tempB = subtractInteger(B, x);
+				freeInteger(&A); freeInteger(&B);
+				A = tempA; B = tempB;
+
+				BitshiftPtr(&A, 1, RIGHT, false);
+				BitshiftPtr(&B, 1, RIGHT, false);
+			}
+		}
+
+		while (isEven(v) && !isZero(v)) {
+			BitshiftPtr(&v, 1, RIGHT, false);
+
+			if (isEven(C) && isEven(D)) {
+				BitshiftPtr(&C, 1, RIGHT, false);
+				BitshiftPtr(&D, 1, RIGHT, false);
+			} else {
+				CustomInteger tempC = addInteger(C, y);
+				CustomInteger tempD = subtractInteger(D, x);
+				freeInteger(&C); freeInteger(&D);
+				C = tempC; D = tempD;
+
+				BitshiftPtr(&C, 1, RIGHT, false);
+				BitshiftPtr(&D, 1, RIGHT, false);
+			}
+		}
+
+		// Soustraction pour réduire les nombres
+		if (compareAbs(u, v) == GREATER || compareAbs(u, v) == EQUALS) {
+			CustomInteger tempU = subtractInteger(u, v);
+			freeInteger(&u);
+			u = tempU;
+
+			CustomInteger tempA = subtractInteger(A, C);
+			CustomInteger tempB = subtractInteger(B, D);
+			freeInteger(&A); freeInteger(&B);
+			A = tempA; B = tempB;
+		} else {
+			CustomInteger tempV = subtractInteger(v, u);
+			freeInteger(&v);
+			v = tempV;
+
+			CustomInteger tempC = subtractInteger(C, A);
+			CustomInteger tempD = subtractInteger(D, B);
+			freeInteger(&C); freeInteger(&D);
+			C = tempC; D = tempD;
+		}
+	}
+
+	output.gcd = copyIntegerToNew(v);
+
+	if (k > 0) {
+		BitshiftPtr(&output.gcd, k, LEFT, true);
+	}
+
+	output.u = copyIntegerToNew(C);
+	output.v = copyIntegerToNew(D);
+
+	if (a.isNegative && !isZero(output.u)) output.u.isNegative = !output.u.isNegative;
+	if (b.isNegative && !isZero(output.v)) output.v.isNegative = !output.v.isNegative;
+
+	freeInteger(&x); freeInteger(&y);
+	freeInteger(&u); freeInteger(&v);
+	freeInteger(&A); freeInteger(&B);
+	freeInteger(&C); freeInteger(&D);
+
+	return output;
+}
+
+CustomInteger steinGcdInteger(CustomInteger a, CustomInteger b) {
 	if (isZero(a)) return copyIntegerToNew(b);
 	if (isZero(b)) return copyIntegerToNew(a);
 

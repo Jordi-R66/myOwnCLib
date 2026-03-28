@@ -129,9 +129,11 @@ bool greaterThanInteger(CustomInteger a, CustomInteger b);
 #pragma region Modular Arithmetics
 
 Euclide ExtendedEuclide(CustomInteger a, CustomInteger b);
-CustomInteger fastGcdInteger(CustomInteger a, CustomInteger b);
+Euclide ExtendedStein(CustomInteger a, CustomInteger b);
+CustomInteger steinGcdInteger(CustomInteger a, CustomInteger b);
 CustomInteger gcdInteger(CustomInteger a, CustomInteger b);
 CustomInteger modularInverse(CustomInteger a, CustomInteger m);
+CustomInteger binaryModularInverse(CustomInteger a, CustomInteger m);
 CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger mod);
 
 #pragma endregion
