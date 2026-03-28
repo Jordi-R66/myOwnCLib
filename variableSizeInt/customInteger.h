@@ -85,14 +85,17 @@ CustomInteger copyIntegerToNew(CustomInteger original);
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest);
 void printInteger(CustomInteger integer, Base base, bool alwaysPutSign);
 
-// Bitwise Operations
-bool getBit(CustomInteger integer, SizeT index);
-void setBit(CustomIntegerPtr integer, bool bitValue, SizeT index);
-
 String integerToString(CustomInteger integer, Base base, bool alwaysPutSign);
 
 // New: Helper pour obtenir un Mot entier (et non un octet)
 Word getWordFromInteger(CustomInteger integer, SizeT index);
+
+#pragma endregion
+
+#pragma region Bitwise Operations
+
+bool getBit(CustomInteger integer, SizeT index);
+void setBit(CustomIntegerPtr integer, bool bitValue, SizeT index);
 
 CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
