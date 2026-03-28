@@ -59,14 +59,14 @@ typedef CustomInteger(*ArithmeticFunc)(CustomInteger, CustomInteger);
 
 /**
  * @brief Allocates space for a CustomInteger
- * * @param capacity Number of Words to allocate
+ * @param capacity Number of Words to allocate
  * @return CustomInteger
  */
 CustomInteger allocInteger(SizeT capacity);
 
 /**
  * @brief Frees the memory allocated for the CustomInteger
- * * @param integer Pointer to the structure to free
+ * @param integer Pointer to the structure to free
  */
 void freeInteger(CustomIntegerPtr integer);
 
