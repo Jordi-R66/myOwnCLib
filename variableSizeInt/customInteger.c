@@ -319,7 +319,7 @@ Word getWordFromInteger(CustomInteger integer, SizeT wordIndex) {
 #pragma region Bitwise Operations
 
 CustomInteger BitwiseAND(CustomInteger a, CustomInteger b) {
-	CustomInteger result = {0};
+	CustomInteger result = { 0 };
 
 	CustomIntegerPtr smallest = a.size < b.size ? &a : &b;
 	CustomIntegerPtr biggest = smallest->size == a.size ? &b : &a;
@@ -337,7 +337,7 @@ CustomInteger BitwiseAND(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger BitwiseOR(CustomInteger a, CustomInteger b) {
-	CustomInteger result = {0};
+	CustomInteger result = { 0 };
 
 	CustomIntegerPtr smallest = a.size < b.size ? &a : &b;
 	CustomIntegerPtr biggest = smallest->size == a.size ? &b : &a;
@@ -355,7 +355,7 @@ CustomInteger BitwiseOR(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger BitwiseXOR(CustomInteger a, CustomInteger b) {
-	CustomInteger result = {0};
+	CustomInteger result = { 0 };
 
 	CustomIntegerPtr smallest = a.size < b.size ? &a : &b;
 	CustomIntegerPtr biggest = smallest->size == a.size ? &b : &a;
@@ -519,7 +519,6 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 
 	bool redirected = false;
 
-	// La logique de redirection des signes reste la même
 	if (b.isNegative && !redirected) {
 		b.isNegative = false;
 		result = addInteger(a, b);
@@ -1115,6 +1114,69 @@ Euclide ExtendedEuclide(CustomInteger a, CustomInteger b) {
 	freeInteger(&temp.v);
 
 	return output;
+}
+
+static SizeT countTrailingZeros(CustomInteger n) {
+	if (isZero(n)) return 0;
+
+	SizeT count = 0;
+	for (SizeT i = 0; i < n.size; i++) {
+		if (n.value[i] == 0) {
+			count += 32;
+		} else {
+			Word w = n.value[i];
+
+			while ((w & 1) == 0) {
+				count++;
+				w >>= 1;
+			}
+
+			break;
+		}
+	}
+
+	return count;
+}
+
+CustomInteger fastGcdInteger(CustomInteger a, CustomInteger b) {
+	if (isZero(a)) return copyIntegerToNew(b);
+	if (isZero(b)) return copyIntegerToNew(a);
+
+	CustomInteger u = copyIntegerToNew(a);
+	CustomInteger v = copyIntegerToNew(b);
+	u.isNegative = false;
+	v.isNegative = false;
+
+	SizeT tzU = countTrailingZeros(u);
+	SizeT tzV = countTrailingZeros(v);
+	SizeT k = (tzU < tzV) ? tzU : tzV;
+
+	if (tzU > 0) BitshiftPtr(&u, tzU, RIGHT, false);
+	if (tzV > 0) BitshiftPtr(&v, tzV, RIGHT, false);
+
+	while (!isZero(v)) {
+		SizeT tz = countTrailingZeros(v);
+		if (tz > 0) {
+			BitshiftPtr(&v, tz, RIGHT, false);
+		}
+
+		if (compareAbs(u, v) == GREATER) {
+			CustomInteger temp = u;
+			u = v;
+			v = temp;
+		}
+
+		CustomInteger diff = subtractInteger(v, u);
+		freeInteger(&v);
+		v = diff;
+	}
+
+	if (k > 0) {
+		BitshiftPtr(&u, k, LEFT, true);
+	}
+
+	freeInteger(&v);
+	return u;
 }
 
 CustomInteger gcdInteger(CustomInteger a, CustomInteger b) {
