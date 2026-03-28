@@ -113,6 +113,10 @@ CustomInteger multiplyKaratsuba(CustomInteger a, CustomInteger b);
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
 EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b);
 CustomInteger divideInteger(CustomInteger a, CustomInteger b);
+
+CustomInteger getBarrettMu(CustomInteger n);
+CustomInteger barrettReduce(CustomInteger a, CustomInteger n, CustomInteger mu);
+
 CustomInteger modInteger(CustomInteger a, CustomInteger b);
 
 CustomInteger powInteger(CustomInteger a, CustomInteger exp);
