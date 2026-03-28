@@ -465,6 +465,21 @@ void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction
 	freeInteger(&shifted);
 }
 
+SizeT getIntegerBitLength(CustomInteger n) {
+	if (isZero(n)) return 0;
+
+	SizeT words = n.size;
+	Word topWord = n.value[words - 1];
+	SizeT bitsInTopWord = 0;
+
+	while (topWord > 0) {
+		bitsInTopWord++;
+		topWord >>= 1;
+	}
+
+	return (words - 1) * 32 + bitsInTopWord;
+}
+
 #pragma endregion
 
 #pragma region Arithmetic Operations

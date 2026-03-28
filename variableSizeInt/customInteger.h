@@ -100,6 +100,8 @@ void setBit(CustomIntegerPtr integer, bool bitValue, SizeT index);
 CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 void BitshiftPtr(CustomIntegerPtr integer, SizeT shift, ShiftDirection direction, bool adaptCapacity);
 
+SizeT getIntegerBitLength(CustomInteger n);
+
 #pragma endregion
 
 #pragma region Arithmetic Operations
