@@ -879,10 +879,104 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 	return result;
 }
 
-CustomInteger modInteger(CustomInteger a, CustomInteger b) {
+CustomInteger getBarrettMu(CustomInteger n) {
+	SizeT k = n.size;
+
+	CustomInteger num = allocInteger(2 * k + 1);
+	num.size = 2 * k + 1;
+	setMemory(num.value, 0, num.capacity * WORD_SIZE);
+	num.value[2 * k] = 1; // Le bit de poids fort
+
+	EuclideanDivision div = euclideanDivInteger(num, n);
+
+	freeInteger(&num);
+	freeInteger(&div.remainder);
+
+	return div.quotient;
+}
+
+CustomInteger barrettReduce(CustomInteger a, CustomInteger n, CustomInteger mu) {
+	// Si a < n, il est déjà réduit !
+	if (compareAbs(a, n) == LESS) {
+		return copyIntegerToNew(a);
+	}
+
+	SizeT k = n.size;
+
+	CustomInteger q1 = copyIntegerToNew(a);
+	if (k > 1) {
+		BitshiftPtr(&q1, (k - 1) * 32, RIGHT, false);
+	}
+
+	CustomInteger q2 = multiplyKaratsuba(q1, mu);
+	freeInteger(&q1);
+
+	CustomInteger q3 = q2; 
+	BitshiftPtr(&q3, (k + 1) * 32, RIGHT, false);
+
+	CustomInteger r1 = allocInteger(k + 1);
+	r1.size = (a.size < k + 1) ? a.size : k + 1;
+	for (SizeT i = 0; i < r1.size; i++) {
+		r1.value[i] = a.value[i];
+	}
+	reallocToFitInteger(&r1);
+
+	CustomInteger q3_n = multiplyKaratsuba(q3, n);
+	freeInteger(&q3);
+	CustomInteger r2 = allocInteger(k + 1);
+	r2.size = (q3_n.size < k + 1) ? q3_n.size : k + 1;
+	for (SizeT i = 0; i < r2.size; i++) {
+		r2.value[i] = q3_n.value[i];
+	}
+
+	reallocToFitInteger(&r2);
+	freeInteger(&q3_n);
+
+	CustomInteger r;
+	if (compareAbs(r1, r2) == LESS) {
+		CustomInteger base_k1 = allocInteger(k + 2);
+		base_k1.size = k + 2;
+		setMemory(base_k1.value, 0, base_k1.capacity * WORD_SIZE);
+		base_k1.value[k + 1] = 1;
+
+		CustomInteger temp = addInteger(r1, base_k1);
+		r = subtractInteger(temp, r2);
+
+		freeInteger(&temp);
+		freeInteger(&base_k1);
+	} else {
+		r = subtractInteger(r1, r2);
+	}
+
+	freeInteger(&r1);
+	freeInteger(&r2);
+
+	while (greaterThanInteger(r, n) || equalsInteger(r, n)) {
+		CustomInteger tempR = subtractInteger(r, n);
+		freeInteger(&r);
+		r = tempR;
+	}
+
+	return r;
+}
+
+CustomInteger modNaive(CustomInteger a, CustomInteger b) {
 	EuclideanDivision euclid = euclideanDivInteger(a, b);
 	freeInteger(&euclid.quotient);
 	return euclid.remainder;
+}
+
+CustomInteger modBarrett(CustomInteger a, CustomInteger b) {
+	CustomInteger mu = getBarrettMu(b);
+	CustomInteger result = barrettReduce(a, b, mu);
+
+	freeInteger(&mu);
+
+	return result;
+}
+
+CustomInteger modInteger(CustomInteger a, CustomInteger b) {
+	return modBarrett(a, b);
 }
 
 CustomInteger divideInteger(CustomInteger a, CustomInteger b) {
