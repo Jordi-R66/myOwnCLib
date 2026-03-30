@@ -4,6 +4,16 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#ifdef _64BITS
+#define WORD_BIT_SHIFT 6  // 2^6 = 64
+#define WORD_BIT_MASK 63  // 64 - 1
+
+#else
+#define WORD_BIT_SHIFT 5  // 2^5 = 32
+#define WORD_BIT_MASK 31  // 32 - 1
+
+#endif
+
 // Pour la multiplication Karatsuba
 // Seuil en Mots. En dessous de 32 mots (1024 bits), l'algo naïf est souvent plus rapide
 #define KARATSUBA_THRESHOLD 32
@@ -29,7 +39,7 @@ CustomInteger allocInteger(SizeT capacity) {
 	ptr temp = calloc(capacity, WORD_SIZE);
 
 	if (temp == NULL) {
-		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", capacity * 32);
+		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", capacity * WORD_SIZE * 8);
 		exit(EXIT_FAILURE);
 	}
 
@@ -100,7 +110,7 @@ void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity) {
 
 	if (newPtr == NULL) {
 		freeInteger(integer);
-		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", newCapacity * 32);
+		fprintf(stderr, "Not enough space to allocate to a %zu bits integer\n", newCapacity * WORD_SIZE * 8);
 		exit(EXIT_FAILURE);
 	}
 
@@ -191,12 +201,12 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 	// - C'est une puissance de 2
 	// - ET que les bits s'alignent parfaitement dans un Mot (32 % bits == 0)
 	// Ex: Base 16 (4 bits) -> OK (8 chars/word). Base 8 (3 bits) -> NON (32%3 != 0).
-	if (isPowerOfTwo && (32 % bitsPerChar == 0)) {
+	if (isPowerOfTwo && ((WORD_SIZE * 8) % bitsPerChar == 0)) {
 
 		// --- ALGORITHME RAPIDE (Bitmasking / Modulo local) ---
 
 		SizeT divider = (SizeT)base;
-		SizeT charsPerWord = 32 / bitsPerChar;
+		SizeT charsPerWord = (WORD_SIZE * 8) / bitsPerChar;
 
 		// Taille exacte : (capacité * chars_par_mot) + signe + null terminator
 		SizeT strLength = integer.capacity * charsPerWord + 2;
@@ -225,7 +235,7 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 			// Le signe sera ajouté après
 		} else {
 			// Estimation pire cas (Base 2) : size * 32
-			SizeT estimatedLen = integer.size * 32 + 2;
+			SizeT estimatedLen = integer.size * (WORD_SIZE * 8) + 2;
 			obj = allocString(estimatedLen);
 
 			CustomInteger temp = copyIntegerToNew(integer);
@@ -281,7 +291,7 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 	if (value == 0) size = 1;
 
 	// Calcul de la taille nécessaire en Mots
-	while (value >> (size * 32)) {
+	while (value >> (size * (WORD_SIZE * 8))) {
 		size++;
 	}
 
@@ -295,7 +305,7 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 
 	for (SizeT i = 0; i < size; i++) {
 		// Extraction de 32 bits
-		output.value[i] = (Word)((value >> (i * 32)) & WORD_MAX_VAL);
+		output.value[i] = (Word)((value >> (i * (WORD_SIZE * 8))) & WORD_MAX_VAL);
 	}
 
 	if (fitToValue) {
@@ -387,25 +397,25 @@ CustomInteger BitwiseNOT(CustomInteger a) {
 }
 
 bool getBit(CustomInteger integer, SizeT bitIndex) {
-	SizeT wordIdx = bitIndex >> 5; // bitIndex / 32
+	SizeT wordIdx = bitIndex >> WORD_BIT_SHIFT;
 	bool output = false;
 
 	if (wordIdx < integer.size)
-		output = (integer.value[wordIdx] >> (bitIndex & 31)) & 1;
+		output = (integer.value[wordIdx] >> (bitIndex & WORD_BIT_MASK)) & 1;
 
 	return output;
 }
 
 void setBit(CustomIntegerPtr integer, bool bitValue, SizeT bitIndex) {
-	SizeT wordIdx = bitIndex >> 5; // bitIndex / 32
+	SizeT wordIdx = bitIndex >> WORD_BIT_SHIFT;
 	if (wordIdx >= integer->capacity) return;
 
 	if (wordIdx >= integer->size) integer->size = wordIdx + 1;
 
 	if (bitValue)
-		integer->value[wordIdx] |= (1 << (bitIndex & 31));
+		integer->value[wordIdx] |= ((Word)1 << (bitIndex & WORD_BIT_MASK));
 	else
-		integer->value[wordIdx] &= ~(1 << (bitIndex & 31));
+		integer->value[wordIdx] &= ~((Word)1 << (bitIndex & WORD_BIT_MASK));
 }
 
 CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direction, bool adaptCapacity) {
@@ -416,7 +426,7 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 	if (shift == 0) {
 		return copyIntegerToNew(integer);
 	} else if (direction == LEFT || direction == RIGHT) {
-		SizeT deltaSize = shift / 32;
+		SizeT deltaSize = shift / (WORD_SIZE * 8);
 		SizeT resultCapacity = integer.capacity;
 
 		if (adaptCapacity && direction == LEFT) {
@@ -434,8 +444,8 @@ CustomInteger Bitshift(CustomInteger integer, SizeT shift, ShiftDirection direct
 			SizeT j = i - 1;
 
 			// On parcourt les 32 bits du mot
-			for (SizeT k = 32; k > 0; k--) {
-				SizeT currentBit = j * 32 + (k - 1);
+			for (SizeT k = (WORD_SIZE * 8); k > 0; k--) {
+				SizeT currentBit = j * (WORD_SIZE * 8) + (k - 1);
 
 				if (direction == RIGHT && currentBit < shift) {
 					break;
@@ -476,7 +486,7 @@ SizeT getIntegerBitLength(CustomInteger n) {
 		topWord >>= 1;
 	}
 
-	return (words - 1) * 32 + bitsInTopWord;
+	return (words - 1) * (WORD_SIZE * 8) + bitsInTopWord;
 }
 
 #pragma endregion
@@ -512,7 +522,7 @@ CustomInteger addInteger(CustomInteger a, CustomInteger b) {
 		TEMP = (DoubleWord)A_VAL + (DoubleWord)B_VAL + (DoubleWord)CARRY;
 
 		SUM = (Word)(TEMP & WORD_MAX_VAL);
-		CARRY = (Word)(TEMP >> 32);
+		CARRY = (Word)(TEMP >> (WORD_SIZE * 8));
 
 		result.value[i] = SUM;
 
@@ -589,7 +599,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b) {
 				// On emprunte 1 au rang suivant (donc on ajoute 2^32 à A)
 				// A - subVal en arithmétique modulo 2^32 revient à faire la soustraction standard
 				// le résultat sera correct, mais on note le borrow
-				result.value[i] = (Word)(((DoubleWord)1 << 32) + (DoubleWord)A - subVal);
+				result.value[i] = (Word)(((DoubleWord)1 << (WORD_SIZE * 8)) + (DoubleWord)A - subVal);
 				BORROW = 1;
 			} else {
 				result.value[i] = A - (Word)subVal;
@@ -635,7 +645,7 @@ CustomInteger multiplyNaive(CustomInteger a, CustomInteger b) {
 				carry;
 
 			result.value[i + j] = (Word)(current & WORD_MAX_VAL);
-			carry = current >> 32;
+			carry = current >> (WORD_SIZE * 8);
 		}
 
 		result.value[i + b.size] += (Word)carry;
@@ -675,11 +685,11 @@ CustomInteger multiplyKaratsuba(CustomInteger a, CustomInteger b) {
 	// B^m correspond à un décalage de m Mots (donc m*32 bits)
 	CustomInteger resultZ2 = allocInteger(z2.capacity + m * 2);
 	copyInteger(&z2, &resultZ2);
-	BitshiftPtr(&resultZ2, m * 32 * 2, LEFT, true);
+	BitshiftPtr(&resultZ2, m * (WORD_SIZE * 8) * 2, LEFT, true);
 
 	CustomInteger resultZ1 = allocInteger(z1.capacity + m);
 	copyInteger(&z1, &resultZ1);
-	BitshiftPtr(&resultZ1, m * 32, LEFT, true);
+	BitshiftPtr(&resultZ1, m * (WORD_SIZE * 8), LEFT, true);
 
 	CustomInteger tempRes = addInteger(resultZ2, resultZ1);
 	CustomInteger result = addInteger(tempRes, z0);
@@ -727,14 +737,14 @@ CustomInteger squareNaive(CustomInteger a) {
 				carry;
 
 			result.value[i + j] = (Word)(current & WORD_MAX_VAL);
-			carry = current >> 32;
+			carry = current >> (WORD_SIZE * 8);
 		}
 		result.value[i + a.size] = (Word)carry;
 	}
 
 	Word carryBit = 0;
 	for (SizeT i = 0; i < result.size; i++) {
-		Word nextCarry = (result.value[i] >> 31) & 1;
+		Word nextCarry = (result.value[i] >> ((WORD_SIZE * 8) - 1)) & 1;
 		result.value[i] = (result.value[i] << 1) | carryBit;
 		carryBit = nextCarry;
 	}
@@ -745,11 +755,11 @@ CustomInteger squareNaive(CustomInteger a) {
 
 		DoubleWord current = (DoubleWord)result.value[2 * i] + (sq & WORD_MAX_VAL) + carry;
 		result.value[2 * i] = (Word)(current & WORD_MAX_VAL);
-		carry = current >> 32;
+		carry = current >> (WORD_SIZE * 8);
 
-		current = (DoubleWord)result.value[2 * i + 1] + (sq >> 32) + carry;
+		current = (DoubleWord)result.value[2 * i + 1] + (sq >> (WORD_SIZE * 8)) + carry;
 		result.value[2 * i + 1] = (Word)(current & WORD_MAX_VAL);
-		carry = current >> 32;
+		carry = current >> (WORD_SIZE * 8);
 	}
 
 	reallocToFitInteger(&result);
@@ -781,11 +791,11 @@ CustomInteger squareInteger(CustomInteger a) {
 
 	CustomInteger resultZ2 = allocInteger(z2.capacity + m * 2);
 	copyInteger(&z2, &resultZ2);
-	BitshiftPtr(&resultZ2, m * 32 * 2, LEFT, true);
+	BitshiftPtr(&resultZ2, m * (WORD_SIZE * 8) * 2, LEFT, true);
 
 	CustomInteger resultZ1 = allocInteger(z1.capacity + m);
 	copyInteger(&z1, &resultZ1);
-	BitshiftPtr(&resultZ1, m * 32, LEFT, true);
+	BitshiftPtr(&resultZ1, m * (WORD_SIZE * 8), LEFT, true);
 
 	CustomInteger tempRes = addInteger(resultZ2, resultZ1);
 	CustomInteger result = addInteger(tempRes, z0);
@@ -814,7 +824,7 @@ static CustomInteger multiplyByWord(CustomInteger a, Word b) {
 	for (SizeT i = 0; i < a.size; i++) {
 		DoubleWord val = (DoubleWord)a.value[i] * (DoubleWord)b + carry;
 		res.value[i] = (Word)(val & WORD_MAX_VAL);
-		carry = val >> 32;
+		carry = val >> (WORD_SIZE * 8);
 	}
 
 	if (carry > 0) {
@@ -858,7 +868,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		reallocToFitInteger(&V);
 		Word msbV = V.value[V.size - 1];
 		SizeT shift = 0;
-		// On cherche à aligner le MSB sur le bit de poids fort du mot (bit 31)
+		// On cherche à aligner le MSB sur le bit de poids fort du mot (bit ((WORD_SIZE * 8) - 1))
 		while ((msbV & 0x80000000) == 0) {
 			msbV <<= 1;
 			shift++;
@@ -883,7 +893,7 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 
 				// A. Estimation (q_est = (u_n * B + u_{n-1}) / v_{n-1})
 				DoubleWord num = 0;
-				if (j + m < U.size) num |= ((DoubleWord)U.value[j + m]) << 32;
+				if (j + m < U.size) num |= ((DoubleWord)U.value[j + m]) << (WORD_SIZE * 8);
 				if (j + m - 1 < U.size) num |= ((DoubleWord)U.value[j + m - 1]);
 
 				DoubleWord den = V.value[m - 1];
@@ -992,14 +1002,14 @@ CustomInteger barrettReduce(CustomInteger a, CustomInteger n, CustomInteger mu) 
 
 	CustomInteger q1 = copyIntegerToNew(a);
 	if (k > 1) {
-		BitshiftPtr(&q1, (k - 1) * 32, RIGHT, false);
+		BitshiftPtr(&q1, (k - 1) * (WORD_SIZE * 8), RIGHT, false);
 	}
 
 	CustomInteger q2 = multiplyKaratsuba(q1, mu);
 	freeInteger(&q1);
 
 	CustomInteger q3 = q2; 
-	BitshiftPtr(&q3, (k + 1) * 32, RIGHT, false);
+	BitshiftPtr(&q3, (k + 1) * (WORD_SIZE * 8), RIGHT, false);
 
 	CustomInteger r1 = allocInteger(k + 1);
 	r1.size = (a.size < k + 1) ? a.size : k + 1;
@@ -1083,10 +1093,10 @@ CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
 	for (SizeT i = 0; i < base.size; i++) {
 		Word b = base.value[i];
 		if (b != 0) {
-			for (int k = 0; k < 32; k++) { // Scan des 32 bits du mot
+			for (int k = 0; k < (WORD_SIZE * 8); k++) { // Scan des 32 bits du mot
 				if ((b >> k) & 1) {
 					setBitCount++;
-					if (setBitCount == 1) bitPosition = i * 32 + k;
+					if (setBitCount == 1) bitPosition = i * (WORD_SIZE * 8) + k;
 				}
 			}
 			if (setBitCount > 1) break; // Pas une puissance de 2
@@ -1110,7 +1120,7 @@ CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
 		for (SizeT i = 0; i < exp.size; i++) {
 			// Reconstitution de la valeur (Word vers SizeT)
 			// On cast en SizeT avant le shift pour éviter l'overflow si SizeT > 32 bits
-			expVal |= ((SizeT)exp.value[i]) << (i * 32);
+			expVal |= ((SizeT)exp.value[i]) << (i * (WORD_SIZE * 8));
 		}
 
 		// Calcul du décalage : (2^k)^exp = 2^(k*exp)
@@ -1137,13 +1147,13 @@ CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
 			if (msWordIdx > 0) {
 				// 2. Trouver le bit le plus significatif dans ce mot
 				Word topWord = exp.value[msWordIdx - 1];
-				int msBit = 31;
+				int msBit = ((WORD_SIZE * 8) - 1);
 				while (msBit >= 0 && !((topWord >> msBit) & 1)) {
 					msBit--;
 				}
 
 				// Index absolu du dernier bit à 1
-				maxBits = (msWordIdx - 1) * 32 + msBit + 1;
+				maxBits = (msWordIdx - 1) * (WORD_SIZE * 8) + msBit + 1;
 			}
 		}
 
@@ -1318,7 +1328,7 @@ static SizeT countTrailingZeros(CustomInteger n) {
 	SizeT count = 0;
 	for (SizeT i = 0; i < n.size; i++) {
 		if (n.value[i] == 0) {
-			count += 32;
+			count += (WORD_SIZE * 8);
 		} else {
 			Word w = n.value[i];
 
@@ -1670,9 +1680,9 @@ CustomInteger modPowInteger_SlidingWindow(CustomInteger base, CustomInteger exp,
 
 		if (msWordIdx > 0) {
 			Word topWord = exp.value[msWordIdx - 1];
-			int msBit = 31;
+			int msBit = ((WORD_SIZE * 8) - 1);
 			while (msBit >= 0 && !((topWord >> msBit) & 1)) msBit--;
-			maxBits = (msWordIdx - 1) * 32 + msBit + 1;
+			maxBits = (msWordIdx - 1) * (WORD_SIZE * 8) + msBit + 1;
 		}
 	}
 
@@ -1780,12 +1790,12 @@ CustomInteger modPowInteger_SquareAndMultiply(CustomInteger base, CustomInteger 
 
 			if (msWordIdx > 0) {
 				Word topWord = exp.value[msWordIdx - 1];
-				int msBit = 31;
+				int msBit = ((WORD_SIZE * 8) - 1);
 				while (msBit >= 0 && !((topWord >> msBit) & 1)) {
 					msBit--;
 				}
 				// Calcul précis du nombre de bits réellement utiles
-				maxBits = (msWordIdx - 1) * 32 + msBit + 1;
+				maxBits = (msWordIdx - 1) * (WORD_SIZE * 8) + msBit + 1;
 			}
 		}
 
