@@ -1551,8 +1551,124 @@ CustomInteger modularInverse(CustomInteger a, CustomInteger m) {
 
 	return result;
 }
+CustomInteger modPowInteger_SlidingWindow(CustomInteger base, CustomInteger exp, CustomInteger mod) {
+	CustomInteger output;
+	CustomInteger One = allocIntegerFromValue(1, false, true);
 
-CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger mod) {
+	if (isZero(mod)) {
+		freeInteger(&One);
+		fprintf(stderr, "Math error: modulo by 0\n");
+		exit(EXIT_FAILURE);
+	} else if (equalsInteger(mod, One)) {
+		output = allocIntegerFromValue(0, false, true);
+		freeInteger(&One);
+		return output;
+	} else if (isZero(exp)) {
+		output = allocIntegerFromValue(1, false, true);
+		freeInteger(&One);
+		return output;
+	} else if (isZero(base)) {
+		output = allocIntegerFromValue(0, false, true);
+		freeInteger(&One);
+		return output;
+	}
+
+	CustomInteger mu = getBarrettMu(mod);
+	CustomInteger baseMod = barrettReduce(base, mod, mu);
+
+	SizeT maxBits = 0;
+	if (exp.size > 0) {
+		SizeT msWordIdx = exp.size;
+		while (msWordIdx > 0 && exp.value[msWordIdx - 1] == 0) msWordIdx--;
+
+		if (msWordIdx > 0) {
+			Word topWord = exp.value[msWordIdx - 1];
+			int msBit = 31;
+			while (msBit >= 0 && !((topWord >> msBit) & 1)) msBit--;
+			maxBits = (msWordIdx - 1) * 32 + msBit + 1;
+		}
+	}
+
+	#define WINDOW_SIZE 5
+	#define TABLE_SIZE (1 << (WINDOW_SIZE - 1))
+
+	CustomInteger precomputed[TABLE_SIZE];
+	precomputed[0] = copyIntegerToNew(baseMod);
+
+	CustomInteger sq = multiplyKaratsuba(baseMod, baseMod);
+	CustomInteger base2 = barrettReduce(sq, mod, mu);
+	freeInteger(&sq);
+
+	for (int k = 1; k < TABLE_SIZE; k++) {
+		CustomInteger prod = multiplyKaratsuba(precomputed[k - 1], base2);
+		precomputed[k] = barrettReduce(prod, mod, mu);
+		freeInteger(&prod);
+	}
+	freeInteger(&base2);
+
+	output = allocIntegerFromValue(1, false, true);
+	SizeT i = maxBits;
+
+	while (i > 0) {
+		if (getBit(exp, i - 1) == 0) {
+			CustomInteger sqOut = multiplyKaratsuba(output, output);
+			CustomInteger newOut = barrettReduce(sqOut, mod, mu);
+
+			freeInteger(&output);
+			freeInteger(&sqOut);
+
+			output = newOut;
+			i--;
+		} else {
+			SizeT j = (i > WINDOW_SIZE) ? i - WINDOW_SIZE : 0;
+
+			while (getBit(exp, j) == 0) {
+				j++;
+			}
+
+			Word windowVal = 0;
+			for (SizeT k = i; k > j; k--) {
+				windowVal = (windowVal << 1) | getBit(exp, k - 1);
+			}
+
+			for (SizeT k = i; k > j; k--) {
+				CustomInteger sqOut = multiplyKaratsuba(output, output);
+				CustomInteger newOut = barrettReduce(sqOut, mod, mu);
+
+				freeInteger(&output);
+				freeInteger(&sqOut);
+
+				output = newOut;
+			}
+
+			CustomInteger prod = multiplyKaratsuba(output, precomputed[windowVal / 2]);
+			CustomInteger newOut = barrettReduce(prod, mod, mu);
+
+			freeInteger(&output);
+			freeInteger(&prod);
+
+			output = newOut;
+
+			i = j;
+		}
+	}
+
+	if (!isZero(output)) {
+		output.isNegative = base.isNegative && (getBit(exp, 0) == 1);
+	}
+	reallocToFitInteger(&output);
+
+	freeInteger(&One);
+	freeInteger(&baseMod);
+	freeInteger(&mu);
+	for (int k = 0; k < TABLE_SIZE; k++) {
+		freeInteger(&precomputed[k]);
+	}
+
+	return output;
+}
+
+CustomInteger modPowInteger_SquareAndMultiply(CustomInteger base, CustomInteger exp, CustomInteger mod) {
 	CustomInteger output;
 	CustomInteger One = allocIntegerFromValue(1, false, true);
 
@@ -1613,6 +1729,10 @@ CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger
 	reallocToFitInteger(&output);
 
 	return output;
+}
+
+CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger mod) {
+	return modPowInteger_SlidingWindow(base, exp, mod);
 }
 
 #pragma endregion

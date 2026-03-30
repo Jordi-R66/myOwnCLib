@@ -144,6 +144,8 @@ CustomInteger gcdInteger(CustomInteger a, CustomInteger b);
 CustomInteger modularInverse(CustomInteger a, CustomInteger m);
 CustomInteger binaryModularInverse(CustomInteger a, CustomInteger m);
 CustomInteger modPowInteger(CustomInteger base, CustomInteger exp, CustomInteger mod);
+CustomInteger modPowInteger_SlidingWindow(CustomInteger base, CustomInteger exp, CustomInteger mod);
+CustomInteger modPowInteger_SquareAndMultiply(CustomInteger base, CustomInteger exp, CustomInteger mod);
 
 #pragma endregion
 
