@@ -1682,7 +1682,7 @@ CustomInteger modPowInteger_SlidingWindow(CustomInteger base, CustomInteger exp,
 	CustomInteger precomputed[TABLE_SIZE];
 	precomputed[0] = copyIntegerToNew(baseMod);
 
-	CustomInteger sq = multiplyKaratsuba(baseMod, baseMod);
+	CustomInteger sq = squareInteger(baseMod);
 	CustomInteger base2 = barrettReduce(sq, mod, mu);
 	freeInteger(&sq);
 
@@ -1698,7 +1698,7 @@ CustomInteger modPowInteger_SlidingWindow(CustomInteger base, CustomInteger exp,
 
 	while (i > 0) {
 		if (getBit(exp, i - 1) == 0) {
-			CustomInteger sqOut = multiplyKaratsuba(output, output);
+			CustomInteger sqOut = squareInteger(output);
 			CustomInteger newOut = barrettReduce(sqOut, mod, mu);
 
 			freeInteger(&output);
@@ -1719,7 +1719,7 @@ CustomInteger modPowInteger_SlidingWindow(CustomInteger base, CustomInteger exp,
 			}
 
 			for (SizeT k = i; k > j; k--) {
-				CustomInteger sqOut = multiplyKaratsuba(output, output);
+				CustomInteger sqOut = squareInteger(output);
 				CustomInteger newOut = barrettReduce(sqOut, mod, mu);
 
 				freeInteger(&output);
