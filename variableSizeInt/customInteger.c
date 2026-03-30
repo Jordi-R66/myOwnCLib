@@ -1093,7 +1093,7 @@ CustomInteger powInteger(CustomInteger base, CustomInteger exp) {
 	for (SizeT i = 0; i < base.size; i++) {
 		Word b = base.value[i];
 		if (b != 0) {
-			for (int k = 0; k < (WORD_SIZE * 8); k++) { // Scan des 32 bits du mot
+			for (SizeT k = 0; k < (WORD_SIZE * 8); k++) { // Scan des 32 bits du mot
 				if ((b >> k) & 1) {
 					setBitCount++;
 					if (setBitCount == 1) bitPosition = i * (WORD_SIZE * 8) + k;
