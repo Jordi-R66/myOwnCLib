@@ -14,31 +14,31 @@ typedef unsigned short uint16;
 typedef signed short int16;
 
 #pragma region INT 32 AND 64 DEFINITION
-	#if defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
-		typedef signed int int32;
-		typedef unsigned int uint32;
+#if defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
+typedef signed int int32;
+typedef unsigned int uint32;
 
-		typedef unsigned long long uint64;
-		typedef signed long long int64;
-	#elif defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_64BITS)
-		typedef signed int int32;
-		typedef unsigned int uint32;
+typedef unsigned long long uint64;
+typedef signed long long int64;
+#elif defined(LINUX) && defined(INTEL_ARCH_FAMILY) && defined(_64BITS)
+typedef signed int int32;
+typedef unsigned int uint32;
 
-		typedef unsigned long uint64;
-		typedef signed long int64;
-	#elif defined(WINDOWS) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
-		typedef signed int int32;
-		typedef unsigned int uint32;
+typedef unsigned long uint64;
+typedef signed long int64;
+#elif defined(WINDOWS) && defined(INTEL_ARCH_FAMILY) && defined(_32BITS)
+typedef signed int int32;
+typedef unsigned int uint32;
 
-		typedef unsigned long long uint64;
-		typedef signed long long int64;
-	#elif defined(WINDOWS) && defined(INTEL_ARCH_FAMILY) && defined(_64BITS)
-		typedef signed int int32;
-		typedef unsigned int uint32;
+typedef unsigned long long uint64;
+typedef signed long long int64;
+#elif defined(WINDOWS) && defined(INTEL_ARCH_FAMILY) && defined(_64BITS)
+typedef signed int int32;
+typedef unsigned int uint32;
 
-		typedef unsigned long long uint64;
-		typedef signed long long int64;
-	#endif
+typedef unsigned long long uint64;
+typedef signed long long int64;
+#endif
 #pragma endregion
 
 #define BYTE_SIZE sizeof(Byte)
@@ -70,6 +70,8 @@ typedef signed short int16;
 
 #pragma region Word Declaration
 
+#ifdef _32BITS
+// Système 32 bits : Word = 32 bits, DoubleWord = 64 bits
 #define SWORD_TYPE int32
 #define WORD_TYPE uint32
 
@@ -90,6 +92,32 @@ typedef signed short int16;
 
 #define WORD_SIZE I32_SIZE
 #define DOUBLE_WORD_SIZE I64_SIZE
+
+#elif defined(_64BITS)
+// Système 64 bits : Word = 64 bits, DoubleWord = 128 bits
+#define SWORD_TYPE int64
+#define WORD_TYPE uint64
+
+#define WORD_MAX_VAL U64_MAX_VAL
+#define WORD_MIN_VAL U64_MIN_VAL
+
+#define SWORD_MAX_VAL I64_MAX_VAL
+#define SWORD_MIN_VAL I64_MIN_VAL
+
+#define SDOUBLE_WORD_TYPE __int128
+#define DOUBLE_WORD_TYPE unsigned __int128
+
+// Astuces de manipulation de bits pour générer les valeurs max/min sur 128 bits
+#define DOUBLE_WORD_MAX_VAL (~(unsigned __int128)0)
+#define DOUBLE_WORD_MIN_VAL ((unsigned __int128)0)
+
+#define SDOUBLE_WORD_MAX_VAL ((__int128)(DOUBLE_WORD_MAX_VAL >> 1))
+#define SDOUBLE_WORD_MIN_VAL (~SDOUBLE_WORD_MAX_VAL)
+
+#define WORD_SIZE I64_SIZE
+#define DOUBLE_WORD_SIZE 16
+
+#endif
 
 typedef SWORD_TYPE sWord;
 typedef WORD_TYPE Word;
