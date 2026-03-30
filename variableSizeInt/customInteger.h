@@ -111,6 +111,7 @@ CustomInteger subtractInteger(CustomInteger a, CustomInteger b);
 CustomInteger multiplyNaive(CustomInteger a, CustomInteger b);
 CustomInteger multiplyKaratsuba(CustomInteger a, CustomInteger b);
 CustomInteger multiplyInteger(CustomInteger a, CustomInteger b);
+CustomInteger squareInteger(CustomInteger a);
 EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b);
 CustomInteger divideInteger(CustomInteger a, CustomInteger b);
 

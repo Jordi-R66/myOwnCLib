@@ -1,4 +1,3 @@
-// TODO: Lire le fichier TODO.md
 #include "customInteger.h"
 
 #include <stdio.h>
@@ -709,6 +708,94 @@ CustomInteger multiplyInteger(CustomInteger a, CustomInteger b) {
 
 	result.isNegative = resultNegative;
 
+	reallocToFitInteger(&result);
+
+	return result;
+}
+
+CustomInteger squareNaive(CustomInteger a) {
+	CustomInteger result = allocInteger(a.size * 2);
+	result.size = a.size * 2;
+	result.isNegative = false;
+	setToZero(&result);
+
+	for (SizeT i = 0; i < a.size; i++) {
+		DoubleWord carry = 0;
+		for (SizeT j = i + 1; j < a.size; j++) {
+			DoubleWord current = (DoubleWord)result.value[i + j] +
+				((DoubleWord)a.value[i] * (DoubleWord)a.value[j]) +
+				carry;
+
+			result.value[i + j] = (Word)(current & WORD_MAX_VAL);
+			carry = current >> 32;
+		}
+		result.value[i + a.size] = (Word)carry;
+	}
+
+	Word carryBit = 0;
+	for (SizeT i = 0; i < result.size; i++) {
+		Word nextCarry = (result.value[i] >> 31) & 1;
+		result.value[i] = (result.value[i] << 1) | carryBit;
+		carryBit = nextCarry;
+	}
+
+	DoubleWord carry = 0;
+	for (SizeT i = 0; i < a.size; i++) {
+		DoubleWord sq = (DoubleWord)a.value[i] * (DoubleWord)a.value[i];
+
+		DoubleWord current = (DoubleWord)result.value[2 * i] + (sq & WORD_MAX_VAL) + carry;
+		result.value[2 * i] = (Word)(current & WORD_MAX_VAL);
+		carry = current >> 32;
+
+		current = (DoubleWord)result.value[2 * i + 1] + (sq >> 32) + carry;
+		result.value[2 * i + 1] = (Word)(current & WORD_MAX_VAL);
+		carry = current >> 32;
+	}
+
+	reallocToFitInteger(&result);
+	return result;
+}
+
+CustomInteger squareInteger(CustomInteger a) {
+	if (isZero(a)) {
+		return allocIntegerFromValue(0, false, true);
+	}
+
+	if (a.size < KARATSUBA_THRESHOLD) {
+		return squareNaive(a);
+	}
+
+	SizeT m = a.size / 2;
+
+	CustomInteger low, high;
+	splitInteger(a, m, &low, &high);
+
+	CustomInteger z0 = squareInteger(low);
+	CustomInteger z2 = squareInteger(high);
+
+	CustomInteger high_low = multiplyKaratsuba(high, low);
+	CustomInteger z1 = allocInteger(high_low.size + 1);
+	copyInteger(&high_low, &z1);
+	BitshiftPtr(&z1, 1, LEFT, true);
+	freeInteger(&high_low);
+
+	CustomInteger resultZ2 = allocInteger(z2.capacity + m * 2);
+	copyInteger(&z2, &resultZ2);
+	BitshiftPtr(&resultZ2, m * 32 * 2, LEFT, true);
+
+	CustomInteger resultZ1 = allocInteger(z1.capacity + m);
+	copyInteger(&z1, &resultZ1);
+	BitshiftPtr(&resultZ1, m * 32, LEFT, true);
+
+	CustomInteger tempRes = addInteger(resultZ2, resultZ1);
+	CustomInteger result = addInteger(tempRes, z0);
+
+	freeInteger(&low); freeInteger(&high);
+	freeInteger(&z0); freeInteger(&z2); freeInteger(&z1);
+	freeInteger(&resultZ2); freeInteger(&resultZ1);
+	freeInteger(&tempRes);
+
+	result.isNegative = false;
 	reallocToFitInteger(&result);
 
 	return result;
