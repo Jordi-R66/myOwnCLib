@@ -180,7 +180,6 @@ static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr l
 
 String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 	string baseChars = "0123456789ABCDEF";
-	string base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	String obj;
 
 	// 1. Vérification : Est-ce une puissance de 2 ?
