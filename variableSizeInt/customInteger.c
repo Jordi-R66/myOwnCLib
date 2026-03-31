@@ -180,6 +180,7 @@ static void splitInteger(CustomInteger src, SizeT splitIndex, CustomIntegerPtr l
 
 String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 	string baseChars = "0123456789ABCDEF";
+	string base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	String obj;
 
 	// 1. Vérification : Est-ce une puissance de 2 ?
@@ -287,11 +288,11 @@ CustomInteger allocIntegerFromValue(uint64 value, bool negative, bool fitToValue
 	SizeT capacity = sizeof(uint64) / WORD_SIZE; // Typiquement 2 pour 64 bits / 32 bits
 	if (capacity < 1) capacity = 1;
 
-	SizeT size = (value > 0xFFFFFFFF) ? 2 : 1;
+	SizeT size = (value > WORD_MAX_VAL) ? 2 : 1;
 	if (value == 0) size = 1;
 
 	// Calcul de la taille nécessaire en Mots
-	while (value >> (size * (WORD_SIZE * 8))) {
+	while (value >> (size * (WORD_BIT_MASK + 1))) {
 		size++;
 	}
 
