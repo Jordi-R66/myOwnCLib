@@ -67,6 +67,52 @@ void printInteger(CustomInteger integer, Base base, bool alwaysPutSign) {
 	freeString(&repr);
 }
 
+CustomInteger readFromFile(FILE* stream, bool closeAfter) {
+	CustomInteger integer = { 0 };
+
+	uint64 sizeInBytes, bytesRead, sizeInWords;
+
+	fseek(stream, 0, SEEK_SET);
+
+	bytesRead = fread(&sizeInBytes, I64_SIZE, 1, stream);
+
+	if (bytesRead == 1) {
+		sizeInWords = sizeInBytes / WORD_SIZE + (sizeInBytes % WORD_SIZE > 0);
+		integer = allocInteger(sizeInWords);
+
+		// Lecture du nombre depuis le fichier
+		bytesRead = fread(integer.value, BYTE_SIZE, sizeInBytes, stream);
+		integer.size = sizeInWords;
+		bytesRead = fread(&integer.isNegative, BYTE_SIZE, 1, stream);
+	}
+
+	if (closeAfter) {
+		fclose(stream);
+	}
+
+	return integer;
+}
+
+void writeToFile(CustomIntegerPtr integer, FILE* stream, bool closeAfter) {
+	uint64 sizeInBytes = WORD_SIZE * integer->size;
+
+	uint64 shift = 0;
+	Byte* temp = (Byte*)integer->value;
+
+	while (temp[WORD_SIZE * integer->size - shift - 1] == (Byte)0) {
+		sizeInBytes--;
+		shift++;
+	}
+
+	fwrite(&sizeInBytes, I64_SIZE, 1, stream);
+	fwrite(temp, BYTE_SIZE, sizeInBytes, stream);
+	fwrite(&integer->isNegative, BYTE_SIZE, 1, stream);
+
+	if (closeAfter) {
+		fclose(stream);
+	}
+}
+
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest) {
 	if (dest == src || !custIntInitialized(src)) {
 		return;
