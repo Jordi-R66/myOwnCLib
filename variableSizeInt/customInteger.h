@@ -34,6 +34,7 @@ typedef enum ShiftDirection {
 } ShiftDirection;
 
 typedef enum Base {
+	RAW = 1,
 	BIN = 2,
 	OCT = 8,
 	DEC = 10,
@@ -80,7 +81,7 @@ void reallocInteger(CustomIntegerPtr integer, SizeT newCapacity);
  */
 void reallocToFitInteger(CustomIntegerPtr integer);
 
-CustomInteger allocIntegerFromValue(uint64 value, bool isNegative, bool copy);
+CustomInteger allocIntegerFromValue(uint64 value, bool isNegative, bool fitToValue);
 CustomInteger copyIntegerToNew(CustomInteger original);
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest);
 void printInteger(CustomInteger integer, Base base, bool alwaysPutSign);

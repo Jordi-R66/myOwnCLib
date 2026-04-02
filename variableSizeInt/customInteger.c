@@ -182,6 +182,10 @@ String integerToString(CustomInteger integer, Base base, bool alwaysPutSign) {
 	string baseChars = "0123456789ABCDEF";
 	String obj;
 
+	if (base == RAW) {
+		base = HEX;
+	}
+
 	// 1. Vérification : Est-ce une puissance de 2 ?
 	// L'astuce (base & (base - 1)) == 0 renvoie true si c'est une puissance de 2.
 	bool isPowerOfTwo = (base > 1) && ((base & (base - 1)) == 0);
