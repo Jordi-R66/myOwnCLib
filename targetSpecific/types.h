@@ -170,4 +170,6 @@ typedef char* string;
 typedef void* ptr;
 typedef SizeT IndexT;
 
+#define SIZET_SIZE sizeof(SizeT)
+
 #endif
