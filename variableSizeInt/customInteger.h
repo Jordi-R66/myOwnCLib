@@ -88,6 +88,9 @@ void printInteger(CustomInteger integer, Base base, bool alwaysPutSign);
 
 String integerToString(CustomInteger integer, Base base, bool alwaysPutSign);
 
+CustomInteger readFromFile(FILE* stream, bool closeAfter);
+void writeToFile(CustomIntegerPtr integer, FILE* stream, bool closeAfter);
+
 // New: Helper pour obtenir un Mot entier (et non un octet)
 Word getWordFromInteger(CustomInteger integer, SizeT index);
 
