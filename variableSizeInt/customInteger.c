@@ -1680,7 +1680,7 @@ CustomInteger gcdInteger(CustomInteger a, CustomInteger b) {
 }
 
 CustomInteger modularInverse(CustomInteger a, CustomInteger m) {
-	Euclide res = ExtendedEuclide(a, m);
+	Euclide res = ExtendedStein(a, m);
 
 	CustomInteger One = allocIntegerFromValue(1, false, true);
 	if (!equalsInteger(res.gcd, One)) {
