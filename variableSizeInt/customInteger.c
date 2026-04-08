@@ -918,8 +918,11 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		reallocToFitInteger(&V);
 		Word msbV = V.value[V.size - 1];
 		SizeT shift = 0;
+
+		Word msbMask = ((Word)1) << ((WORD_SIZE * 8) - 1);
+
 		// On cherche à aligner le MSB sur le bit de poids fort du mot (bit ((WORD_SIZE * 8) - 1))
-		while ((msbV & 0x80000000) == 0) {
+		while ((msbV & msbMask) == 0) {
 			msbV <<= 1;
 			shift++;
 		}
