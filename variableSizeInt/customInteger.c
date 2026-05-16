@@ -110,7 +110,7 @@ CustomInteger readFromFile(FILE* stream, bool closeAfter) {
 	return integer;
 }
 
-bool writeToFile(const CustomInteger* integer, FILE* stream, bool closeAfter) {
+bool writeToFile(const CustomIntegerPtr integer, FILE* stream, bool closeAfter) {
 	bool success = false;
 
 	if (integer != NULL && integer->value != NULL && stream != NULL) {
@@ -932,27 +932,28 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 		Q = allocIntegerFromValue(1, false, true);
 		R = allocIntegerFromValue(0, false, true);
 	} else {
-		// Cas A > B : Algorithme de Knuth (Base 2^32)
-		CustomInteger U = copyIntegerToNew(a);
+		CustomInteger U = allocInteger(a.size + 1);
+		U.size = a.size + 1;
+		copyMemory(a.value, U.value, a.size * WORD_SIZE);
+		U.value[a.size] = 0;
+
 		CustomInteger V = copyIntegerToNew(b);
 		U.isNegative = false;
 		V.isNegative = false;
 
-		// --- Normalisation ---
 		reallocToFitInteger(&V);
 		Word msbV = V.value[V.size - 1];
 		SizeT shift = 0;
 
 		Word msbMask = ((Word)1) << ((WORD_SIZE * 8) - 1);
 
-		// On cherche à aligner le MSB sur le bit de poids fort du mot (bit ((WORD_SIZE * 8) - 1))
 		while ((msbV & msbMask) == 0) {
 			msbV <<= 1;
 			shift++;
 		}
 
 		if (shift > 0) {
-			BitshiftPtr(&U, shift, LEFT, true);
+			BitshiftPtr(&U, shift, LEFT, false);
 			BitshiftPtr(&V, shift, LEFT, true);
 		}
 
@@ -968,7 +969,6 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 			for (SizeT j = n - m; j < n - m + 1; j--) {
 				if (j > n) break;
 
-				// A. Estimation (q_est = (u_n * B + u_{n-1}) / v_{n-1})
 				DoubleWord num = 0;
 				if (j + m < U.size) num |= ((DoubleWord)U.value[j + m]) << (WORD_SIZE * 8);
 				if (j + m - 1 < U.size) num |= ((DoubleWord)U.value[j + m - 1]);
@@ -978,7 +978,6 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 
 				if (q_est > WORD_MAX_VAL) q_est = WORD_MAX_VAL;
 
-				// B. Multiplication
 				Word q_word = (Word)q_est;
 				CustomInteger prod = multiplyByWord(V, q_word);
 
@@ -987,7 +986,6 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 				setMemory(shiftedProd.value, 0, j * WORD_SIZE);
 				copyMemory(prod.value, shiftedProd.value + j, prod.size * WORD_SIZE);
 
-				// C. Correction
 				while (compareAbs(shiftedProd, U) == GREATER) {
 					q_word--;
 
@@ -1002,7 +1000,6 @@ EuclideanDivision euclideanDivInteger(CustomInteger a, CustomInteger b) {
 					shiftedProd = newProd;
 				}
 
-				// D. Soustraction
 				CustomInteger newU = subtractInteger(U, shiftedProd);
 				freeInteger(&U);
 				U = newU;
