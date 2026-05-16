@@ -53,7 +53,7 @@ Comparison compareMemory(ptr A, ptr B, SizeT n) {
 #pragma endregion
 
 #pragma region Memory Manipulation
-void copyMemory(const void* src, void* dest, SizeT size) {
+void copyMemory(const ptr src, ptr dest, SizeT size) {
 	const Byte* s8 = (const Byte*)src;
 	Byte* d8 = (Byte*)dest;
 
@@ -92,7 +92,7 @@ void copyMemory(const void* src, void* dest, SizeT size) {
 	}
 }
 
-void setMemory(void* memAddr, uint8 value, SizeT size) {
+void setMemory(ptr memAddr, uint8 value, SizeT size) {
 	Byte* d8 = (Byte*)memAddr;
 
 	Word patternW = (Word)value;
