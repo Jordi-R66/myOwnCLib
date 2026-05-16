@@ -53,20 +53,88 @@ Comparison compareMemory(ptr A, ptr B, SizeT n) {
 #pragma endregion
 
 #pragma region Memory Manipulation
-void copyMemory(ptr src, ptr dest, SizeT size) {
-	Byte* a = (Byte*)src;
-	Byte* b = (Byte*)dest;
+void copyMemory(const void* src, void* dest, SizeT size) {
+	const Byte* s8 = (const Byte*)src;
+	Byte* d8 = (Byte*)dest;
+
+	SizeT dw_count = size / DOUBLE_WORD_SIZE;
+	if (dw_count > 0) {
+		const DoubleWord* s_dw = (const DoubleWord*)s8;
+		DoubleWord* d_dw = (DoubleWord*)d8;
+
+		for (SizeT i = 0; i < dw_count; i++) {
+			d_dw[i] = s_dw[i];
+		}
+
+		SizeT processed = dw_count * DOUBLE_WORD_SIZE;
+		s8 += processed;
+		d8 += processed;
+		size -= processed;
+	}
+
+	SizeT w_count = size / WORD_SIZE;
+	if (w_count > 0) {
+		const Word* s_w = (const Word*)s8;
+		Word* d_w = (Word*)d8;
+
+		for (SizeT i = 0; i < w_count; i++) {
+			d_w[i] = s_w[i];
+		}
+
+		SizeT processed = w_count * WORD_SIZE;
+		s8 += processed;
+		d8 += processed;
+		size -= processed;
+	}
 
 	for (SizeT i = 0; i < size; i++) {
-		b[i] = a[i];
+		d8[i] = s8[i];
 	}
 }
 
-void setMemory(ptr memAddr, uint8 value, SizeT bytes) {
-	uint8* a = (uint8*)memAddr;
+void setMemory(void* memAddr, uint8 value, SizeT size) {
+	Byte* d8 = (Byte*)memAddr;
 
-	for (SizeT i = 0; i < bytes; i++) {
-		a[i] = value;
+	Word patternW = (Word)value;
+	patternW = (patternW << 8) | patternW; // Sur 16 bits
+	patternW = (patternW << 16) | patternW; // Sur 32 bits
+	#ifdef _64BITS
+		patternW = (patternW << 32) | patternW; // Sur 64 bits
+	#endif
+
+	DoubleWord patternDW = (DoubleWord)patternW;
+	#ifdef _64BITS
+		patternDW = (patternDW << 64) | patternDW; // Sur 128 bits
+	#else
+		patternDW = (patternDW << 32) | patternDW; // Sur 64 bits
+	#endif
+
+	SizeT dw_count = size / DOUBLE_WORD_SIZE;
+	if (dw_count > 0) {
+		DoubleWord* d_dw = (DoubleWord*)d8;
+		for (SizeT i = 0; i < dw_count; i++) {
+			d_dw[i] = patternDW;
+		}
+
+		SizeT processed = dw_count * DOUBLE_WORD_SIZE;
+		d8 += processed;
+		size -= processed;
+	}
+
+	SizeT w_count = size / WORD_SIZE;
+	if (w_count > 0) {
+		Word* d_w = (Word*)d8;
+		for (SizeT i = 0; i < w_count; i++) {
+			d_w[i] = patternW;
+		}
+
+		SizeT processed = w_count * WORD_SIZE;
+		d8 += processed;
+		size -= processed;
+	}
+
+	for (SizeT i = 0; i < size; i++) {
+		d8[i] = value;
 	}
 }
 #pragma endregion

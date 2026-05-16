@@ -37,7 +37,7 @@ Comparison compareMemory(ptr A, ptr B, SizeT n);
 // Memory manipulation
 #pragma region Memory Manipulation
 
-void copyMemory(ptr src, ptr dest, SizeT size);
+void copyMemory(const ptr src, ptr dest, SizeT size);
 void setMemory(ptr memAddr, uint8 value, SizeT bytes);
 
 #pragma endregion
