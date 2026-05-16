@@ -57,34 +57,36 @@ void copyMemory(const ptr src, ptr dest, SizeT size) {
 	const Byte* s8 = (const Byte*)src;
 	Byte* d8 = (Byte*)dest;
 
-	SizeT dw_count = size / DOUBLE_WORD_SIZE;
-	if (dw_count > 0) {
-		const DoubleWord* s_dw = (const DoubleWord*)s8;
-		DoubleWord* d_dw = (DoubleWord*)d8;
+	if (((SizeT)s8 % DOUBLE_WORD_SIZE == 0) && ((SizeT)d8 % DOUBLE_WORD_SIZE == 0)) {
+		SizeT dw_count = size / DOUBLE_WORD_SIZE;
+		if (dw_count > 0) {
+			const DoubleWord* s_dw = (const DoubleWord*)s8;
+			DoubleWord* d_dw = (DoubleWord*)d8;
 
-		for (SizeT i = 0; i < dw_count; i++) {
-			d_dw[i] = s_dw[i];
+			for (SizeT i = 0; i < dw_count; i++) {
+				d_dw[i] = s_dw[i];
+			}
+
+			SizeT processed = dw_count * DOUBLE_WORD_SIZE;
+			s8 += processed;
+			d8 += processed;
+			size -= processed;
 		}
+	} else if (((SizeT)s8 % WORD_SIZE == 0) && ((SizeT)d8 % WORD_SIZE == 0)) {
+		SizeT w_count = size / WORD_SIZE;
+		if (w_count > 0) {
+			const Word* s_w = (const Word*)s8;
+			Word* d_w = (Word*)d8;
 
-		SizeT processed = dw_count * DOUBLE_WORD_SIZE;
-		s8 += processed;
-		d8 += processed;
-		size -= processed;
-	}
+			for (SizeT i = 0; i < w_count; i++) {
+				d_w[i] = s_w[i];
+			}
 
-	SizeT w_count = size / WORD_SIZE;
-	if (w_count > 0) {
-		const Word* s_w = (const Word*)s8;
-		Word* d_w = (Word*)d8;
-
-		for (SizeT i = 0; i < w_count; i++) {
-			d_w[i] = s_w[i];
+			SizeT processed = w_count * WORD_SIZE;
+			s8 += processed;
+			d8 += processed;
+			size -= processed;
 		}
-
-		SizeT processed = w_count * WORD_SIZE;
-		s8 += processed;
-		d8 += processed;
-		size -= processed;
 	}
 
 	for (SizeT i = 0; i < size; i++) {
