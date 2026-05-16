@@ -69,48 +69,72 @@ void printInteger(CustomInteger integer, Base base, bool alwaysPutSign) {
 
 CustomInteger readFromFile(FILE* stream, bool closeAfter) {
 	CustomInteger integer = { 0 };
+	bool success = false;
 
-	uint64 sizeInBytes, bytesRead, sizeInWords;
+	if (stream != NULL) {
+		uint64 sizeInBytes = 0;
 
-	fseek(stream, 0, SEEK_SET);
+		do {
+			if (fread(&sizeInBytes, sizeof(uint64), 1, stream) != 1) break;
 
-	bytesRead = fread(&sizeInBytes, I64_SIZE, 1, stream);
+			uint64 sizeInWords = (sizeInBytes / WORD_SIZE) + ((sizeInBytes % WORD_SIZE) > 0 ? 1 : 0);
 
-	if (bytesRead == 1) {
-		sizeInWords = sizeInBytes / WORD_SIZE + (sizeInBytes % WORD_SIZE > 0);
-		integer = allocInteger(sizeInWords);
+			integer = allocInteger((SizeT)sizeInWords);
+			if (integer.value == NULL) break;
 
-		// Lecture du nombre depuis le fichier
-		bytesRead = fread(integer.value, BYTE_SIZE, sizeInBytes, stream);
-		integer.size = sizeInWords;
-		bytesRead = fread(&integer.isNegative, BYTE_SIZE, 1, stream);
+			setMemory(integer.value, 0, sizeInWords * WORD_SIZE);
+
+			if (sizeInBytes > 0) {
+				if (fread(integer.value, 1, sizeInBytes, stream) != sizeInBytes) break;
+			}
+
+			if (fread(&integer.isNegative, sizeof(bool), 1, stream) != 1) break;
+
+			integer.size = (SizeT)sizeInWords;
+			success = true;
+
+		} while (0);
+
+		if (closeAfter) {
+			fclose(stream);
+		}
 	}
 
-	if (closeAfter) {
-		fclose(stream);
+	if (!success) {
+		if (integer.value != NULL) {
+			freeInteger(&integer);
+		}
+		setMemory(&integer, 0, sizeof(CustomInteger));
 	}
 
 	return integer;
 }
 
-void writeToFile(CustomIntegerPtr integer, FILE* stream, bool closeAfter) {
-	uint64 sizeInBytes = WORD_SIZE * integer->size;
+bool writeToFile(const CustomInteger* integer, FILE* stream, bool closeAfter) {
+	bool success = false;
 
-	uint64 shift = 0;
-	Byte* temp = (Byte*)integer->value;
+	if (integer != NULL && integer->value != NULL && stream != NULL) {
+		uint64 sizeInBytes = (uint64)integer->size * WORD_SIZE;
+		const Byte* temp = (const Byte*)integer->value;
 
-	while (temp[WORD_SIZE * integer->size - shift - 1] == (Byte)0) {
-		sizeInBytes--;
-		shift++;
+		while (sizeInBytes > 1 && temp[sizeInBytes - 1] == 0x00) {
+			sizeInBytes--;
+		}
+
+		do {
+			if (fwrite(&sizeInBytes, sizeof(uint64), 1, stream) != 1) break;
+			if (fwrite(temp, 1, sizeInBytes, stream) != sizeInBytes) break;
+			if (fwrite(&integer->isNegative, sizeof(bool), 1, stream) != 1) break;
+
+			success = true;
+		} while (0);
+
+		if (closeAfter) {
+			fclose(stream);
+		}
 	}
 
-	fwrite(&sizeInBytes, I64_SIZE, 1, stream);
-	fwrite(temp, BYTE_SIZE, sizeInBytes, stream);
-	fwrite(&integer->isNegative, BYTE_SIZE, 1, stream);
-
-	if (closeAfter) {
-		fclose(stream);
-	}
+	return success;
 }
 
 void copyInteger(CustomIntegerPtr src, CustomIntegerPtr dest) {
